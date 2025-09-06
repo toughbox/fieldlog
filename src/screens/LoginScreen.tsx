@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
-import { 
-  Text, 
-  Button, 
-  TextInput, 
-  Card, 
-  Title, 
+import {
+  Text,
+  Button,
+  TextInput,
+  Card,
+  Title,
   Paragraph
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { currentApi, LoginRequest } from '../services/api';
+import { validateEmail } from '../utils/validation';
 
 interface LoginScreenProps {
   navigation: any;
@@ -20,26 +22,57 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    // 기본 유효성 검사
+    if (!email.trim() || !password) {
       Alert.alert('알림', '이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert('알림', '올바른 이메일 형식을 입력해주세요.');
       return;
     }
 
     setIsLoading(true);
     
-    // 임시 로그인 로직 (실제로는 API 호출)
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email === 'test@fieldlog.com' && password === 'password123') {
+    try {
+      console.log('🔄 로그인 API 호출 시작...');
+      
+      const loginData: LoginRequest = {
+        email: email.trim().toLowerCase(),
+        password: password,
+      };
+
+      const response = await currentApi.login(loginData);
+      
+      if (response.success && response.data) {
+        console.log('✅ 로그인 성공:', response.data.user);
+        
+        // TODO: 토큰 저장 (AsyncStorage 등)
+        // await AsyncStorage.setItem('access_token', response.data.access_token);
+        // await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        
         navigation.replace('Home');
       } else {
-        Alert.alert('로그인 실패', '이메일 또는 비밀번호가 올바르지 않습니다.');
+        console.error('❌ 로그인 실패:', response.error);
+        Alert.alert(
+          '로그인 실패', 
+          response.error || '로그인 중 오류가 발생했습니다.'
+        );
       }
-    }, 1000);
+    } catch (error) {
+      console.error('❌ 로그인 예외 오류:', error);
+      Alert.alert(
+        '오류 발생',
+        '네트워크 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUp = () => {
-    Alert.alert('회원가입', '회원가입 기능은 준비 중입니다.');
+    navigation.navigate('SignUp');
   };
 
   return (
@@ -49,7 +82,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.emoji}>🏗️</Text>
           <Title style={styles.title}>현장기록</Title>
-          <Paragraph style={styles.subtitle}>FieldLog</Paragraph>
         </View>
 
         {/* 로그인 폼 */}
