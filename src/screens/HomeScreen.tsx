@@ -9,6 +9,7 @@ import {
   Surface
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
 
 interface HomeScreenProps {
   navigation: any;
@@ -58,6 +59,7 @@ const mockData = {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
+  const { logout, user } = useAuth();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -75,7 +77,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         { 
           text: '로그아웃', 
           style: 'destructive',
-          onPress: () => navigation.replace('Login')
+          onPress: async () => {
+            try {
+              await logout();
+              navigation.replace('Login');
+            } catch (error) {
+              console.error('❌ 로그아웃 오류:', error);
+              Alert.alert('오류', '로그아웃 중 오류가 발생했습니다.');
+            }
+          }
         }
       ]
     );
@@ -109,10 +119,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       >
         {/* 헤더 */}
         <View style={styles.header}>
-          <View>
-            <Title style={styles.headerTitle}>현장기록</Title>
-            <Paragraph style={styles.headerSubtitle}>안녕하세요! 👋</Paragraph>
-          </View>
+               <View>
+                 <Title style={styles.headerTitle}>현장기록</Title>
+                 <Paragraph style={styles.headerSubtitle}>
+                   안녕하세요, {user?.name || '사용자'}님! 👋
+                 </Paragraph>
+               </View>
           <Button 
             mode="outlined" 
             onPress={handleLogout} 

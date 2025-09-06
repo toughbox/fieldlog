@@ -10,14 +10,54 @@ import {
 } from '@expo-google-fonts/noto-sans-kr';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack = createStackNavigator();
 
 // SplashScreen 유지
 SplashScreen.preventAutoHideAsync();
+
+// 로딩 컴포넌트
+const LoadingScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+    <ActivityIndicator size="large" color="#6366F1" />
+  </View>
+);
+
+// 네비게이션 컴포넌트 (인증 상태에 따라 화면 결정)
+const AppNavigator = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={isAuthenticated ? "Home" : "Login"}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {isAuthenticated ? (
+          // 인증된 사용자용 화면들
+          <Stack.Screen name="Home" component={HomeScreen} />
+        ) : (
+          // 인증되지 않은 사용자용 화면들
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -87,19 +127,10 @@ export default function App() {
 
   return (
     <PaperProvider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator 
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
+      <AuthProvider>
+        <AppNavigator />
         <StatusBar style="auto" />
-      </NavigationContainer>
+      </AuthProvider>
     </PaperProvider>
   );
 }

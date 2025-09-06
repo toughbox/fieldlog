@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { currentApi, LoginRequest } from '../services/api';
 import { validateEmail } from '../utils/validation';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginScreenProps {
   navigation: any;
@@ -20,6 +21,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     // 기본 유효성 검사
@@ -46,12 +49,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       const response = await currentApi.login(loginData);
       
       if (response.success && response.data) {
-        console.log('✅ 로그인 성공:', response.data.user);
+        console.log('✅ 로그인 API 성공:', response.data.user);
         
-        // TODO: 토큰 저장 (AsyncStorage 등)
-        // await AsyncStorage.setItem('access_token', response.data.access_token);
-        // await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        // 인증 컨텍스트를 통해 로그인 처리 (토큰 저장 포함)
+        await login(
+          response.data.access_token,
+          response.data.refresh_token,
+          response.data.user
+        );
         
+        console.log('✅ 인증 처리 완료 - 홈 화면으로 이동');
         navigation.replace('Home');
       } else {
         console.error('❌ 로그인 실패:', response.error);
