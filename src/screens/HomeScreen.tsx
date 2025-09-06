@@ -6,9 +6,6 @@ import {
   Card,
   Title,
   Paragraph,
-  Divider,
-  Avatar,
-  Chip,
   Surface
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -116,10 +113,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Title style={styles.headerTitle}>현장기록</Title>
             <Paragraph style={styles.headerSubtitle}>안녕하세요! 👋</Paragraph>
           </View>
-          <Button
-            mode="outlined"
-            onPress={handleLogout}
+          <Button 
+            mode="outlined" 
+            onPress={handleLogout} 
             compact
+            labelStyle={styles.buttonText}
           >
             로그아웃
           </Button>
@@ -173,91 +171,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           {/* 마감 임박 작업 */}
           <Card style={styles.card}>
             <Card.Content>
-              <View style={styles.cardHeader}>
-                <Title style={styles.cardTitle}>⚠️ 마감 임박</Title>
-                <Text style={styles.cardSubtitle}>24시간 이내</Text>
-              </View>
-              
+              <Title style={styles.cardTitle}>⚠️ 마감 임박</Title>
               {mockData.upcomingTasks.map((task) => (
                 <Card key={task.id} style={styles.taskCard}>
-                  <Card.Content style={styles.taskContent}>
-                    <View style={styles.taskInfo}>
-                      <View style={styles.taskHeader}>
-                        <View 
-                          style={[
-                            styles.priorityDot, 
-                            { backgroundColor: getPriorityColor(task.priority) }
-                          ]} 
-                        />
-                        <Text style={styles.taskTitle}>{task.title}</Text>
-                      </View>
-                      <Text style={styles.taskCategory}>{task.category}</Text>
-                    </View>
-                    <View style={styles.taskMeta}>
-                      <Text 
-                        style={[
-                          styles.taskDueDate,
-                          { color: task.dueDate === '오늘' ? '#F44336' : '#FF9800' }
-                        ]}
-                      >
-                        {task.dueDate}
-                      </Text>
-                      <Chip 
-                        mode="outlined" 
-                        compact
-                        textStyle={{ fontSize: 10 }}
-                      >
-                        대기중
-                      </Chip>
-                    </View>
+                  <Card.Content>
+                    <Text style={styles.taskTitle}>{task.title}</Text>
+                    <Text style={styles.taskCategory}>{task.category}</Text>
+                    <Text style={styles.taskDueDate}>{task.dueDate}</Text>
                   </Card.Content>
                 </Card>
               ))}
             </Card.Content>
           </Card>
 
-          {/* 최근 활동 */}
-          <Card style={styles.card}>
-            <Card.Content>
-              <Title style={styles.cardTitle}>📝 최근 활동</Title>
-              
-              {mockData.recentActivities.map((activity, index) => (
-                <View key={activity.id}>
-                  <View style={styles.activityItem}>
-                    <View 
-                      style={[
-                        styles.activityDot,
-                        { backgroundColor: activity.type === 'completed' ? '#4CAF50' : '#2196F3' }
-                      ]}
-                    />
-                    <View style={styles.activityContent}>
-                      <Text style={styles.activityTitle}>{activity.title}</Text>
-                      <Text style={styles.activityTime}>{activity.time}</Text>
-                    </View>
-                  </View>
-                  {index < mockData.recentActivities.length - 1 && (
-                    <Divider style={styles.activityDivider} />
-                  )}
-                </View>
-              ))}
-            </Card.Content>
-          </Card>
-
-          {/* 빠른 액션 버튼들 */}
+          {/* 빠른 액션 */}
           <View style={styles.quickActions}>
             <Title style={styles.cardTitle}>빠른 작업</Title>
             <View style={styles.actionButtons}>
               <Button 
                 mode="contained" 
                 style={styles.actionButton}
-                contentStyle={styles.actionButtonContent}
+                labelStyle={styles.buttonText}
               >
                 새 기록
               </Button>
               <Button 
                 mode="outlined" 
                 style={styles.actionButton}
-                contentStyle={styles.actionButtonContent}
+                labelStyle={styles.buttonText}
               >
                 카테고리
               </Button>
@@ -266,13 +207,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* 하단 네비게이션 (임시) */}
+      {/* 하단 네비게이션 */}
       <Surface style={styles.bottomNav}>
         <View style={styles.navContainer}>
-          <Button mode="text" compact>🏠 홈</Button>
-          <Button mode="text" compact>📂 기록</Button>
-          <Button mode="text" compact>📋 카테고리</Button>
-          <Button mode="text" compact>👤 내정보</Button>
+          <Button mode="text" compact labelStyle={styles.navButtonText}>🏠 홈</Button>
+          <Button mode="text" compact labelStyle={styles.navButtonText}>📂 기록</Button>
+          <Button mode="text" compact labelStyle={styles.navButtonText}>📋 카테고리</Button>
+          <Button mode="text" compact labelStyle={styles.navButtonText}>👤 내정보</Button>
         </View>
       </Surface>
     </SafeAreaView>
@@ -292,21 +233,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingBottom: 10,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontFamily: 'NotoSansKR_700Bold',
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
     fontSize: 14,
+    fontFamily: 'NotoSansKR_400Regular',
     color: '#666',
   },
   content: {
     padding: 20,
-    paddingTop: 10,
-    paddingBottom: 100, // 하단 네비게이션 공간
+    paddingBottom: 100,
   },
   card: {
     marginBottom: 16,
@@ -314,19 +254,9 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontFamily: 'NotoSansKR_500Medium',
+    letterSpacing: -0.2,
     marginBottom: 16,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: '#666',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -350,73 +280,28 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'NotoSansKR_400Regular',
     color: '#666',
   },
   taskCard: {
     marginBottom: 8,
     backgroundColor: '#fafafa',
   },
-  taskContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  taskInfo: {
-    flex: 1,
-  },
-  taskHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  priorityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
   taskTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontFamily: 'NotoSansKR_500Medium',
+    marginBottom: 4,
   },
   taskCategory: {
     fontSize: 12,
+    fontFamily: 'NotoSansKR_400Regular',
     color: '#666',
-  },
-  taskMeta: {
-    alignItems: 'flex-end',
+    marginBottom: 4,
   },
   taskDueDate: {
     fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  activityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 2,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: '#666',
-  },
-  activityDivider: {
-    marginVertical: 8,
+    fontFamily: 'NotoSansKR_500Medium',
+    color: '#FF9800',
   },
   quickActions: {
     marginTop: 8,
@@ -427,9 +312,6 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-  },
-  actionButtonContent: {
-    height: 48,
   },
   bottomNav: {
     position: 'absolute',
@@ -444,6 +326,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 8,
+  },
+  buttonText: {
+    fontFamily: 'NotoSansKR_500Medium',
+    fontSize: 16,
+  },
+  navButtonText: {
+    fontFamily: 'NotoSansKR_400Regular',
+    fontSize: 12,
   },
 });
 

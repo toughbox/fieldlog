@@ -31,7 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+#.env*.local
 
 # typescript
 *.tsbuildinfo
+
+# Tamagui (완전히 사용하지 않음)
+.tamagui/
+tamagui-web.css

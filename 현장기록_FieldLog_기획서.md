@@ -394,7 +394,7 @@ GET  /api/notifications/upcoming    # 다가오는 마감일 목록
 - **모바일**: React Native
 - **웹 (선택)**: React + TypeScript
 - **상태관리**: Redux Toolkit 또는 Zustand
-- **UI 라이브러리**: Tamagui
+- **UI 라이브러리**: React Native Paper
 
 ### 7.3 인프라
 - **배포**: Docker(홈서버)
