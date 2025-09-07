@@ -52,11 +52,11 @@
 ```mermaid
 graph TD
     A["로그인/회원가입"] --> B["메인 대시보드"]
-    B --> C["카테고리 관리"]
+    B --> C["현장 관리"]
     B --> D["현장 기록 목록"]
     B --> E["알림 설정"]
     
-    C --> C1["카테고리 생성"]
+    C --> C1["현장 생성"]
     C --> C2["속성 정의"]
     C2 --> C3["속성 타입 선택<br/>(텍스트, 숫자, 선택, 날짜 등)"]
     
@@ -64,7 +64,7 @@ graph TD
     D --> D2["기록 상세보기"]
     D --> D3["기록 수정/삭제"]
     
-    D1 --> D4["카테고리 선택"]
+    D1 --> D4["현장 선택"]
     D4 --> D5["사용자 정의 속성 입력"]
     D5 --> D6["첨부파일 추가"]
     D6 --> D7["저장"]
@@ -78,7 +78,7 @@ graph TD
 #### 📱 모바일 화면 구성
 1. **로그인/회원가입**
 2. **메인 대시보드** - 오늘 할 일, 긴급 이슈, 통계
-3. **카테고리 관리** - 카테고리 목록, 속성 설정
+3. **현장 관리** - 현장 목록, 속성 설정
 4. **현장 기록** - 목록, 상세, 작성/수정
 5. **설정** - 알림, 프로필, 백업
 
@@ -93,7 +93,7 @@ graph TD
 
 ```sql
 -- 사용자 테이블
-CREATE TABLE users (
+CREATE TABLE user (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -102,8 +102,8 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- 카테고리 테이블
-CREATE TABLE categories (
+-- 현장 테이블
+CREATE TABLE field (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -116,10 +116,10 @@ CREATE TABLE categories (
 );
 
 -- 현장 기록 테이블 (메인)
-CREATE TABLE field_records (
+CREATE TABLE field_record (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+    field_id INTEGER REFERENCES field(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(50) DEFAULT 'pending', -- pending, in_progress, completed, cancelled
@@ -133,7 +133,7 @@ CREATE TABLE field_records (
 );
 
 -- 알림 설정 테이블
-CREATE TABLE notification_settings (
+CREATE TABLE notification_setting (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     due_date_reminder_hours INTEGER DEFAULT 24, -- 마감일 몇 시간 전 알림
@@ -205,10 +205,10 @@ CREATE TABLE notification_settings (
 ```sql
 -- JSONB 검색 성능 향상을 위한 인덱스
 CREATE INDEX idx_field_records_custom_data ON field_records USING GIN (custom_data);
-CREATE INDEX idx_categories_field_schema ON categories USING GIN (field_schema);
+CREATE INDEX idx_field_field_schema ON field USING GIN (field_schema);
 CREATE INDEX idx_field_records_status ON field_records (status);
 CREATE INDEX idx_field_records_due_date ON field_records (due_date);
-CREATE INDEX idx_field_records_user_category ON field_records (user_id, category_id);
+CREATE INDEX idx_field_records_user_field ON field_records (user_id, field_id);
 ```
 
 ## 5. API 명세서
@@ -223,19 +223,19 @@ POST /api/auth/refresh
 GET  /api/auth/me
 ```
 
-### 5.2 카테고리 관리 API
+### 5.2 현장 관리 API
 
 ```
-GET    /api/categories          # 사용자의 카테고리 목록
-POST   /api/categories          # 새 카테고리 생성
-GET    /api/categories/:id      # 카테고리 상세 조회
-PUT    /api/categories/:id      # 카테고리 수정
-DELETE /api/categories/:id      # 카테고리 삭제
+GET    /api/fields          # 사용자의 현장 목록
+POST   /api/fields          # 새 현장 생성
+GET    /api/fields/:id      # 현장 상세 조회
+PUT    /api/fields/:id      # 현장 수정
+DELETE /api/fields/:id      # 현장 삭제
 ```
 
-#### 카테고리 생성 예시
+#### 현장 생성 예시
 ```json
-POST /api/categories
+POST /api/fields
 {
   "name": "건설현장 하자관리",
   "description": "아파트 건설현장 하자 관리용",
@@ -274,7 +274,7 @@ DELETE /api/records/:id         # 기록 삭제
 ```json
 POST /api/records
 {
-  "category_id": 1,
+  "field_id": 1,
   "title": "101동 2001호 전기 하자",
   "description": "거실 콘센트 작동 불가",
   "status": "pending",
@@ -300,7 +300,7 @@ POST /api/records
 ### 5.4 검색 및 필터링 API
 
 ```
-GET /api/records/search?q=전기&category=1&status=pending&due_date_from=2024-01-01
+GET /api/records/search?q=전기&field=1&status=pending&due_date_from=2024-01-01
 ```
 
 ### 5.5 알림 관리 API

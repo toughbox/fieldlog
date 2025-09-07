@@ -29,8 +29,8 @@ CREATE TABLE fieldlog.user (
 CREATE INDEX idx_user_email ON fieldlog.user (email);
 CREATE INDEX idx_user_active ON fieldlog.user (is_active);
 
--- 카테고리 테이블
-CREATE TABLE fieldlog.category (
+-- 필드 테이블
+CREATE TABLE fieldlog.field (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES fieldlog.user(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -44,19 +44,19 @@ CREATE TABLE fieldlog.category (
     updated_at TIMESTAMP DEFAULT NOW(),
     
     -- 제약조건
-    CONSTRAINT category_user_name_unique UNIQUE (user_id, name)
+    CONSTRAINT field_user_name_unique UNIQUE (user_id, name)
 );
 
--- 카테고리 테이블 인덱스
-CREATE INDEX idx_category_user_id ON fieldlog.category (user_id);
-CREATE INDEX idx_category_field_schema ON fieldlog.category USING GIN (field_schema);
-CREATE INDEX idx_category_active ON fieldlog.category (is_active);
+-- 필드 테이블 인덱스
+CREATE INDEX idx_field_user_id ON fieldlog.field (user_id);
+CREATE INDEX idx_field_field_schema ON fieldlog.field USING GIN (field_schema);
+CREATE INDEX idx_field_active ON fieldlog.field (is_active);
 
 -- 현장 기록 테이블 (메인)
 CREATE TABLE fieldlog.field_record (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES fieldlog.user(id) ON DELETE CASCADE,
-    category_id INTEGER REFERENCES fieldlog.category(id) ON DELETE SET NULL,
+    field_id INTEGER REFERENCES fieldlog.field(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(50) DEFAULT 'pending', -- pending, in_progress, completed, cancelled
@@ -74,14 +74,14 @@ CREATE TABLE fieldlog.field_record (
 
 -- 현장 기록 테이블 인덱스
 CREATE INDEX idx_field_record_user_id ON fieldlog.field_record (user_id);
-CREATE INDEX idx_field_record_category_id ON fieldlog.field_record (category_id);
+CREATE INDEX idx_field_record_field_id ON fieldlog.field_record (field_id);
 CREATE INDEX idx_field_record_status ON fieldlog.field_record (status);
 CREATE INDEX idx_field_record_priority ON fieldlog.field_record (priority);
 CREATE INDEX idx_field_record_due_date ON fieldlog.field_record (due_date);
 CREATE INDEX idx_field_record_created_at ON fieldlog.field_record (created_at);
 CREATE INDEX idx_field_record_custom_data ON field_record USING GIN (custom_data);
 CREATE INDEX idx_field_record_tags ON field_record USING GIN (tags);
-CREATE INDEX idx_field_record_user_category ON fieldlog.field_record (user_id, category_id);
+CREATE INDEX idx_field_record_user_field ON fieldlog.field_record (user_id, field_id);
 CREATE INDEX idx_field_record_user_status ON fieldlog.field_record (user_id, status);
 CREATE INDEX idx_field_record_deleted ON fieldlog.field_record (is_deleted);
 
@@ -193,7 +193,7 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_user_updated_at BEFORE UPDATE ON fieldlog.user
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_category_updated_at BEFORE UPDATE ON fieldlog.category
+CREATE TRIGGER update_field_updated_at BEFORE UPDATE ON fieldlog.field
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_field_record_updated_at BEFORE UPDATE ON fieldlog.field_record
@@ -213,37 +213,37 @@ SELECT
     COUNT(CASE WHEN fr.status = 'completed' THEN 1 END) as completed_records,
     COUNT(CASE WHEN fr.due_date < NOW() AND fr.status != 'completed' THEN 1 END) as overdue_records,
     COUNT(CASE WHEN fr.due_date BETWEEN NOW() AND NOW() + INTERVAL '24 hours' AND fr.status != 'completed' THEN 1 END) as due_soon_records,
-    COUNT(c.id) as total_categories
+    COUNT(f.id) as total_fields
 FROM fieldlog.user u
 LEFT JOIN fieldlog.field_record fr ON u.id = fr.user_id AND fr.is_deleted = false
-LEFT JOIN fieldlog.category c ON u.id = c.user_id AND c.is_active = true
+LEFT JOIN fieldlog.field f ON u.id = f.user_id AND f.is_active = true
 WHERE u.is_active = true
 GROUP BY u.id, u.name;
 
--- 뷰: 카테고리별 통계
-CREATE VIEW fieldlog.category_statistics AS
+-- 뷰: 필드별 통계
+CREATE VIEW fieldlog.field_statistics AS
 SELECT 
-    c.id as category_id,
-    c.name as category_name,
-    c.user_id,
+    f.id as field_id,
+    f.name as field_name,
+    f.user_id,
     COUNT(fr.id) as total_records,
     COUNT(CASE WHEN fr.status = 'pending' THEN 1 END) as pending_records,
     COUNT(CASE WHEN fr.status = 'in_progress' THEN 1 END) as in_progress_records,
     COUNT(CASE WHEN fr.status = 'completed' THEN 1 END) as completed_records,
     AVG(CASE WHEN fr.status = 'completed' AND fr.completed_at IS NOT NULL 
         THEN EXTRACT(EPOCH FROM (fr.completed_at - fr.created_at))/86400 END) as avg_completion_days
-FROM fieldlog.category c
-LEFT JOIN fieldlog.field_record fr ON c.id = fr.category_id AND fr.is_deleted = false
-WHERE c.is_active = true
-GROUP BY c.id, c.name, c.user_id;
+FROM fieldlog.field f
+LEFT JOIN fieldlog.field_record fr ON f.id = fr.field_id AND fr.is_deleted = false
+WHERE f.is_active = true
+GROUP BY f.id, f.name, f.user_id;
 
 -- 기본 데이터 삽입 (선택사항)
 -- 관리자 계정 생성 예시
 -- INSERT INTO fieldlog.user (email, password_hash, name) VALUES 
 -- ('admin@fieldlog.com', '$2b$10$example_hash', '관리자');
 
--- 샘플 카테고리 스키마
--- INSERT INTO fieldlog.category (user_id, name, description, color, icon, field_schema) VALUES 
+-- 샘플 필드 스키마
+-- INSERT INTO fieldlog.field (user_id, name, description, color, icon, field_schema) VALUES 
 -- (1, '건설현장 하자관리', '아파트 건설현장 하자 관리용', '#FF6B6B', 'construction', 
 --  '{"fields": [
 --     {"key": "building", "label": "동", "type": "text", "required": true, "placeholder": "예: 101동"},
@@ -256,7 +256,7 @@ GROUP BY c.id, c.name, c.user_id;
 -- 성능 최적화를 위한 추가 설정
 -- JSONB 컬럼에 대한 통계 수집 활성화
 ALTER TABLE fieldlog.field_record ALTER COLUMN custom_data SET STATISTICS 1000;
-ALTER TABLE fieldlog.category ALTER COLUMN field_schema SET STATISTICS 1000;
+ALTER TABLE fieldlog.field ALTER COLUMN field_schema SET STATISTICS 1000;
 
 -- 자동 VACUUM 설정 (선택사항)
 -- ALTER TABLE fieldlog.field_record SET (autovacuum_vacuum_scale_factor = 0.1);
@@ -268,7 +268,7 @@ ALTER TABLE fieldlog.category ALTER COLUMN field_schema SET STATISTICS 1000;
 
 COMMENT ON DATABASE fieldlog IS '현장기록(FieldLog) 앱 데이터베이스';
 COMMENT ON TABLE fieldlog.user IS '사용자 정보';
-COMMENT ON TABLE fieldlog.category IS '사용자 정의 카테고리';
+COMMENT ON TABLE fieldlog.field IS '사용자 정의 필드';
 COMMENT ON TABLE fieldlog.field_record IS '현장 기록 메인 테이블';
 COMMENT ON TABLE fieldlog.attachment IS '첨부파일 정보';
 COMMENT ON TABLE fieldlog.notification_setting IS '사용자별 알림 설정';
@@ -277,6 +277,6 @@ COMMENT ON TABLE fieldlog.activity_log IS '사용자 활동 로그';
 COMMENT ON TABLE fieldlog.user_session IS '사용자 세션 관리';
 
 COMMENT ON COLUMN fieldlog.field_record.custom_data IS '사용자 정의 속성 데이터 (JSONB)';
-COMMENT ON COLUMN fieldlog.category.field_schema IS '카테고리별 필드 스키마 정의 (JSONB)';
+COMMENT ON COLUMN fieldlog.field.field_schema IS '필드별 스키마 정의 (JSONB)';
 COMMENT ON COLUMN fieldlog.field_record.status IS 'pending, in_progress, completed, cancelled';
 COMMENT ON COLUMN fieldlog.field_record.priority IS '1(낮음) ~ 5(높음)';

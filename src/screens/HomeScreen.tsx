@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, RefreshControl, ScrollView } from 'react-native';
+import { View, StyleSheet, Alert, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import {
   Text,
   Button,
@@ -27,7 +27,7 @@ const mockData = {
     {
       id: 1,
       title: '101동 전기하자',
-      category: '건설현장',
+      field: '건설현장',
       dueDate: '오늘',
       priority: 'high',
       status: 'pending'
@@ -35,7 +35,7 @@ const mockData = {
     {
       id: 2,
       title: '서버점검',
-      category: '서버관리',
+      field: '서버관리',
       dueDate: '내일',
       priority: 'medium',
       status: 'pending'
@@ -188,7 +188,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <Card key={task.id} style={styles.taskCard}>
                   <Card.Content>
                     <Text style={styles.taskTitle}>{task.title}</Text>
-                    <Text style={styles.taskCategory}>{task.category}</Text>
+                    <Text style={styles.taskCategory}>{task.field}</Text>
                     <Text style={styles.taskDueDate}>{task.dueDate}</Text>
                   </Card.Content>
                 </Card>
@@ -197,25 +197,44 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </Card>
 
           {/* 빠른 액션 */}
-          <View style={styles.quickActions}>
-            <Title style={styles.cardTitle}>빠른 작업</Title>
-            <View style={styles.actionButtons}>
-              <Button 
-                mode="contained" 
-                style={styles.actionButton}
-                labelStyle={styles.buttonText}
-              >
-                새 기록
-              </Button>
-              <Button 
-                mode="outlined" 
-                style={styles.actionButton}
-                labelStyle={styles.buttonText}
-              >
-                카테고리
-              </Button>
-            </View>
-          </View>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Title style={styles.cardTitle}>빠른 작업</Title>
+              <View style={styles.actionGrid}>
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.primaryButton]}
+                  onPress={() => Alert.alert('알림', '새 기록 작성 기능 준비중')}
+                >
+                  <Text style={styles.actionIcon}>📝</Text>
+                  <Text style={styles.primaryButtonText}>새 기록</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.secondaryButton]}
+                  onPress={() => navigation.navigate('CreateField')}
+                >
+                  <Text style={styles.actionIcon}>🏗️</Text>
+                  <Text style={styles.secondaryButtonText}>새 현장</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.secondaryButton]}
+                  onPress={() => navigation.navigate('FieldList')}
+                >
+                  <Text style={styles.actionIcon}>📋</Text>
+                  <Text style={styles.secondaryButtonText}>현장 관리</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.secondaryButton]}
+                  onPress={() => Alert.alert('알림', '일정 보기 기능 준비중')}
+                >
+                  <Text style={styles.actionIcon}>📅</Text>
+                  <Text style={styles.secondaryButtonText}>일정 보기</Text>
+                </TouchableOpacity>
+              </View>
+            </Card.Content>
+          </Card>
         </View>
       </ScrollView>
 
@@ -224,7 +243,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View style={styles.navContainer}>
           <Button mode="text" compact labelStyle={styles.navButtonText}>🏠 홈</Button>
           <Button mode="text" compact labelStyle={styles.navButtonText}>📂 기록</Button>
-          <Button mode="text" compact labelStyle={styles.navButtonText}>📋 카테고리</Button>
+          <Button 
+            mode="text" 
+            compact 
+            labelStyle={styles.navButtonText}
+            onPress={() => navigation.navigate('FieldList')}
+          >
+            🏗️ 현장
+          </Button>
           <Button mode="text" compact labelStyle={styles.navButtonText}>👤 내정보</Button>
         </View>
       </Surface>
@@ -315,15 +341,51 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansKR_500Medium',
     color: '#FF9800',
   },
-  quickActions: {
-    marginTop: 8,
-  },
-  actionButtons: {
+  actionGrid: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 16,
   },
   actionButton: {
-    flex: 1,
+    width: '48%',
+    aspectRatio: 1.5,
+    marginBottom: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  primaryButton: {
+    backgroundColor: '#2196F3',
+  },
+  secondaryButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  actionIcon: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'NotoSansKR_500Medium',
+  },
+  secondaryButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '500',
+    fontFamily: 'NotoSansKR_500Medium',
   },
   bottomNav: {
     position: 'absolute',

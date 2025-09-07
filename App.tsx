@@ -14,6 +14,8 @@ import { ActivityIndicator, View } from 'react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
+import CreateFieldScreen from './src/screens/CreateFieldScreen';
+import FieldListScreen from './src/screens/FieldListScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack = createStackNavigator();
@@ -46,7 +48,11 @@ const AppNavigator = () => {
       >
         {isAuthenticated ? (
           // 인증된 사용자용 화면들
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="CreateField" component={CreateFieldScreen} />
+            <Stack.Screen name="FieldList" component={FieldListScreen} />
+          </>
         ) : (
           // 인증되지 않은 사용자용 화면들
           <>

@@ -3,13 +3,13 @@
 
 -- 샘플 사용자 생성
 -- 비밀번호는 모두 'password123' (실제로는 해시된 값 사용)
-INSERT INTO users (email, password_hash, name, phone) VALUES 
+INSERT INTO fieldlog.user (email, password_hash, name, phone) VALUES 
 ('admin@fieldlog.com', '$2b$10$N9qo8uLOickgx2ZMRZoMye.Uo6HqLOX9QV83jcxzc8qMCloMFUxHS', '관리자', '010-1234-5678'),
 ('manager@construction.com', '$2b$10$N9qo8uLOickgx2ZMRZoMye.Uo6HqLOX9QV83jcxzc8qMCloMFUxHS', '현장관리자', '010-2345-6789'),
 ('worker@field.com', '$2b$10$N9qo8uLOickgx2ZMRZoMye.Uo6HqLOX9QV83jcxzc8qMCloMFUxHS', '현장작업자', '010-3456-7890');
 
--- 샘플 카테고리 생성
-INSERT INTO categories (user_id, name, description, color, icon, field_schema, sort_order) VALUES 
+-- 샘플 현장 생성
+INSERT INTO fieldlog.field (user_id, name, description, color, icon, field_schema, sort_order) VALUES 
 -- 건설현장 하자관리
 (2, '건설현장 하자관리', '아파트 건설현장 하자 관리용', '#FF6B6B', 'construction', 
  '{"fields": [
@@ -58,7 +58,7 @@ INSERT INTO categories (user_id, name, description, color, icon, field_schema, s
   ]}'::jsonb, 4);
 
 -- 샘플 현장 기록 생성
-INSERT INTO field_records (user_id, category_id, title, description, status, priority, due_date, custom_data, tags) VALUES 
+INSERT INTO fieldlog.field_record (user_id, field_id, title, description, status, priority, due_date, custom_data, tags) VALUES 
 -- 건설현장 하자 기록들
 (2, 1, '101동 2001호 전기 하자', '거실 콘센트 3개 중 2개 작동 불가. 전기 입선 불량으로 추정됨.', 'pending', 4, '2024-01-20 09:00:00', 
  '{"building": "101동", "unit": "2001호", "location": "거실", "defect_type": "전기", "severity": "높음", "assigned_team": "전기팀", "estimated_cost": 150000}'::jsonb, 
@@ -100,41 +100,41 @@ INSERT INTO field_records (user_id, category_id, title, description, status, pri
  ARRAY['케이터링', '견적비교']);
 
 -- 완료된 기록의 completed_at 업데이트
-UPDATE field_records SET completed_at = '2024-01-15 17:30:00' WHERE id = 3;
-UPDATE field_records SET completed_at = '2024-01-10 18:00:00' WHERE id = 8;
+UPDATE fieldlog.field_record SET completed_at = '2024-01-15 17:30:00' WHERE id = 3;
+UPDATE fieldlog.field_record SET completed_at = '2024-01-10 18:00:00' WHERE id = 8;
 
 -- 샘플 알림 설정
-INSERT INTO notification_settings (user_id, due_date_reminder_hours, push_enabled, email_enabled) VALUES 
+INSERT INTO fieldlog.notification_setting (user_id, due_date_reminder_hours, push_enabled, email_enabled) VALUES 
 (1, 24, true, true),
 (2, 12, true, false),
 (3, 48, true, true);
 
 -- 샘플 알림 로그
-INSERT INTO notification_logs (user_id, record_id, notification_type, channel, title, message, sent_at, is_read) VALUES 
+INSERT INTO fieldlog.notification_log (user_id, record_id, notification_type, channel, title, message, sent_at, is_read) VALUES 
 (2, 2, 'due_date', 'push', '마감 임박 알림', '102동 1505호 배관 누수 작업이 2시간 후 마감됩니다.', '2024-01-18 12:00:00', true),
 (3, 6, 'status_change', 'push', '상태 변경 알림', '긴급 배송 - 의료용품이 진행중으로 변경되었습니다.', '2024-01-16 14:30:00', false),
 (1, 8, 'status_change', 'email', '작업 완료 알림', '신제품 발표회 장소 예약이 완료되었습니다.', '2024-01-10 18:00:00', true);
 
 -- 샘플 활동 로그
-INSERT INTO activity_logs (user_id, record_id, action, entity_type, entity_id, new_data, ip_address, user_agent) VALUES 
+INSERT INTO fieldlog.activity_log (user_id, record_id, action, entity_type, entity_id, new_data, ip_address, user_agent) VALUES 
 (2, 1, 'create', 'record', 1, '{"title": "101동 2001호 전기 하자", "status": "pending"}'::jsonb, '192.168.1.100', 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)'),
 (2, 2, 'update', 'record', 2, '{"status": "in_progress"}'::jsonb, '192.168.1.100', 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)'),
 (2, 3, 'complete', 'record', 3, '{"status": "completed", "completed_at": "2024-01-15T17:30:00Z"}'::jsonb, '192.168.1.100', 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)');
 
 -- 통계 확인 쿼리 (참고용)
--- SELECT * FROM user_statistics;
--- SELECT * FROM category_statistics;
+-- SELECT * FROM fieldlog.user_statistics;
+-- SELECT * FROM fieldlog.field_statistics;
 
 -- 데이터 검증 쿼리들
 -- SELECT u.name, COUNT(fr.id) as record_count 
--- FROM users u 
--- LEFT JOIN field_records fr ON u.id = fr.user_id 
+-- FROM fieldlog.user u 
+-- LEFT JOIN fieldlog.field_record fr ON u.id = fr.user_id 
 -- GROUP BY u.id, u.name;
 
--- SELECT c.name, COUNT(fr.id) as record_count, 
+-- SELECT f.name, COUNT(fr.id) as record_count, 
 --        COUNT(CASE WHEN fr.status = 'pending' THEN 1 END) as pending,
 --        COUNT(CASE WHEN fr.status = 'in_progress' THEN 1 END) as in_progress,
 --        COUNT(CASE WHEN fr.status = 'completed' THEN 1 END) as completed
--- FROM categories c 
--- LEFT JOIN field_records fr ON c.id = fr.category_id 
--- GROUP BY c.id, c.name;
+-- FROM fieldlog.field f 
+-- LEFT JOIN fieldlog.field_record fr ON f.id = fr.field_id 
+-- GROUP BY f.id, f.name;

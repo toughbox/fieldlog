@@ -46,6 +46,51 @@ export interface LoginResponse {
   refresh_token: string;
 }
 
+// 현장 관련 타입
+export interface FieldSchema {
+  fields: Array<{
+    key: string;
+    label: string;
+    type: 'text' | 'number' | 'select' | 'date' | 'textarea' | 'checkbox';
+    required: boolean;
+    placeholder?: string;
+    options?: string[];
+  }>;
+}
+
+export interface Field {
+  id: number;
+  user_id: number;
+  name: string;
+  description?: string;
+  color: string;
+  icon: string;
+  field_schema: FieldSchema;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateFieldRequest {
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  field_schema: FieldSchema;
+  sort_order?: number;
+}
+
+export interface UpdateFieldRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  field_schema?: FieldSchema;
+  is_active?: boolean;
+  sort_order?: number;
+}
+
 // 공통 fetch 함수
 async function apiRequest<T>(
   endpoint: string, 
@@ -116,6 +161,59 @@ export const authApi = {
   // 이메일 중복 확인
   checkEmail: async (email: string): Promise<ApiResponse<{ available: boolean }>> => {
     return apiRequest<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(email)}`);
+  },
+};
+
+// 현장 관리 API
+export const fieldApi = {
+  // 현장 목록 조회
+  getFields: async (token: string): Promise<ApiResponse<Field[]>> => {
+    return apiRequest<Field[]>('/fields', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  },
+
+  // 현장 상세 조회
+  getField: async (id: number, token: string): Promise<ApiResponse<Field>> => {
+    return apiRequest<Field>(`/fields/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  },
+
+  // 현장 생성
+  createField: async (fieldData: CreateFieldRequest, token: string): Promise<ApiResponse<Field>> => {
+    return apiRequest<Field>('/fields', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(fieldData),
+    });
+  },
+
+  // 현장 수정
+  updateField: async (id: number, fieldData: UpdateFieldRequest, token: string): Promise<ApiResponse<Field>> => {
+    return apiRequest<Field>(`/fields/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(fieldData),
+    });
+  },
+
+  // 현장 삭제
+  deleteField: async (id: number, token: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>(`/fields/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
   },
 };
 
@@ -202,8 +300,176 @@ export const mockApi = {
   },
 };
 
+// 현장 관리 목킹 API
+export const mockFieldApi = {
+  // 목킹된 현장 목록 조회
+  getFields: async (token: string): Promise<ApiResponse<Field[]>> => {
+    console.log('🧪 목킹된 현장 목록 조회:', token);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const mockFields: Field[] = [
+      {
+        id: 1,
+        user_id: 1,
+        name: '건설현장 하자관리',
+        description: '아파트 건설현장 하자 관리용',
+        color: '#FF6B6B',
+        icon: 'construction',
+        field_schema: {
+          fields: [
+            { key: 'building', label: '동', type: 'text', required: true, placeholder: '예: 101동' },
+            { key: 'unit', label: '호수', type: 'text', required: true, placeholder: '예: 2001호' },
+            { key: 'location', label: '위치', type: 'select', required: true, options: ['거실', '주방', '화장실', '침실1', '침실2', '베란다'] },
+            { key: 'defect_type', label: '하자유형', type: 'select', required: true, options: ['전기', '배관', '도배', '바닥', '창호', '기타'] },
+          ],
+        },
+        is_active: true,
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        user_id: 1,
+        name: '서버 점검',
+        description: 'IT 인프라 서버 점검 및 관리',
+        color: '#3B82F6',
+        icon: 'server',
+        field_schema: {
+          fields: [
+            { key: 'server_name', label: '서버명', type: 'text', required: true },
+            { key: 'server_type', label: '서버 유형', type: 'select', required: true, options: ['웹서버', 'DB서버', '파일서버', '메일서버'] },
+            { key: 'priority', label: '우선순위', type: 'select', required: true, options: ['낮음', '보통', '높음', '긴급'] },
+          ],
+        },
+        is_active: true,
+        sort_order: 2,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ];
+
+    return {
+      success: true,
+      data: mockFields,
+      message: '현장 목록을 성공적으로 조회했습니다.',
+    };
+  },
+
+  // 목킹된 현장 상세 조회
+  getField: async (id: number, token: string): Promise<ApiResponse<Field>> => {
+    console.log('🧪 목킹된 현장 상세 조회:', id, token);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (id === 1) {
+      const mockField: Field = {
+        id: 1,
+        user_id: 1,
+        name: '건설현장 하자관리',
+        description: '아파트 건설현장 하자 관리용',
+        color: '#FF6B6B',
+        icon: 'construction',
+        field_schema: {
+          fields: [
+            { key: 'building', label: '동', type: 'text', required: true, placeholder: '예: 101동' },
+            { key: 'unit', label: '호수', type: 'text', required: true, placeholder: '예: 2001호' },
+            { key: 'location', label: '위치', type: 'select', required: true, options: ['거실', '주방', '화장실', '침실1', '침실2', '베란다'] },
+            { key: 'defect_type', label: '하자유형', type: 'select', required: true, options: ['전기', '배관', '도배', '바닥', '창호', '기타'] },
+          ],
+        },
+        is_active: true,
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        data: mockField,
+        message: '현장 정보를 성공적으로 조회했습니다.',
+      };
+    }
+
+    return {
+      success: false,
+      error: '현장을 찾을 수 없습니다.',
+    };
+  },
+
+  // 목킹된 현장 생성
+  createField: async (fieldData: CreateFieldRequest, token: string): Promise<ApiResponse<Field>> => {
+    console.log('🧪 목킹된 현장 생성:', fieldData, token);
+    
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    
+    const mockField: Field = {
+      id: Math.floor(Math.random() * 1000) + 3,
+      user_id: 1,
+      name: fieldData.name,
+      description: fieldData.description || '',
+      color: fieldData.color || '#6366F1',
+      icon: fieldData.icon || 'folder',
+      field_schema: fieldData.field_schema,
+      is_active: true,
+      sort_order: fieldData.sort_order || 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    return {
+      success: true,
+      data: mockField,
+      message: '현장이 성공적으로 생성되었습니다.',
+    };
+  },
+
+  // 목킹된 현장 수정
+  updateField: async (id: number, fieldData: UpdateFieldRequest, token: string): Promise<ApiResponse<Field>> => {
+    console.log('🧪 목킹된 현장 수정:', id, fieldData, token);
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockField: Field = {
+      id: id,
+      user_id: 1,
+      name: fieldData.name || '수정된 현장',
+      description: fieldData.description || '수정된 설명',
+      color: fieldData.color || '#6366F1',
+      icon: fieldData.icon || 'folder',
+      field_schema: fieldData.field_schema || { fields: [] },
+      is_active: fieldData.is_active !== undefined ? fieldData.is_active : true,
+      sort_order: fieldData.sort_order || 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    return {
+      success: true,
+      data: mockField,
+      message: '현장이 성공적으로 수정되었습니다.',
+    };
+  },
+
+  // 목킹된 현장 삭제
+  deleteField: async (id: number, token: string): Promise<ApiResponse<void>> => {
+    console.log('🧪 목킹된 현장 삭제:', id, token);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      success: true,
+      message: '현장이 성공적으로 삭제되었습니다.',
+    };
+  },
+};
+
 // 현재 사용할 API (실제 백엔드 연동)
 export const currentApi = authApi;
+export const currentFieldApi = fieldApi;
 
 // 백엔드 서버가 없을 때는 아래 주석을 해제하세요
 // export const currentApi = __DEV__ ? mockApi : authApi;
+// 목킹 API 사용 (백엔드 서버 없이 테스트용)
+// export const currentFieldApi = __DEV__ ? mockFieldApi : fieldApi;
