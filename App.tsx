@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { 
   NotoSansKR_400Regular, 
@@ -85,58 +86,12 @@ export default function App() {
     return null;
   }
 
-  // Noto Sans KR 폰트를 기본으로 사용하는 테마
-  const theme = {
-    ...DefaultTheme,
-    fonts: {
-      ...DefaultTheme.fonts,
-      regular: {
-        fontFamily: 'NotoSansKR_400Regular',
-        fontWeight: 'normal' as const,
-      },
-      medium: {
-        fontFamily: 'NotoSansKR_500Medium',
-        fontWeight: 'normal' as const,
-      },
-      light: {
-        fontFamily: 'NotoSansKR_400Regular',
-        fontWeight: 'normal' as const,
-      },
-      thin: {
-        fontFamily: 'NotoSansKR_400Regular',
-        fontWeight: 'normal' as const,
-      },
-      // 추가 폰트 설정
-      labelLarge: {
-        fontFamily: 'NotoSansKR_500Medium',
-        fontWeight: 'normal' as const,
-        fontSize: 14,
-        lineHeight: 20,
-        letterSpacing: 0.1,
-      },
-      bodyLarge: {
-        fontFamily: 'NotoSansKR_400Regular',
-        fontWeight: 'normal' as const,
-        fontSize: 16,
-        lineHeight: 24,
-        letterSpacing: 0.15,
-      },
-      bodyMedium: {
-        fontFamily: 'NotoSansKR_400Regular',
-        fontWeight: 'normal' as const,
-        fontSize: 14,
-        lineHeight: 20,
-        letterSpacing: 0.25,
-      },
-    },
-  };
-
   return (
-    <PaperProvider theme={theme}>
+    <GluestackUIProvider config={config}>
       <AuthProvider>
         <AppNavigator />
-        <StatusBar style="auto" />
+        <StatusBar style="dark" backgroundColor="transparent" />
       </AuthProvider>
-    </PaperProvider>
+    </GluestackUIProvider>
   );
 }

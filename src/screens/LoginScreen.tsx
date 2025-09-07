@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Alert, ScrollView, StatusBar } from 'react-native';
 import {
+  Box,
+  VStack,
+  HStack,
   Text,
   Button,
-  TextInput,
+  Input,
+  InputField,
   Card,
-  Title,
-  Paragraph
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  Heading,
+  SafeAreaView,
+  ButtonText,
+  ButtonIcon,
+  Center,
+  Spinner
+} from '@gluestack-ui/themed';
+import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { currentApi, LoginRequest } from '../services/api';
 import { validateEmail } from '../utils/validation';
 import { useAuth } from '../context/AuthContext';
@@ -83,124 +91,85 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <SafeAreaView flex={1} bg="$coolGray50">
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
+      <ScrollView flex={1} contentContainerStyle={{ paddingTop: 20 }}>
         {/* 로고 및 타이틀 */}
-        <View style={styles.header}>
-          <Text style={styles.emoji}>🏗️</Text>
-          <Title style={styles.title}>현장기록</Title>
-        </View>
+        <Box alignItems="center" mt="$20" mb="$10">
+          <Text fontSize="$3xl">🏗️</Text>
+          <Heading size="xl">현장기록</Heading>
+        </Box>
 
         {/* 로그인 폼 */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <TextInput
-              label="이메일"
-              mode="outlined"
-              placeholder="이메일을 입력하세요"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              style={styles.input}
-            />
+        <Card bg="white" p="$6" mx="$4" borderRadius="$xl" shadowOpacity={0.1} shadowRadius={8} mb="$6">
+          <VStack space="md">
+            <VStack space="xs">
+              <Text size="sm" color="$gray600">이메일</Text>
+              <Input variant="outline" size="lg">
+                <InputField
+                  placeholder="이메일을 입력하세요"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </Input>
+            </VStack>
 
-            <TextInput
-              label="비밀번호"
-              mode="outlined"
-              placeholder="비밀번호를 입력하세요"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              style={styles.input}
-            />
+            <VStack space="xs">
+              <Text size="sm" color="$gray600">비밀번호</Text>
+              <Input variant="outline" size="lg">
+                <InputField
+                  placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                />
+              </Input>
+            </VStack>
 
             <Button
-              mode="contained"
+              action="primary"
+              size="lg"
               onPress={handleLogin}
-              loading={isLoading}
-              disabled={isLoading}
-              style={styles.button}
-              labelStyle={styles.buttonText}
+              isDisabled={isLoading}
+              mt="$4"
             >
-              로그인
+              {isLoading ? (
+                <HStack alignItems="center" space="sm">
+                  <Spinner color="white" size="small" />
+                  <ButtonText>로그인 중...</ButtonText>
+                </HStack>
+              ) : (
+                <>
+                  <ButtonIcon as={LogIn} />
+                  <ButtonText>로그인</ButtonText>
+                </>
+              )}
             </Button>
 
             <Button
-              mode="outlined"
+              variant="outline"
+              size="lg"
               onPress={handleSignUp}
-              style={styles.button}
-              labelStyle={styles.buttonText}
             >
-              회원가입
+              <ButtonText>회원가입</ButtonText>
             </Button>
-          </Card.Content>
+          </VStack>
         </Card>
 
         {/* 테스트 계정 안내 */}
-        <Card style={styles.testCard}>
-          <Card.Content>
-            <Text style={styles.testTitle}>테스트 계정</Text>
-            <Text>이메일: test@fieldlog.com</Text>
-            <Text>비밀번호: password123</Text>
-          </Card.Content>
+        <Card bg="$amber50" p="$4" mx="$4" borderRadius="$lg" borderWidth={1} borderColor="$amber200">
+          <VStack space="xs">
+            <Text fontWeight="bold" color="$amber800">🔑 테스트 계정</Text>
+            <Text color="$amber700">이메일: test@fieldlog.com</Text>
+            <Text color="$amber700">비밀번호: password123</Text>
+          </VStack>
         </Card>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  emoji: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: 'NotoSansKR_700Bold',
-    letterSpacing: -0.5,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: 'NotoSansKR_400Regular',
-    color: '#666',
-  },
-  card: {
-    marginBottom: 20,
-    elevation: 4,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  button: {
-    marginTop: 8,
-  },
-  buttonText: {
-    fontFamily: 'NotoSansKR_500Medium',
-    fontSize: 16,
-  },
-  testCard: {
-    backgroundColor: '#E3F2FD',
-  },
-  testTitle: {
-    fontFamily: 'NotoSansKR_500Medium',
-    marginBottom: 8,
-  },
-});
 
 export default LoginScreen;

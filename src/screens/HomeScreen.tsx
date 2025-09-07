@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
+import { RefreshControl, ScrollView, Alert, StatusBar } from 'react-native';
 import {
+  Box,
+  VStack,
+  HStack,
   Text,
   Button,
   Card,
-  Title,
-  Paragraph,
-  Surface
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  SafeAreaView,
+  Heading,
+  Badge,
+  Pressable,
+  Center,
+  Divider,
+  ButtonText,
+  ButtonIcon
+} from '@gluestack-ui/themed';
+import { 
+  Home, 
+  FileText, 
+  Settings, 
+  User, 
+  Plus, 
+  BarChart3, 
+  Calendar, 
+  LogOut,
+  Edit,
+  Building,
+  List
+} from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 
 interface HomeScreenProps {
@@ -110,305 +130,246 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView flex={1} bg="$coolGray50">
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
+      
+      {/* 헤더 */}
+      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+        <HStack justifyContent="space-between" alignItems="center">
+          <VStack>
+            <Heading size="xl" color="$gray900">현장기록</Heading>
+            <Text size="sm" color="$gray600">안녕하세요, {user?.name || '사용자'}님! 👋</Text>
+          </VStack>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            action="secondary"
+            onPress={handleLogout}
+          >
+            <ButtonIcon as={LogOut} />
+            <ButtonText>로그아웃</ButtonText>
+          </Button>
+        </HStack>
+      </Box>
+      
       <ScrollView
-        style={styles.scrollView}
+        flex={1}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* 헤더 */}
-        <View style={styles.header}>
-               <View>
-                 <Title style={styles.headerTitle}>현장기록</Title>
-                 <Paragraph style={styles.headerSubtitle}>
-                   안녕하세요, {user?.name || '사용자'}님! 👋
-                 </Paragraph>
-               </View>
-          <Button 
-            mode="outlined" 
-            onPress={handleLogout} 
-            compact
-            labelStyle={styles.buttonText}
-          >
-            로그아웃
-          </Button>
-        </View>
 
-        <View style={styles.content}>
+        <VStack space="md" p="$4">
           {/* 오늘의 현황 */}
-          <Card style={styles.card}>
-            <Card.Content>
-              <Title style={styles.cardTitle}>📊 오늘의 현황</Title>
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Surface style={[styles.statCircle, { backgroundColor: '#FFF3E0' }]}>
-                    <Text style={[styles.statNumber, { color: '#FF9800' }]}>
+          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <VStack space="md">
+              <HStack alignItems="center" space="sm">
+                <BarChart3 size={20} color="#6366f1" />
+                <Heading size="lg" color="$gray900">오늘의 현황</Heading>
+              </HStack>
+              
+              <HStack justifyContent="space-between" space="sm">
+                <VStack alignItems="center" flex={1}>
+                  <Center 
+                    w="$12" 
+                    h="$12" 
+                    bg="$orange100" 
+                    borderRadius="$full"
+                    mb="$2"
+                  >
+                    <Text size="lg" fontWeight="bold" color="$orange600">
                       {mockData.todayStats.pending}
                     </Text>
-                  </Surface>
-                  <Text style={styles.statLabel}>대기중</Text>
-                </View>
+                  </Center>
+                  <Text size="xs" color="$gray600">대기중</Text>
+                </VStack>
                 
-                <View style={styles.statItem}>
-                  <Surface style={[styles.statCircle, { backgroundColor: '#E3F2FD' }]}>
-                    <Text style={[styles.statNumber, { color: '#2196F3' }]}>
+                <VStack alignItems="center" flex={1}>
+                  <Center 
+                    w="$12" 
+                    h="$12" 
+                    bg="$blue100" 
+                    borderRadius="$full"
+                    mb="$2"
+                  >
+                    <Text size="lg" fontWeight="bold" color="$blue600">
                       {mockData.todayStats.inProgress}
                     </Text>
-                  </Surface>
-                  <Text style={styles.statLabel}>진행중</Text>
-                </View>
+                  </Center>
+                  <Text size="xs" color="$gray600">진행중</Text>
+                </VStack>
                 
-                <View style={styles.statItem}>
-                  <Surface style={[styles.statCircle, { backgroundColor: '#E8F5E8' }]}>
-                    <Text style={[styles.statNumber, { color: '#4CAF50' }]}>
+                <VStack alignItems="center" flex={1}>
+                  <Center 
+                    w="$12" 
+                    h="$12" 
+                    bg="$green100" 
+                    borderRadius="$full"
+                    mb="$2"
+                  >
+                    <Text size="lg" fontWeight="bold" color="$green600">
                       {mockData.todayStats.completed}
                     </Text>
-                  </Surface>
-                  <Text style={styles.statLabel}>완료</Text>
-                </View>
+                  </Center>
+                  <Text size="xs" color="$gray600">완료</Text>
+                </VStack>
                 
-                <View style={styles.statItem}>
-                  <Surface style={[styles.statCircle, { backgroundColor: '#FFEBEE' }]}>
-                    <Text style={[styles.statNumber, { color: '#F44336' }]}>
+                <VStack alignItems="center" flex={1}>
+                  <Center 
+                    w="$12" 
+                    h="$12" 
+                    bg="$red100" 
+                    borderRadius="$full"
+                    mb="$2"
+                  >
+                    <Text size="lg" fontWeight="bold" color="$red600">
                       {mockData.todayStats.urgent}
                     </Text>
-                  </Surface>
-                  <Text style={styles.statLabel}>긴급</Text>
-                </View>
-              </View>
-            </Card.Content>
+                  </Center>
+                  <Text size="xs" color="$gray600">긴급</Text>
+                </VStack>
+              </HStack>
+            </VStack>
           </Card>
 
           {/* 마감 임박 작업 */}
-          <Card style={styles.card}>
-            <Card.Content>
-              <Title style={styles.cardTitle}>⚠️ 마감 임박</Title>
+          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <VStack space="sm">
+              <HStack alignItems="center" space="sm">
+                <Calendar size={20} color="#f59e0b" />
+                <Heading size="lg" color="$gray900">마감 임박</Heading>
+              </HStack>
+              
               {mockData.upcomingTasks.map((task) => (
-                <Card key={task.id} style={styles.taskCard}>
-                  <Card.Content>
-                    <Text style={styles.taskTitle}>{task.title}</Text>
-                    <Text style={styles.taskCategory}>{task.field}</Text>
-                    <Text style={styles.taskDueDate}>{task.dueDate}</Text>
-                  </Card.Content>
+                <Card key={task.id} bg="$orange50" p="$3" borderRadius="$md" borderLeftWidth={4} borderLeftColor="$orange500">
+                  <VStack space="xs">
+                    <Text fontWeight="semibold" color="$gray900">{task.title}</Text>
+                    <HStack justifyContent="space-between" alignItems="center">
+                      <Badge bg="$orange100" borderRadius="$sm">
+                        <Text size="xs" color="$orange700">{task.field}</Text>
+                      </Badge>
+                      <Text size="xs" color="$orange600" fontWeight="medium">{task.dueDate}</Text>
+                    </HStack>
+                  </VStack>
                 </Card>
               ))}
-            </Card.Content>
+            </VStack>
           </Card>
 
           {/* 빠른 액션 */}
-          <Card style={styles.card}>
-            <Card.Content>
-              <Title style={styles.cardTitle}>빠른 작업</Title>
-              <View style={styles.actionGrid}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.primaryButton]}
-                  onPress={() => Alert.alert('알림', '새 기록 작성 기능 준비중')}
-                >
-                  <Text style={styles.actionIcon}>📝</Text>
-                  <Text style={styles.primaryButtonText}>새 기록</Text>
-                </TouchableOpacity>
+          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <VStack space="md">
+              <HStack alignItems="center" space="sm">
+                <Plus size={20} color="#6366f1" />
+                <Heading size="lg" color="$gray900">빠른 작업</Heading>
+              </HStack>
+              
+              <VStack space="sm">
+                <HStack space="sm">
+                  <Button 
+                    flex={1}
+                    size="lg" 
+                    action="primary" 
+                    onPress={() => Alert.alert('알림', '새 기록 작성 기능 준비중')}
+                  >
+                    <ButtonIcon as={Edit} />
+                    <ButtonText>새 기록</ButtonText>
+                  </Button>
 
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.secondaryButton]}
-                  onPress={() => navigation.navigate('CreateField')}
-                >
-                  <Text style={styles.actionIcon}>🏗️</Text>
-                  <Text style={styles.secondaryButtonText}>새 현장</Text>
-                </TouchableOpacity>
+                  <Button 
+                    flex={1}
+                    size="lg" 
+                    variant="outline" 
+                    action="secondary"
+                    onPress={() => navigation.navigate('CreateField')}
+                  >
+                    <ButtonIcon as={Building} />
+                    <ButtonText>새 현장</ButtonText>
+                  </Button>
+                </HStack>
 
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.secondaryButton]}
-                  onPress={() => navigation.navigate('FieldList')}
-                >
-                  <Text style={styles.actionIcon}>📋</Text>
-                  <Text style={styles.secondaryButtonText}>현장 관리</Text>
-                </TouchableOpacity>
+                <HStack space="sm">
+                  <Button 
+                    flex={1}
+                    size="lg" 
+                    variant="outline" 
+                    action="secondary"
+                    onPress={() => navigation.navigate('FieldList')}
+                  >
+                    <ButtonIcon as={List} />
+                    <ButtonText>현장 관리</ButtonText>
+                  </Button>
 
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.secondaryButton]}
-                  onPress={() => Alert.alert('알림', '일정 보기 기능 준비중')}
-                >
-                  <Text style={styles.actionIcon}>📅</Text>
-                  <Text style={styles.secondaryButtonText}>일정 보기</Text>
-                </TouchableOpacity>
-              </View>
-            </Card.Content>
+                  <Button 
+                    flex={1}
+                    size="lg" 
+                    variant="outline" 
+                    action="secondary"
+                    onPress={() => Alert.alert('알림', '일정 보기 기능 준비중')}
+                  >
+                    <ButtonIcon as={Calendar} />
+                    <ButtonText>일정 보기</ButtonText>
+                  </Button>
+                </HStack>
+              </VStack>
+            </VStack>
           </Card>
-        </View>
+        </VStack>
       </ScrollView>
 
       {/* 하단 네비게이션 */}
-      <Surface style={styles.bottomNav}>
-        <View style={styles.navContainer}>
-          <Button mode="text" compact labelStyle={styles.navButtonText}>🏠 홈</Button>
-          <Button mode="text" compact labelStyle={styles.navButtonText}>📂 기록</Button>
-          <Button 
-            mode="text" 
-            compact 
-            labelStyle={styles.navButtonText}
+      <Box 
+        bg="white" 
+        px="$4" 
+        py="$2" 
+        shadowOpacity={0.1} 
+        shadowRadius={8} 
+        shadowOffset={{ width: 0, height: -2 }}
+        borderTopWidth={1}
+        borderTopColor="$gray200"
+      >
+        <HStack justifyContent="space-around" alignItems="center">
+          <Pressable alignItems="center" p="$2" flex={1}>
+            <Center mb="$1">
+              <Home size={24} color="#6366f1" />
+            </Center>
+            <Text size="xs" color="$primary600" fontWeight="medium">홈</Text>
+          </Pressable>
+          
+          <Pressable alignItems="center" p="$2" flex={1}>
+            <Center mb="$1">
+              <FileText size={24} color="#9ca3af" />
+            </Center>
+            <Text size="xs" color="$gray500">기록</Text>
+          </Pressable>
+          
+          <Pressable 
+            alignItems="center" 
+            p="$2" 
+            flex={1}
             onPress={() => navigation.navigate('FieldList')}
           >
-            🏗️ 현장
-          </Button>
-          <Button mode="text" compact labelStyle={styles.navButtonText}>👤 내정보</Button>
-        </View>
-      </Surface>
+            <Center mb="$1">
+              <Building size={24} color="#9ca3af" />
+            </Center>
+            <Text size="xs" color="$gray500">현장</Text>
+          </Pressable>
+          
+          <Pressable 
+            alignItems="center" 
+            p="$2" 
+            flex={1}
+            onPress={handleLogout}
+          >
+            <Center mb="$1">
+              <LogOut size={24} color="#ef4444" />
+            </Center>
+            <Text size="xs" color="$red500">로그아웃</Text>
+          </Pressable>
+        </HStack>
+      </Box>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: 'NotoSansKR_700Bold',
-    letterSpacing: -0.3,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    fontFamily: 'NotoSansKR_400Regular',
-    color: '#666',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  card: {
-    marginBottom: 16,
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontFamily: 'NotoSansKR_500Medium',
-    letterSpacing: -0.2,
-    marginBottom: 16,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    elevation: 1,
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: 'NotoSansKR_400Regular',
-    color: '#666',
-  },
-  taskCard: {
-    marginBottom: 8,
-    backgroundColor: '#fafafa',
-  },
-  taskTitle: {
-    fontSize: 14,
-    fontFamily: 'NotoSansKR_500Medium',
-    marginBottom: 4,
-  },
-  taskCategory: {
-    fontSize: 12,
-    fontFamily: 'NotoSansKR_400Regular',
-    color: '#666',
-    marginBottom: 4,
-  },
-  taskDueDate: {
-    fontSize: 12,
-    fontFamily: 'NotoSansKR_500Medium',
-    color: '#FF9800',
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  actionButton: {
-    width: '48%',
-    aspectRatio: 1.5,
-    marginBottom: 12,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-  },
-  primaryButton: {
-    backgroundColor: '#2196F3',
-  },
-  secondaryButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'NotoSansKR_500Medium',
-  },
-  secondaryButtonText: {
-    color: '#333',
-    fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'NotoSansKR_500Medium',
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    elevation: 8,
-    backgroundColor: 'white',
-  },
-  navContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  buttonText: {
-    fontFamily: 'NotoSansKR_500Medium',
-    fontSize: 16,
-  },
-  navButtonText: {
-    fontFamily: 'NotoSansKR_400Regular',
-    fontSize: 12,
-  },
-});
 
 export default HomeScreen;

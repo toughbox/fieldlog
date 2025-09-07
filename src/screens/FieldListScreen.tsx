@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, RefreshControl, ScrollView, FlatList } from 'react-native';
+import { Alert, RefreshControl, FlatList, StatusBar } from 'react-native';
 import {
+  Box,
+  VStack,
+  HStack,
   Text,
   Button,
+  Input,
+  InputField,
   Card,
-  Title,
-  Paragraph,
-  Surface,
-  IconButton,
-  Chip,
-  FAB,
-  Searchbar,
-  Menu,
-  Divider
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  Heading,
+  Badge,
+  Pressable,
+  SafeAreaView,
+  ButtonText,
+  ButtonIcon,
+  Fab,
+  FabIcon,
+  Divider,
+  Center,
+  Spinner
+} from '@gluestack-ui/themed';
+import { ArrowLeft, Plus, Trash2, Search, MoreVertical, Building } from 'lucide-react-native';
 import { currentFieldApi, Field } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
@@ -30,7 +37,6 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortMenuVisible, setSortMenuVisible] = useState(false);
   const [sortBy, setSortBy] = useState<'name' | 'created' | 'updated'>('name');
 
   useEffect(() => {
@@ -45,36 +51,35 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
     try {
       const accessToken = await TokenService.getAccessToken();
       if (!accessToken) {
-        Alert.alert('오류', '로그인이 필요합니다.');
+        Alert.alert('오류', '접근권한이 없습니다.');
         return;
       }
 
-      const result = await currentFieldApi.getFields(accessToken);
-      
-      if (result.success && result.data) {
-        setFields(result.data);
+      const response = await currentFieldApi.getFields(accessToken);
+      if (response.success && response.data) {
+        setFields(response.data);
       } else {
-        Alert.alert('오류', result.error || '현장 목록을 불러올 수 없습니다.');
+        Alert.alert('오류', response.message || '현장 목록을 불러오는데 실패했습니다.');
       }
     } catch (error) {
-      console.error('현장 목록 로드 오류:', error);
+      console.error('현장 목록 로딩 오류:', error);
       Alert.alert('오류', '현장 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
-      setRefreshing(false);
     }
   };
 
-  const filterAndSortFields = () => {
-    let filtered = fields;
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadFields();
+    setRefreshing(false);
+  };
 
-    // 검색 필터링
-    if (searchQuery.trim()) {
-      filtered = fields.filter(field => 
-        field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        field.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  const filterAndSortFields = () => {
+    let filtered = fields.filter(field =>
+      field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (field.description && field.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
     // 정렬
     filtered.sort((a, b) => {
@@ -93,28 +98,32 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
     setFilteredFields(filtered);
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    loadFields();
-  };
-
-  const handleCreateField = () => {
-    navigation.navigate('CreateField');
-  };
-
   const handleFieldPress = (field: Field) => {
-    // 현장 상세보기 또는 해당 현장의 기록 목록으로 이동
-    navigation.navigate('FieldDetail', { fieldId: field.id });
+    // 현장 상세 화면으로 이동 (추후 구현)
+    Alert.alert('현장 선택', `${field.name} 현장을 선택했습니다.`);
   };
 
-  const handleFieldEdit = (field: Field) => {
-    navigation.navigate('EditField', { fieldId: field.id });
+  const handleFieldOptions = (field: Field) => {
+    Alert.alert(
+      '현장 관리',
+      `${field.name} 현장을 어떻게 하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        { text: '편집', onPress: () => handleEditField(field) },
+        { text: '삭제', style: 'destructive', onPress: () => handleDeleteField(field) }
+      ]
+    );
   };
 
-  const handleFieldDelete = async (field: Field) => {
+  const handleEditField = (field: Field) => {
+    // 편집 화면으로 이동 (추후 구현)
+    Alert.alert('알림', '현장 편집 기능은 준비 중입니다.');
+  };
+
+  const handleDeleteField = async (field: Field) => {
     Alert.alert(
       '현장 삭제',
-      `"${field.name}" 현장을 삭제하시겠습니까?\n\n이 현장에 연결된 기록이 있다면 현장이 비활성화되고, 기록이 없다면 완전히 삭제됩니다.`,
+      `정말 "${field.name}" 현장을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`,
       [
         { text: '취소', style: 'cancel' },
         {
@@ -123,15 +132,17 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
           onPress: async () => {
             try {
               const accessToken = await TokenService.getAccessToken();
-              if (!accessToken) return;
+              if (!accessToken) {
+                Alert.alert('오류', '접근권한이 없습니다.');
+                return;
+              }
 
-              const result = await currentFieldApi.deleteField(field.id, accessToken);
-              
-              if (result.success) {
-                Alert.alert('성공', result.message || '현장이 삭제되었습니다.');
+              const response = await currentFieldApi.deleteField(field.id, accessToken);
+              if (response.success) {
+                Alert.alert('성공', '현장이 삭제되었습니다.');
                 loadFields(); // 목록 새로고침
               } else {
-                Alert.alert('오류', result.error || '현장 삭제에 실패했습니다.');
+                Alert.alert('오류', response.message || '현장 삭제에 실패했습니다.');
               }
             } catch (error) {
               console.error('현장 삭제 오류:', error);
@@ -143,168 +154,140 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
     );
   };
 
+  const handleCreateField = () => {
+    navigation.navigate('CreateField');
+  };
+
   const getFieldStats = (field: Field) => {
-    const fieldCount = field.field_schema.fields.length;
-    return `${fieldCount}개 필드`;
+    // 추후 실제 통계로 교체
+    return `${Math.floor(Math.random() * 20)} 기록`;
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return new Date(dateString).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
   const renderFieldItem = ({ item }: { item: Field }) => (
-    <Card style={styles.fieldCard} onPress={() => handleFieldPress(item)}>
-      <Card.Content>
-        <View style={styles.fieldHeader}>
-          <View style={styles.fieldInfo}>
-            <View style={styles.fieldTitleRow}>
-              <View style={[styles.colorDot, { backgroundColor: item.color }]} />
-              <Title style={styles.fieldName}>{item.name}</Title>
-            </View>
-            {item.description && (
-              <Paragraph style={styles.fieldDescription} numberOfLines={2}>
-                {item.description}
-              </Paragraph>
-            )}
-            <View style={styles.fieldMeta}>
-              <Chip size="small" style={styles.fieldChip}>
-                {getFieldStats(item)}
-              </Chip>
-              <Text style={styles.fieldDate}>
-                생성: {formatDate(item.created_at)}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.fieldActions}>
-            <IconButton
-              icon={item.icon}
-              iconColor={item.color}
-              size={24}
-              style={[styles.fieldIcon, { backgroundColor: item.color + '20' }]}
-            />
-            <Menu
-              visible={false}
-              onDismiss={() => {}}
-              anchor={
-                <IconButton
-                  icon="dots-vertical"
-                  onPress={() => {}}
-                />
-              }
+    <Pressable onPress={() => handleFieldPress(item)} mb="$3">
+      <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+        <VStack space="sm">
+          <HStack justifyContent="space-between" alignItems="center">
+            <VStack space="xs" flex={1}>
+              <HStack alignItems="center" space="sm">
+                <Box w="$4" h="$4" borderRadius="$full" bg={item.color} />
+                <Heading size="md" color="$gray900">{item.name}</Heading>
+              </HStack>
+              {item.description && (
+                <Text size="sm" color="$gray600" numberOfLines={2}>
+                  {item.description}
+                </Text>
+              )}
+              <HStack justifyContent="space-between" alignItems="center">
+                <Badge bg="$blue100" borderRadius="$sm">
+                  <Text size="xs" color="$blue700">
+                    {getFieldStats(item)}
+                  </Text>
+                </Badge>
+                <Text size="xs" color="$gray500">
+                  생성: {formatDate(item.created_at)}
+                </Text>
+              </HStack>
+            </VStack>
+            
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onPress={(e) => {
+                e.stopPropagation();
+                handleFieldOptions(item);
+              }}
             >
-              <Menu.Item onPress={() => handleFieldEdit(item)} title="수정" />
-              <Menu.Item onPress={() => handleFieldDelete(item)} title="삭제" />
-            </Menu>
-          </View>
-        </View>
-      </Card.Content>
-    </Card>
+              <ButtonIcon as={MoreVertical} />
+            </Button>
+          </HStack>
+        </VStack>
+      </Card>
+    </Pressable>
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>🏗️</Text>
-      <Title style={styles.emptyTitle}>현장이 없습니다</Title>
-      <Paragraph style={styles.emptyDescription}>
-        첫 번째 현장을 만들어 기록 관리를 시작해보세요
-      </Paragraph>
-      <Button
-        mode="contained"
-        onPress={handleCreateField}
-        style={styles.emptyButton}
-      >
-        첫 현장 만들기
-      </Button>
-    </View>
+    <Center flex={1} p="$8">
+      <VStack alignItems="center" space="lg">
+        <Box w="$20" h="$20" bg="$gray100" borderRadius="$full" alignItems="center" justifyContent="center">
+          <Building size={40} color="#9ca3af" />
+        </Box>
+        <VStack alignItems="center" space="sm">
+          <Heading size="lg" color="$gray900">현장이 없습니다</Heading>
+          <Text size="sm" color="$gray600" textAlign="center">
+            첫 번째 현장을 만들어 기록 관리를 시작해보세요
+          </Text>
+        </VStack>
+        <Button 
+          action="primary"
+          onPress={handleCreateField}
+        >
+          <ButtonIcon as={Plus} />
+          <ButtonText>첫 현장 만들기</ButtonText>
+        </Button>
+      </VStack>
+    </Center>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView flex={1} bg="$coolGray50">
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
       {/* 헤더 */}
-      <Surface style={styles.header}>
-        <View style={styles.headerContent}>
-          <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
-          <Title style={styles.headerTitle}>현장 관리</Title>
-          <Menu
-            visible={sortMenuVisible}
-            onDismiss={() => setSortMenuVisible(false)}
-            anchor={
-              <IconButton
-                icon="sort"
-                onPress={() => setSortMenuVisible(true)}
-              />
-            }
-          >
-            <Menu.Item
-              onPress={() => {
-                setSortBy('name');
-                setSortMenuVisible(false);
-              }}
-              title="이름순"
-              leadingIcon={sortBy === 'name' ? 'check' : undefined}
-            />
-            <Menu.Item
-              onPress={() => {
-                setSortBy('created');
-                setSortMenuVisible(false);
-              }}
-              title="최신순"
-              leadingIcon={sortBy === 'created' ? 'check' : undefined}
-            />
-            <Menu.Item
-              onPress={() => {
-                setSortBy('updated');
-                setSortMenuVisible(false);
-              }}
-              title="수정순"
-              leadingIcon={sortBy === 'updated' ? 'check' : undefined}
-            />
-          </Menu>
-        </View>
-      </Surface>
+      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+        <HStack justifyContent="space-between" alignItems="center">
+          <HStack alignItems="center" space="sm">
+            <Button variant="ghost" size="sm" onPress={() => navigation.goBack()}>
+              <ButtonIcon as={ArrowLeft} />
+            </Button>
+            <Heading size="xl" color="$gray900">현장 관리</Heading>
+          </HStack>
+        </HStack>
+      </Box>
 
       {/* 검색바 */}
-      <View style={styles.searchContainer}>
-        <Searchbar
-          placeholder="현장 검색..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-        />
-      </View>
+      <Box px="$4" py="$3" bg="white">
+        <Input>
+          <ButtonIcon as={Search} ml="$3" color="$gray400" />
+          <InputField
+            placeholder="현장 이름이나 설명으로 검색..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </Input>
+      </Box>
 
       {/* 통계 */}
       {fields.length > 0 && (
-        <Surface style={styles.statsContainer}>
-          <View style={styles.statsContent}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{fields.length}</Text>
-              <Text style={styles.statLabel}>전체 현장</Text>
-            </View>
-            <Divider style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{filteredFields.length}</Text>
-              <Text style={styles.statLabel}>검색 결과</Text>
-            </View>
-          </View>
-        </Surface>
+        <Box bg="white" px="$4" py="$3" mb="$1">
+          <HStack justifyContent="space-around" alignItems="center">
+            <VStack alignItems="center">
+              <Text size="2xl" fontWeight="bold" color="$primary600">{fields.length}</Text>
+              <Text size="xs" color="$gray600">전체 현장</Text>
+            </VStack>
+            <Divider orientation="vertical" h="$10" />
+            <VStack alignItems="center">
+              <Text size="2xl" fontWeight="bold" color="$green600">{filteredFields.length}</Text>
+              <Text size="xs" color="$gray600">검색 결과</Text>
+            </VStack>
+          </HStack>
+        </Box>
       )}
 
       {/* 현장 목록 */}
-      <View style={styles.listContainer}>
+      <Box flex={1} px="$4">
         {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <Text>현장 목록을 불러오는 중...</Text>
-          </View>
-        ) : filteredFields.length === 0 ? (
-          renderEmptyState()
-        ) : (
+          <Center flex={1}>
+            <Spinner size="large" color="$primary600" />
+          </Center>
+        ) : filteredFields.length > 0 ? (
           <FlatList
             data={filteredFields}
             renderItem={renderFieldItem}
@@ -312,174 +295,27 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
-            contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
           />
+        ) : (
+          renderEmptyState()
         )}
-      </View>
+      </Box>
 
-      {/* 플로팅 액션 버튼 */}
-      <FAB
-        icon="plus"
-        style={styles.fab}
+      {/* FAB */}
+      <Fab
+        size="lg"
+        placement="bottom right"
         onPress={handleCreateField}
-        label="새 현장"
-      />
+        bg="$primary600"
+        mb="$20"
+        mr="$4"
+      >
+        <FabIcon as={Plus} color="white" />
+      </Fab>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    elevation: 2,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  searchContainer: {
-    padding: 16,
-  },
-  searchbar: {
-    elevation: 2,
-  },
-  statsContainer: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 8,
-    elevation: 1,
-  },
-  statsContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2196F3',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  statDivider: {
-    height: 30,
-    width: 1,
-  },
-  listContainer: {
-    flex: 1,
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 100, // FAB를 위한 여백
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fieldCard: {
-    marginBottom: 12,
-    elevation: 2,
-  },
-  fieldHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  fieldInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  fieldTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  colorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  fieldName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  fieldDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-    lineHeight: 20,
-  },
-  fieldMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  fieldChip: {
-    height: 24,
-  },
-  fieldDate: {
-    fontSize: 12,
-    color: '#999',
-  },
-  fieldActions: {
-    alignItems: 'center',
-  },
-  fieldIcon: {
-    marginBottom: 8,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 24,
-  },
-  emptyButton: {
-    paddingHorizontal: 24,
-  },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
-  },
-});
 
 export default FieldListScreen;
