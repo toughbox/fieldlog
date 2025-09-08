@@ -420,16 +420,11 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
       <VStack space="sm">
         <HStack justifyContent="space-between" alignItems="center">
           <Text fontWeight="bold" color="$gray900">필드 {index + 1}</Text>
-          <Button variant="ghost" size="sm" onPress={onRemove}>
+          <Button variant="ghost" size="sm" onPress={onRemove} bg="transparent">
             <ButtonIcon as={Trash2} color="$red500" />
           </Button>
         </HStack>
 
-        {/* 자동 생성된 키 표시 */}
-        <HStack space="sm" alignItems="center" bg="$blue50" p="$2" borderRadius="$sm">
-          <Text size="xs" color="$blue700">🔑 자동 생성된 키:</Text>
-          <Text size="xs" fontWeight="bold" color="$blue800">{field.key}</Text>
-        </HStack>
 
         <VStack space="xs">
           <Text size="sm" color="$gray600">라벨 (화면에 표시될 이름) *</Text>
@@ -448,15 +443,21 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
             {FIELD_TYPES.map((type) => (
               <Pressable
                 key={type.value}
-                onPress={() => onUpdate({ type: type.value as any })}
-                bg={field.type === type.value ? "$primary100" : "$gray100"}
+                onPress={() => {
+                  console.log(`타입 변경: ${field.type} -> ${type.value}`);
+                  onUpdate({ type: type.value as any });
+                }}
+                bg={field.type === type.value ? "#6366F1" : "#F3F4F6"}
                 p="$2"
                 borderRadius="$sm"
                 mb="$1"
+                borderWidth={field.type === type.value ? 2 : 1}
+                borderColor={field.type === type.value ? "#4F46E5" : "#D1D5DB"}
               >
                 <Text 
                   size="xs" 
-                  color={field.type === type.value ? "$primary700" : "$gray700"}
+                  color={field.type === type.value ? "white" : "$gray700"}
+                  fontWeight={field.type === type.value ? "bold" : "normal"}
                 >
                   {type.label}
                 </Text>
@@ -505,7 +506,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
               {field.options?.map((option, optionIndex) => (
                 <HStack key={optionIndex} justifyContent="space-between" alignItems="center" bg="white" p="$2" borderRadius="$sm">
                   <Text size="sm" color="$gray800">{option}</Text>
-                  <Button variant="ghost" size="sm" onPress={() => removeOption(optionIndex)}>
+                  <Button variant="ghost" size="sm" onPress={() => removeOption(optionIndex)} bg="transparent">
                     <ButtonIcon as={Trash2} size={16} color="$red500" />
                   </Button>
                 </HStack>
