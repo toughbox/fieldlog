@@ -1,5 +1,6 @@
 // API 기본 설정
-const API_HOST = process.env.EXPO_PUBLIC_API_HOST || '192.168.0.19';
+//const API_HOST = process.env.EXPO_PUBLIC_API_HOST || '192.168.0.19';
+const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
 
 const API_BASE_URL = __DEV__ 
@@ -20,6 +21,7 @@ export interface SignUpRequest {
   email: string;
   password: string;
   phone?: string;
+  company?: string;
 }
 
 export interface SignUpResponse {
@@ -27,6 +29,7 @@ export interface SignUpResponse {
   email: string;
   name: string;
   phone?: string;
+  company?: string;
   created_at: string;
 }
 
@@ -41,6 +44,7 @@ export interface LoginResponse {
     email: string;
     name: string;
     phone?: string;
+    company?: string;
   };
   access_token: string;
   refresh_token: string;
@@ -465,11 +469,10 @@ export const mockFieldApi = {
   },
 };
 
-// 현재 사용할 API (실제 백엔드 연동)
+// 실제 백엔드 연동 사용
 export const currentApi = authApi;
 export const currentFieldApi = fieldApi;
 
-// 백엔드 서버가 없을 때는 아래 주석을 해제하세요
+// 백엔드 서버가 없을 때는 목킹 API 사용
 // export const currentApi = __DEV__ ? mockApi : authApi;
-// 목킹 API 사용 (백엔드 서버 없이 테스트용)
 // export const currentFieldApi = __DEV__ ? mockFieldApi : fieldApi;
