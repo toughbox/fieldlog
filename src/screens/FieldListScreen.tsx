@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, RefreshControl, FlatList, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Box,
   VStack,
@@ -12,7 +13,6 @@ import {
   Heading,
   Badge,
   Pressable,
-  SafeAreaView,
   ButtonText,
   ButtonIcon,
   Fab,
@@ -238,8 +238,8 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView flex={1} bg="$coolGray50">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       {/* 헤더 */}
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
         <HStack justifyContent="space-between" alignItems="center">

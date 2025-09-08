@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, ScrollView, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Box,
   VStack,
@@ -12,7 +13,6 @@ import {
   Heading,
   Badge,
   Pressable,
-  SafeAreaView,
   ButtonText,
   ButtonIcon,
   Select,
@@ -219,8 +219,8 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
   };
 
   return (
-    <SafeAreaView flex={1} bg="$coolGray50">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       {/* 헤더 */}
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
         <HStack justifyContent="space-between" alignItems="center">
@@ -239,7 +239,7 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
           <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
             <VStack space="md">
               <Heading size="lg" color="$gray900">템플릿 선택</Heading>
-              <Text color="$gray600">자주 사용하는 현장 유형을 선택하거나 직접 만들어보세요</Text>
+              <Text color="$gray600" fontFamily="NotoSansKR_400Regular">현장을 관리하기 위하여 기록할 항목을 직접 만들어보세요</Text>
               
               {TEMPLATES.map((template, index) => (
                 <Pressable

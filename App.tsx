@@ -9,6 +9,49 @@ import {
   NotoSansKR_500Medium, 
   NotoSansKR_700Bold 
 } from '@expo-google-fonts/noto-sans-kr';
+
+// 한글 폰트를 포함한 커스텀 설정
+const customConfig = {
+  ...config,
+  tokens: {
+    ...config.tokens,
+    fonts: {
+      ...config.tokens.fonts,
+      body: 'NotoSansKR_400Regular',
+      heading: 'NotoSansKR_700Bold',
+    },
+  },
+  components: {
+    ...config.components,
+    Text: {
+      ...config.components?.Text,
+      defaultProps: {
+        ...config.components?.Text?.defaultProps,
+        fontFamily: 'NotoSansKR_400Regular',
+      },
+    },
+    Heading: {
+      ...config.components?.Heading,
+      defaultProps: {
+        ...config.components?.Heading?.defaultProps,
+        fontFamily: 'NotoSansKR_700Bold',
+      },
+    },
+    Button: {
+      ...config.components?.Button,
+      defaultProps: {
+        ...config.components?.Button?.defaultProps,
+      },
+    },
+    ButtonText: {
+      ...config.components?.ButtonText,
+      defaultProps: {
+        ...config.components?.ButtonText?.defaultProps,
+        fontFamily: 'NotoSansKR_500Medium',
+      },
+    },
+  },
+};
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -87,7 +130,7 @@ export default function App() {
   }
 
   return (
-    <GluestackUIProvider config={config}>
+    <GluestackUIProvider config={customConfig}>
       <AuthProvider>
         <AppNavigator />
         <StatusBar style="dark" backgroundColor="transparent" />
