@@ -66,8 +66,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           response.data.user
         );
         
-        console.log('✅ 인증 처리 완료 - 홈 화면으로 이동');
-        navigation.replace('Home');
+        console.log('✅ 인증 처리 완료 - 자동으로 홈 화면으로 이동됩니다');
       } else {
         console.error('❌ 로그인 실패:', response.error);
         Alert.alert(

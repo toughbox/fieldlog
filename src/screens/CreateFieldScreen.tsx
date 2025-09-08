@@ -335,13 +335,7 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
             {/* 필드 설정 */}
             <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
               <VStack space="md">
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Heading size="lg" color="$gray900">입력 필드 설정</Heading>
-                  <Button size="sm" variant="outline" onPress={addField}>
-                    <ButtonIcon as={Plus} />
-                    <ButtonText>필드 추가</ButtonText>
-                  </Button>
-                </HStack>
+                <Heading size="lg" color="$gray900">입력 필드 설정</Heading>
 
                 {fields.length === 0 ? (
                   <Text color="$gray600" textAlign="center" py="$4">
@@ -360,6 +354,12 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
                     ))}
                   </VStack>
                 )}
+
+                {/* 필드 추가 버튼을 아래쪽으로 이동 */}
+                <Button variant="outline" onPress={addField} mt="$2">
+                  <ButtonIcon as={Plus} />
+                  <ButtonText>필드 추가</ButtonText>
+                </Button>
               </VStack>
             </Card>
 
