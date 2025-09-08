@@ -69,33 +69,6 @@ const ICONS = [
   'home', 'building', 'chart', 'clipboard', 'settings'
 ];
 
-const TEMPLATES = [
-  {
-    name: '건설현장 하자관리',
-    description: '아파트 건설현장 하자 관리용',
-    color: '#FF6B6B',
-    icon: '🏗️',
-    fields: [
-      { label: '동', type: 'text', required: true, placeholder: '예: 101동' },
-      { label: '호수', type: 'text', required: true, placeholder: '예: 1001호' },
-      { label: '하자유형', type: 'select', required: true, options: ['균열', '누수', '도장불량', '타일불량', '기타'] },
-      { label: '심각도', type: 'select', required: true, options: ['높음', '보통', '낮음'] },
-      { label: '담당자', type: 'text', required: false, placeholder: '담당자 이름' }
-    ]
-  },
-  {
-    name: '매장 점검',
-    description: '매장 일일 점검 및 관리',
-    color: '#4ECDC4',
-    icon: '🏪',
-    fields: [
-      { label: '점검구역', type: 'select', required: true, options: ['입구', '매장내부', '창고', '화장실', '주방'] },
-      { label: '점검항목', type: 'text', required: true, placeholder: '점검 항목' },
-      { label: '상태', type: 'select', required: true, options: ['양호', '보통', '불량'] },
-      { label: '특이사항', type: 'textarea', required: false, placeholder: '특이사항 기록' }
-    ]
-  }
-];
 
 const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
@@ -105,7 +78,6 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
   const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
   const [fields, setFields] = useState<FieldDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(true);
 
   const addField = () => {
     const nextNumber = fields.length + 1;
@@ -137,24 +109,6 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
     ));
   };
 
-  const applyTemplate = (template: any) => {
-    setName(template.name);
-    setDescription(template.description);
-    setSelectedColor(template.color);
-    
-    const templateFields = template.fields.map((field: any, index: number) => ({
-      id: Date.now().toString() + index,
-      key: `attribute${index + 1}`,
-      label: field.label,
-      type: field.type,
-      required: field.required,
-      placeholder: field.placeholder || '',
-      options: field.options || []
-    }));
-    
-    setFields(templateFields);
-    setShowTemplates(false);
-  };
 
   const handleCreateField = async () => {
     if (!name.trim()) {
@@ -163,13 +117,13 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
     }
 
     if (fields.length === 0) {
-      Alert.alert('알림', '최소 하나의 입력 필드를 추가해주세요.');
+      Alert.alert('알림', '최소 하나의 입력 항목을 추가해주세요.');
       return;
     }
 
     const invalidField = fields.find(field => !field.label.trim());
     if (invalidField) {
-      Alert.alert('알림', '모든 필드의 라벨을 입력해주세요.');
+      Alert.alert('알림', '모든 항목의 라벨을 입력해주세요.');
       return;
     }
 
@@ -225,7 +179,7 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
         <HStack justifyContent="space-between" alignItems="center">
           <HStack alignItems="center" space="sm">
-            <Button variant="ghost" size="sm" onPress={() => navigation.goBack()}>
+            <Button variant="link" size="sm" onPress={() => navigation.goBack()}>
               <ButtonIcon as={ArrowLeft} />
             </Button>
             <Heading size="xl" color="$gray900">새 현장 만들기</Heading>
@@ -233,50 +187,9 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
         </HStack>
       </Box>
 
-      <ScrollView flex={1} p="$4">
-        {/* 템플릿 선택 */}
-        {showTemplates && (
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
-            <VStack space="md">
-              <Heading size="lg" color="$gray900">템플릿 선택</Heading>
-              <Text color="$gray600" fontFamily="NotoSansKR_400Regular">현장을 관리하기 위하여 기록할 항목을 직접 만들어보세요</Text>
-              
-              {TEMPLATES.map((template, index) => (
-                <Pressable
-                  key={index}
-                  onPress={() => applyTemplate(template)}
-                  bg="$gray50"
-                  p="$3"
-                  borderRadius="$md"
-                  borderLeftWidth={4}
-                  borderLeftColor={template.color}
-                >
-                  <HStack space="sm" alignItems="center">
-                    <Text fontSize="$2xl">{template.icon}</Text>
-                    <VStack space="xs" flex={1}>
-                      <Text fontWeight="bold" color="$gray900">{template.name}</Text>
-                      <Text size="sm" color="$gray600">{template.description}</Text>
-                    </VStack>
-                    <Button size="sm" variant="outline">
-                      <ButtonText>사용</ButtonText>
-                    </Button>
-                  </HStack>
-                </Pressable>
-              ))}
-
-              <Button
-                variant="ghost"
-                onPress={() => setShowTemplates(false)}
-              >
-                <ButtonText>직접 만들기</ButtonText>
-              </Button>
-            </VStack>
-          </Card>
-        )}
-
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {/* 기본 정보 */}
-        {!showTemplates && (
-          <VStack space="md">
+        <VStack space="md">
             <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
               <VStack space="md">
                 <Heading size="lg" color="$gray900">기본 정보</Heading>
@@ -335,11 +248,11 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
             {/* 필드 설정 */}
             <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
               <VStack space="md">
-                <Heading size="lg" color="$gray900">입력 필드 설정</Heading>
+                <Heading size="lg" color="$gray900">입력 항목 설정</Heading>
 
                 {fields.length === 0 ? (
                   <Text color="$gray600" textAlign="center" py="$4">
-                    입력 필드를 추가해주세요. 각 기록에서 입력받을 정보들을 정의할 수 있습니다.
+                    입력 항목을 추가해주세요. 각 기록에서 입력받을 정보들을 정의할 수 있습니다.
                   </Text>
                 ) : (
                   <VStack space="sm">
@@ -355,10 +268,10 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
                   </VStack>
                 )}
 
-                {/* 필드 추가 버튼을 아래쪽으로 이동 */}
+                {/* 항목 추가 버튼을 아래쪽으로 이동 */}
                 <Button variant="outline" onPress={addField} mt="$2">
                   <ButtonIcon as={Plus} />
-                  <ButtonText>필드 추가</ButtonText>
+                  <ButtonText>항목 추가</ButtonText>
                 </Button>
               </VStack>
             </Card>
@@ -386,7 +299,6 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
               </Button>
             </HStack>
           </VStack>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -419,8 +331,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
     <Card bg="$gray50" p="$3" borderRadius="$md" borderWidth={1} borderColor="$gray200">
       <VStack space="sm">
         <HStack justifyContent="space-between" alignItems="center">
-          <Text fontWeight="bold" color="$gray900">필드 {index + 1}</Text>
-          <Button variant="ghost" size="sm" onPress={onRemove} bg="transparent">
+          <Text fontWeight="bold" color="$gray900">항목 {index + 1}</Text>
+          <Button variant="link" size="sm" onPress={onRemove} style={{ backgroundColor: 'transparent' }}>
             <ButtonIcon as={Trash2} color="$red500" />
           </Button>
         </HStack>
@@ -466,16 +378,6 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
           </HStack>
         </VStack>
 
-        <VStack space="xs">
-          <Text size="sm" color="$gray600">플레이스홀더</Text>
-          <Input>
-            <InputField
-              placeholder="입력 안내 문구 (선택사항)"
-              value={field.placeholder}
-              onChangeText={(text) => onUpdate({ placeholder: text })}
-            />
-          </Input>
-        </VStack>
 
         <HStack justifyContent="space-between" alignItems="center">
           <Text size="sm" color="$gray600">필수 입력</Text>
@@ -506,8 +408,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
               {field.options?.map((option, optionIndex) => (
                 <HStack key={optionIndex} justifyContent="space-between" alignItems="center" bg="white" p="$2" borderRadius="$sm">
                   <Text size="sm" color="$gray800">{option}</Text>
-                  <Button variant="ghost" size="sm" onPress={() => removeOption(optionIndex)} bg="transparent">
-                    <ButtonIcon as={Trash2} size={16} color="$red500" />
+                  <Button variant="link" size="sm" onPress={() => removeOption(optionIndex)} style={{ backgroundColor: 'transparent' }}>
+                    <ButtonIcon as={Trash2} color="$red500" />
                   </Button>
                 </HStack>
               ))}
