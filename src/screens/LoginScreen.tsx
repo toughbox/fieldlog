@@ -158,14 +158,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </VStack>
         </Card>
 
-        {/* 테스트 계정 안내 */}
-        <Card bg="$amber50" p="$4" mx="$4" borderRadius="$lg" borderWidth={1} borderColor="$amber200">
-          <VStack space="xs">
-            <Text fontWeight="bold" color="$amber800">🔑 테스트 계정</Text>
-            <Text color="$amber700">이메일: test@fieldlog.com</Text>
-            <Text color="$amber700">비밀번호: password123</Text>
-          </VStack>
-        </Card>
       </ScrollView>
     </SafeAreaView>
   );
