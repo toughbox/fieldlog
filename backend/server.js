@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const fieldRoutes = require('./routes/fields');
+const recordRoutes = require('./routes/records');
 const { connectDB } = require('./config/database');
 
 const app = express();
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 // 라우트 설정
 app.use('/api/auth', authRoutes);
 app.use('/api/fields', fieldRoutes);
+app.use('/api/records', recordRoutes);
 
 // 기본 헬스체크 엔드포인트
 app.get('/api/health', (req, res) => {
@@ -86,6 +88,7 @@ async function startServer() {
       console.log(`📍 Health Check: http://localhost:${PORT}/api/health`);
       console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
       console.log(`🏗️  Fields API: http://localhost:${PORT}/api/fields`);
+      console.log(`📝 Records API: http://localhost:${PORT}/api/records`);
     });
   } catch (error) {
     console.error('❌ 서버 시작 실패:', error);

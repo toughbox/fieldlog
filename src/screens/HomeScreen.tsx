@@ -270,7 +270,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     flex={1}
                     size="lg" 
                     action="primary" 
-                    onPress={() => Alert.alert('알림', '새 기록 작성 기능 준비중')}
+                    onPress={() => navigation.navigate('CreateRecord')}
                   >
                     <ButtonIcon as={Edit} />
                     <ButtonText fontFamily="NotoSansKR_500Medium">새 기록</ButtonText>
@@ -305,10 +305,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     size="lg" 
                     variant="outline" 
                     action="secondary"
-                    onPress={() => Alert.alert('알림', '일정 보기 기능 준비중')}
+                    onPress={() => navigation.navigate('RecordsList')}
                   >
-                    <ButtonIcon as={Calendar} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">일정 보기</ButtonText>
+                    <ButtonIcon as={FileText} />
+                    <ButtonText fontFamily="NotoSansKR_500Medium">기록 목록</ButtonText>
                   </Button>
                 </HStack>
               </VStack>

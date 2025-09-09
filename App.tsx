@@ -60,6 +60,10 @@ import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import CreateFieldScreen from './src/screens/CreateFieldScreen';
 import FieldListScreen from './src/screens/FieldListScreen';
+import CreateRecordScreen from './src/screens/CreateRecordScreen';
+import RecordsListScreen from './src/screens/RecordsListScreen';
+import RecordDetailScreen from './src/screens/RecordDetailScreen';
+import EditRecordScreen from './src/screens/EditRecordScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack = createStackNavigator();
@@ -96,6 +100,10 @@ const AppNavigator = () => {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="CreateField" component={CreateFieldScreen} />
             <Stack.Screen name="FieldList" component={FieldListScreen} />
+            <Stack.Screen name="CreateRecord" component={CreateRecordScreen} />
+            <Stack.Screen name="RecordsList" component={RecordsListScreen} />
+            <Stack.Screen name="RecordDetail" component={RecordDetailScreen} />
+            <Stack.Screen name="EditRecord" component={EditRecordScreen} />
           </>
         ) : (
           // 인증되지 않은 사용자용 화면들
