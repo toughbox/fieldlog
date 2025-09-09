@@ -332,7 +332,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                   <Button
                     size="sm"
                     action="primary"
-                    bg="$green500"
+                    bg="$red500"
                     onPress={handleComplete}
                     isDisabled={isCompleting}
                     ml="$2"
@@ -341,8 +341,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                       <Spinner color="white" size="small" />
                     ) : (
                       <>
-                        <ButtonIcon as={CheckCircle2} size={16} mr="$1" />
-                        <ButtonText size="sm">완료</ButtonText>
+                        <ButtonText size="sm">완료 처리</ButtonText>
                       </>
                     )}
                   </Button>

@@ -30,7 +30,7 @@ import {
   TextareaInput,
   Center
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Tag, Calendar, Save } from 'lucide-react-native';
+import { ArrowLeft, Tag, Calendar, Save, ChevronDown } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, UpdateRecordRequest, Field, FieldRecord } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
@@ -354,7 +354,10 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                 onValueChange={(value) => setSelectedFieldId(value ? parseInt(value) : null)}
               >
                 <SelectTrigger>
-                  <SelectInput placeholder="현장을 선택하세요" />
+                  <SelectInput 
+                    placeholder="현장 선택"
+                    value={selectedField ? selectedField.name : ''}
+                  />
                   <SelectIcon />
                 </SelectTrigger>
                 <SelectPortal>
