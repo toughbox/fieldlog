@@ -90,7 +90,7 @@ router.get('/', authenticateToken, async (req, res) => {
              fr.status, fr.priority, fr.due_date, fr.completed_at,
              fr.custom_data, fr.attachment, fr.location, fr.tags,
              fr.created_at, fr.updated_at,
-             f.name as field_name, f.color as field_color, f.icon as field_icon
+             f.name as field_name, f.color as field_color, f.icon as field_icon, f.field_schema
       FROM fieldlog.field_record fr
       LEFT JOIN fieldlog.field f ON fr.field_id = f.id
       WHERE ${whereConditions.join(' AND ')}

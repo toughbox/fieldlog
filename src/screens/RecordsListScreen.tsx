@@ -285,6 +285,30 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
               </Text>
             </HStack>
 
+            {/* 사용자 정의 필드 */}
+            {item.custom_data && Object.keys(item.custom_data).length > 0 && (
+              <VStack space="xs">
+                {Object.entries(item.custom_data).map(([key, value], index) => {
+                  if (!value || !value.toString().trim()) return null;
+                  
+                  // field_schema에서 해당 key의 label 찾기
+                  const fieldDef = item.field_schema?.fields.find(f => f.key === key);
+                  const label = fieldDef?.label || key;
+                  
+                  return (
+                    <HStack key={index} space="xs" alignItems="center">
+                      <Text size="xs" color="$gray500" fontWeight="500" minWidth="$16">
+                        {label}:
+                      </Text>
+                      <Text size="xs" color="$gray700" flex={1} numberOfLines={1}>
+                        {value.toString()}
+                      </Text>
+                    </HStack>
+                  );
+                })}
+              </VStack>
+            )}
+
             {/* 태그 */}
             {item.tags && item.tags.length > 0 && (
               <HStack space="xs" flexWrap="wrap">
