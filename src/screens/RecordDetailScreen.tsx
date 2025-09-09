@@ -197,21 +197,26 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
     ]);
   };
 
-  const renderCustomField = (key: string, value: any, fieldSchema?: any) => {
+  const renderCustomField = (key: string, value: any, fieldSchema?: any, index: number, isLast: boolean) => {
     if (!value && value !== 0) return null;
 
     const fieldDef = fieldSchema?.fields?.find((f: any) => f.key === key);
     const label = fieldDef?.label || key;
 
     return (
-      <HStack key={key} space="sm" alignItems="flex-start" flexWrap="wrap">
-        <Text size="sm" color="$gray600" fontWeight="500">
-          {label}:
-        </Text>
-        <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
-          {value.toString()}
-        </Text>
-      </HStack>
+      <VStack key={key} space="xs">
+        <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
+          <Text size="sm" color="$gray600" fontWeight="500">
+            {label}:
+          </Text>
+          <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+            {value.toString()}
+          </Text>
+        </HStack>
+        {!isLast && (
+          <Divider bg="$gray200" opacity={0.5} />
+        )}
+      </VStack>
     );
   };
 
@@ -368,13 +373,13 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
           {/* 일정 정보 */}
           <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
+            <VStack space="sm">
               <HStack alignItems="center" space="sm">
                 <Calendar size={20} color="#6366f1" />
                 <Heading size="lg" color="$gray900">일정 정보</Heading>
               </HStack>
 
-              <VStack space="sm">
+              <VStack space="xs">
                 <HStack justifyContent="space-between" alignItems="center">
                   <Text color="$gray600" size="sm">생성일</Text>
                   <Text color="$gray900">{formatDate(record.created_at)}</Text>
@@ -413,9 +418,9 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                   <Heading size="lg" color="$gray900">상세 정보</Heading>
                 </HStack>
 
-                <VStack space="xs">
-                  {Object.entries(record.custom_data).map(([key, value]) =>
-                    renderCustomField(key, value, record.field_schema)
+                <VStack space="sm">
+                  {Object.entries(record.custom_data).map(([key, value], index, array) =>
+                    renderCustomField(key, value, record.field_schema, index, index === array.length - 1)
                   )}
                 </VStack>
               </VStack>
