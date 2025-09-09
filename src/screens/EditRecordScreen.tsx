@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Alert, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -58,6 +58,7 @@ const PRIORITY_OPTIONS = [
 const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }) => {
   const { user } = useAuth();
   const { recordId } = route.params;
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // 기본 정보
   const [record, setRecord] = useState<FieldRecord | null>(null);
@@ -88,8 +89,15 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
     if (selectedFieldId && fields.length > 0) {
       const field = fields.find(f => f.id === selectedFieldId);
       setSelectedField(field || null);
+      
+      // 현장 선택 시 맨 위로 스크롤 (초기 로딩이 아닌 경우에만)
+      if (!isLoading && record) {
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+        }, 100);
+      }
     }
-  }, [selectedFieldId, fields]);
+  }, [selectedFieldId, fields, isLoading, record]);
 
   const loadInitialData = async () => {
     try {
@@ -334,7 +342,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         <VStack space="md">
           {/* 현장 선택 */}
           <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>

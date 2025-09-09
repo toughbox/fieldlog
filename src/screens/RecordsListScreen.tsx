@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert, ScrollView, StatusBar, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -59,6 +59,7 @@ const PRIORITY_CONFIG = {
 const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route }) => {
   const { user } = useAuth();
   const { preselectedFieldId } = route.params || {};
+  const flatListRef = useRef<FlatList>(null);
 
   // 데이터 상태
   const [records, setRecords] = useState<FieldRecord[]>([]);
@@ -93,6 +94,11 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
   useEffect(() => {
     if (!isLoading) {
       loadRecords(true);
+      
+      // 필터 변경 시 목록 맨 위로 스크롤
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
     }
   }, [searchQuery, selectedFieldId, selectedStatus, selectedPriority]);
 
@@ -490,6 +496,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
         </Center>
       ) : (
         <FlatList
+          ref={flatListRef}
           data={records}
           renderItem={renderRecordItem}
           keyExtractor={(item) => item.id.toString()}

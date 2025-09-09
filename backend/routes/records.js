@@ -274,7 +274,7 @@ router.post('/', authenticateToken, async (req, res) => {
         JSON.stringify(custom_data),
         JSON.stringify(attachment),
         location ? JSON.stringify(location) : null,
-        tags
+        Array.isArray(tags) ? tags : []
       ]
     );
 
@@ -443,7 +443,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
     if (tags !== undefined) {
       updateFields.push(`tags = $${paramIndex++}`);
-      updateValues.push(tags);
+      updateValues.push(Array.isArray(tags) ? tags : []);
     }
 
     if (updateFields.length === 0) {

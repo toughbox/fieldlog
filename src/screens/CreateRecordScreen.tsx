@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Alert, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -58,6 +58,7 @@ const PRIORITY_OPTIONS = [
 const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, route }) => {
   const { user } = useAuth();
   const { preselectedFieldId } = route.params || {};
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // 기본 정보
   const [selectedFieldId, setSelectedFieldId] = useState<number | null>(preselectedFieldId || null);
@@ -95,6 +96,11 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
           initialCustomData[fieldDef.key] = '';
         });
         setCustomData(initialCustomData);
+        
+        // 현장 선택 시 맨 위로 스크롤
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+        }, 100);
       }
     } else {
       setSelectedField(null);
@@ -308,7 +314,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         <VStack space="md">
           {/* 현장 선택 */}
           <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>

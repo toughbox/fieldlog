@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, ScrollView, StatusBar, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -42,6 +42,7 @@ import {
 } from 'lucide-react-native';
 import { currentRecordApi, FieldRecord } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
 import { TokenService } from '../services/tokenService';
 
 interface RecordDetailScreenProps {
@@ -72,10 +73,14 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
-  useEffect(() => {
-    loadRecord();
-  }, [recordId]);
+  // 화면 포커스시 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      loadRecord();
+    }, [recordId])
+  );
 
   const loadRecord = async () => {
     try {
@@ -100,6 +105,36 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
       navigation.goBack();
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!record || record.status === 'completed') return;
+
+    try {
+      setIsCompleting(true);
+      const accessToken = await TokenService.getAccessToken();
+      if (!accessToken) {
+        Alert.alert('오류', '접근권한이 없습니다.');
+        return;
+      }
+
+      const response = await currentRecordApi.updateRecord(record.id, {
+        status: 'completed'
+      }, accessToken);
+      
+      if (response.success) {
+        // 로컬 상태 업데이트
+        setRecord(prev => prev ? { ...prev, status: 'completed', completed_at: new Date().toISOString() } : null);
+        Alert.alert('완료', '기록이 완료 처리되었습니다.');
+      } else {
+        Alert.alert('오류', response.error || '완료 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('완료 처리 오류:', error);
+      Alert.alert('오류', '완료 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -262,32 +297,55 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
               <Heading size="xl" color="$gray900">{record.title}</Heading>
 
               {/* 상태 및 우선순위 */}
-              <HStack space="sm" flexWrap="wrap">
-                <HStack 
-                  alignItems="center" 
-                  space="xs" 
-                  bg={statusConfig.bgColor} 
-                  px="$3" 
-                  py="$1" 
-                  borderRadius="$md"
-                >
-                  <StatusIcon size={16} color={statusConfig.color} />
-                  <Text size="sm" color={statusConfig.color} fontWeight="500">
-                    {statusConfig.label}
-                  </Text>
+              <HStack justifyContent="space-between" alignItems="center">
+                <HStack space="sm" flexWrap="wrap" flex={1}>
+                  <HStack 
+                    alignItems="center" 
+                    space="xs" 
+                    bg={statusConfig.bgColor} 
+                    px="$3" 
+                    py="$1" 
+                    borderRadius="$md"
+                  >
+                    <StatusIcon size={16} color={statusConfig.color} />
+                    <Text size="sm" color={statusConfig.color} fontWeight="500">
+                      {statusConfig.label}
+                    </Text>
+                  </HStack>
+
+                  <Badge 
+                    variant="solid" 
+                    bg={priorityConfig.color}
+                  >
+                    <Text color="white" size="sm">우선순위 {record.priority}</Text>
+                  </Badge>
+
+                  {overdue && (
+                    <Badge variant="solid" bg="$red500">
+                      <Text color="white" size="sm">지연</Text>
+                    </Badge>
+                  )}
                 </HStack>
 
-                <Badge 
-                  variant="solid" 
-                  bg={priorityConfig.color}
-                >
-                  <Text color="white" size="sm">우선순위 {record.priority}</Text>
-                </Badge>
-
-                {overdue && (
-                  <Badge variant="solid" bg="$red500">
-                    <Text color="white" size="sm">지연</Text>
-                  </Badge>
+                {/* 완료 버튼 */}
+                {record.status !== 'completed' && record.status !== 'cancelled' && (
+                  <Button
+                    size="sm"
+                    action="primary"
+                    bg="$green500"
+                    onPress={handleComplete}
+                    isDisabled={isCompleting}
+                    ml="$2"
+                  >
+                    {isCompleting ? (
+                      <Spinner color="white" size="small" />
+                    ) : (
+                      <>
+                        <ButtonIcon as={CheckCircle2} size={16} mr="$1" />
+                        <ButtonText size="sm">완료</ButtonText>
+                      </>
+                    )}
+                  </Button>
                 )}
               </HStack>
 
