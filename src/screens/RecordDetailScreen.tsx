@@ -178,6 +178,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
     });
   };
 
+
   const isOverdue = (record: FieldRecord) => {
     if (!record.due_date || record.status === 'completed' || record.status === 'cancelled') {
       return false;
@@ -203,10 +204,14 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
     const label = fieldDef?.label || key;
 
     return (
-      <VStack key={key} space="xs">
-        <Text size="sm" color="$gray600" fontWeight="500">{label}</Text>
-        <Text color="$gray900">{value.toString()}</Text>
-      </VStack>
+      <HStack key={key} space="sm" alignItems="flex-start" flexWrap="wrap">
+        <Text size="sm" color="$gray600" fontWeight="500">
+          {label}:
+        </Text>
+        <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+          {value.toString()}
+        </Text>
+      </HStack>
     );
   };
 
@@ -408,7 +413,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                   <Heading size="lg" color="$gray900">상세 정보</Heading>
                 </HStack>
 
-                <VStack space="sm">
+                <VStack space="xs">
                   {Object.entries(record.custom_data).map(([key, value]) =>
                     renderCustomField(key, value, record.field_schema)
                   )}
