@@ -200,6 +200,14 @@ router.post('/', authenticateToken, async (req, res) => {
       tags = []
     } = req.body;
 
+    // 디버깅: 받은 데이터 확인
+    console.log('📝 기록 생성 요청 데이터:', {
+      field_id,
+      title,
+      attachment: attachment,
+      attachment_length: attachment?.length || 0
+    });
+
     // 필수 필드 검증
     if (!field_id || !title) {
       return res.status(400).json({
@@ -253,6 +261,28 @@ router.post('/', authenticateToken, async (req, res) => {
     // 완료일 설정 (상태가 completed인 경우)
     const completedAt = status === 'completed' ? new Date() : null;
 
+    // 디버깅: INSERT 데이터 확인
+    const insertData = {
+      userId,
+      field_id,
+      title: title.trim(),
+      description: description?.trim() || null,
+      status,
+      priority,
+      parsedDueDate,
+      completedAt,
+      custom_data: JSON.stringify(custom_data),
+      attachment: JSON.stringify(attachment),
+      location: location ? JSON.stringify(location) : null,
+      tags: Array.isArray(tags) ? tags : []
+    };
+    
+    console.log('📝 INSERT 데이터:', {
+      attachment_raw: attachment,
+      attachment_json: JSON.stringify(attachment),
+      attachment_length: attachment?.length || 0
+    });
+
     // 현장 기록 생성
     const result = await query(
       `INSERT INTO fieldlog.field_record 
@@ -263,18 +293,18 @@ router.post('/', authenticateToken, async (req, res) => {
                  due_date, completed_at, custom_data, attachment, location, tags,
                  created_at, updated_at`,
       [
-        userId,
-        field_id,
-        title.trim(),
-        description?.trim() || null,
-        status,
-        priority,
-        parsedDueDate,
-        completedAt,
-        JSON.stringify(custom_data),
-        JSON.stringify(attachment),
-        location ? JSON.stringify(location) : null,
-        Array.isArray(tags) ? tags : []
+        insertData.userId,
+        insertData.field_id,
+        insertData.title,
+        insertData.description,
+        insertData.status,
+        insertData.priority,
+        insertData.parsedDueDate,
+        insertData.completedAt,
+        insertData.custom_data,
+        insertData.attachment,
+        insertData.location,
+        insertData.tags
       ]
     );
 
