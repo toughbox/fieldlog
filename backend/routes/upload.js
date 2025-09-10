@@ -99,7 +99,7 @@ router.post('/image', authenticateToken, upload.single('image'), async (req, res
       'Content-Type': req.file.mimetype
     });
 
-    // 이미지 URL 생성
+    // 이미지 URL 생성 (백엔드 API를 통해 서빙)
     const imageUrl = `/api/upload/image/${fileName}`;
 
     res.json({

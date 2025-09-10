@@ -20,6 +20,16 @@ import {
 } from '@gluestack-ui/themed';
 import { X, ChevronLeft, ChevronRight, Camera } from 'lucide-react-native';
 
+// 이미지 URL 생성 함수
+const getFullImageUrl = (url: string): string => {
+  if (url.startsWith('http')) {
+    return url; // 이미 전체 URL인 경우
+  }
+  // 상대 경로인 경우 백엔드 API를 통해 서빙
+  const baseUrl = 'http://192.168.206.171:3030';
+  return `${baseUrl}${url}`;
+};
+
 interface ImageSliderProps {
   attachments: Array<{
     name: string;
@@ -36,6 +46,7 @@ const imageHeight = 200;
 const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
 
   // 이미지 파일만 필터링
   const imageAttachments = attachments.filter(att => 
@@ -48,8 +59,23 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   }
 
   const handleImagePress = (index: number) => {
+    console.log('🖼️ 이미지 클릭:', {
+      index,
+      fileName: imageAttachments[index]?.name,
+      originalUrl: imageAttachments[index]?.url,
+      fullUrl: getFullImageUrl(imageAttachments[index]?.url)
+    });
     setSelectedImageIndex(index);
     setIsModalOpen(true);
+  };
+
+  const handleImageError = (index: number) => {
+    console.log('❌ 이미지 로딩 오류:', {
+      index,
+      fileName: imageAttachments[index]?.name,
+      url: getFullImageUrl(imageAttachments[index]?.url)
+    });
+    setImageLoadErrors(prev => new Set(prev).add(index));
   };
 
   const handlePreviousImage = () => {
@@ -64,37 +90,38 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
     );
   };
 
-  const renderImageItem = ({ item, index }: { item: any; index: number }) => (
-    <Pressable onPress={() => handleImagePress(index)}>
-      <Box
-        width={imageWidth}
-        height={imageHeight}
-        borderRadius="$lg"
-        overflow="hidden"
-        bg="$gray100"
-        mr={index < imageAttachments.length - 1 ? "$3" : "$0"}
-      >
-        <RNImage
-          source={{ uri: item.url }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode="cover"
-        />
+  const renderImageItem = ({ item, index }: { item: any; index: number }) => {
+    const hasError = imageLoadErrors.has(index);
+    const imageUrl = getFullImageUrl(item.url);
+    
+    return (
+      <Pressable onPress={() => handleImagePress(index)}>
         <Box
-          position="absolute"
-          bottom="$2"
-          left="$2"
-          right="$2"
-          bg="rgba(0,0,0,0.6)"
-          borderRadius="$sm"
-          p="$2"
+          width={imageWidth}
+          height={imageHeight}
+          borderRadius="$lg"
+          overflow="hidden"
+          bg="$gray100"
+          mr={index < imageAttachments.length - 1 ? "$3" : "$0"}
         >
-          <Text color="white" size="sm" numberOfLines={1}>
-            {item.name}
-          </Text>
+          {hasError ? (
+            <Center flex={1} bg="$gray200">
+              <Text color="$gray500" textAlign="center">
+                이미지 로딩 실패
+              </Text>
+            </Center>
+          ) : (
+            <RNImage
+              source={{ uri: imageUrl }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+              onError={() => handleImageError(index)}
+            />
+          )}
         </Box>
-      </Box>
-    </Pressable>
-  );
+      </Pressable>
+    );
+  };
 
   return (
     <>
@@ -125,10 +152,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
         <ModalBackdrop />
         <ModalContent bg="black">
           <ModalHeader>
-            <HStack justifyContent="space-between" alignItems="center" width="$full">
-              <Text color="white" fontWeight="600">
-                {imageAttachments[selectedImageIndex]?.name}
-              </Text>
+            <HStack justifyContent="flex-end" alignItems="center" width="$full">
               <ModalCloseButton>
                 <ButtonIcon as={X} color="white" />
               </ModalCloseButton>
@@ -137,11 +161,43 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
           
           <ModalBody flex={1}>
             <Center flex={1} position="relative">
-              <RNImage
-                source={{ uri: imageAttachments[selectedImageIndex]?.url }}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="contain"
-              />
+              {imageLoadErrors.has(selectedImageIndex) ? (
+                <Center flex={1} bg="$gray800">
+                  <VStack alignItems="center" space="md">
+                    <Text color="white" textAlign="center" fontSize={18}>
+                      이미지를 불러올 수 없습니다
+                    </Text>
+                    <Text color="white" textAlign="center" fontSize={14} opacity={0.7}>
+                      {imageAttachments[selectedImageIndex]?.name}
+                    </Text>
+                    <Text color="white" textAlign="center" fontSize={12} opacity={0.5}>
+                      URL: {getFullImageUrl(imageAttachments[selectedImageIndex]?.url)}
+                    </Text>
+                  </VStack>
+                </Center>
+              ) : (
+                <RNImage
+                  source={{ 
+                    uri: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
+                    cache: 'force-cache'
+                  }}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="contain"
+                  onError={() => {
+                    console.log('❌ 팝업 이미지 로딩 오류:', {
+                      url: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
+                      fileName: imageAttachments[selectedImageIndex]?.name
+                    });
+                    handleImageError(selectedImageIndex);
+                  }}
+                  onLoad={() => {
+                    console.log('✅ 팝업 이미지 로딩 성공:', {
+                      url: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
+                      fileName: imageAttachments[selectedImageIndex]?.name
+                    });
+                  }}
+                />
+              )}
               
               {/* 이전/다음 버튼 */}
               {imageAttachments.length > 1 && (
