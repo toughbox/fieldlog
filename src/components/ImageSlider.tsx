@@ -189,17 +189,24 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
         size="full"
       >
         <ModalBackdrop />
-        <ModalContent bg="black" w="$full" h="$full" m="$0" p="$0">
+        <ModalContent 
+          bg="white" 
+          w="$full" 
+          h="$full" 
+          m="$0" 
+          p="$0"
+        >
           {/* 닫기 버튼 */}
           <Box position="absolute" top="$4" right="$4" zIndex={10}>
             <Button
               variant="outline"
-              bg="rgba(0,0,0,0.5)"
-              borderColor="white"
+              bg="rgba(0,0,0,0.1)"
+              borderColor="rgba(0,0,0,0.2)"
               borderRadius="$full"
+              size="sm"
               onPress={() => setIsModalOpen(false)}
             >
-              <ButtonIcon as={X} color="white" />
+              <ButtonIcon as={X} color="$gray700" />
             </Button>
           </Box>
           
@@ -207,15 +214,16 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
           <Center flex={1} w="$full" h="$full">
             {imageLoadErrors.has(selectedImageIndex) ? (
               <VStack alignItems="center" space="md" p="$4">
-                <Text color="white" textAlign="center" fontSize={18}>
+                <Text color="$gray800" textAlign="center" fontSize={18}>
                   이미지를 불러올 수 없습니다
                 </Text>
-                <Text color="white" textAlign="center" fontSize={14} opacity={0.7}>
+                <Text color="$gray600" textAlign="center" fontSize={14}>
                   {imageAttachments[selectedImageIndex]?.name}
                 </Text>
                 <Button 
                   variant="outline" 
-                  borderColor="white"
+                  borderColor="$gray300"
+                  bg="$gray50"
                   onPress={() => {
                     setImageLoadErrors(prev => {
                       const newSet = new Set(prev);
@@ -224,13 +232,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     });
                   }}
                 >
-                  <ButtonText color="white">다시 시도</ButtonText>
+                  <ButtonText color="$gray700">다시 시도</ButtonText>
                 </Button>
               </VStack>
             ) : loadingImages.has(selectedImageIndex) ? (
               <VStack alignItems="center" space="md">
-                <Text color="white" fontSize={18}>이미지 로딩 중...</Text>
-                <Text color="white" fontSize={12} opacity={0.7}>
+                <Text color="$gray800" fontSize={18}>이미지 로딩 중...</Text>
+                <Text color="$gray600" fontSize={12}>
                   {imageAttachments[selectedImageIndex]?.name}
                 </Text>
               </VStack>
@@ -239,7 +247,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                 {(() => {
                   const currentImage = imageAttachments[selectedImageIndex];
                   if (!currentImage) {
-                    return <Text color="white">이미지를 찾을 수 없습니다</Text>;
+                    return <Text color="$gray800">이미지를 찾을 수 없습니다</Text>;
                   }
                   
                   const imageUrl = getFullImageUrl(currentImage.url);
@@ -249,7 +257,8 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                       source={{ uri: imageUrl }}
                       style={{ 
                         width: screenWidth - 40, 
-                        height: (screenWidth - 40) * 0.75
+                        height: (screenWidth - 40) * 0.75,
+                        borderRadius: 8
                       }}
                       resizeMode="contain"
                       onLoad={() => {
@@ -287,12 +296,14 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                       top="50%"
                       transform={[{ translateY: -20 }]}
                       variant="outline"
-                      bg="rgba(0,0,0,0.5)"
-                      borderColor="white"
+                      bg="white"
+                      borderColor="$gray300"
+                      borderRadius="$full"
+                      size="md"
                       onPress={handlePreviousImage}
                       zIndex={10}
                     >
-                      <ButtonIcon as={ChevronLeft} color="white" />
+                      <ButtonIcon as={ChevronLeft} color="$gray600" />
                     </Button>
                     
                     <Button
@@ -301,12 +312,14 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                       top="50%"
                       transform={[{ translateY: -20 }]}
                       variant="outline"
-                      bg="rgba(0,0,0,0.5)"
-                      borderColor="white"
+                      bg="white"
+                      borderColor="$gray300"
+                      borderRadius="$full"
+                      size="md"
                       onPress={handleNextImage}
                       zIndex={10}
                     >
-                      <ButtonIcon as={ChevronRight} color="white" />
+                      <ButtonIcon as={ChevronRight} color="$gray600" />
                     </Button>
                   </>
                 )}
