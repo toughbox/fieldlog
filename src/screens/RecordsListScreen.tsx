@@ -280,9 +280,6 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                 )}
               </HStack>
               
-              <Text size="xs" color="$gray500">
-                {formatDate(item.created_at)}
-              </Text>
             </HStack>
 
             {/* 사용자 정의 필드 */}

@@ -42,7 +42,7 @@ interface ImageSliderProps {
 
 const { width: screenWidth } = Dimensions.get('window');
 const imageWidth = screenWidth - 40; // 좌우 패딩 고려
-const imageHeight = 200;
+const imageHeight = 280;
 
 const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -197,7 +197,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
           p="$0"
         >
           {/* 닫기 버튼 */}
-          <Box position="absolute" top="$4" right="$4" zIndex={10}>
+          <Box position="absolute" top="$12" right="$4" zIndex={10}>
             <Button
               variant="outline"
               bg="rgba(0,0,0,0.1)"
