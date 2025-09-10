@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Dimensions, FlatList, Image as RNImage } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { Dimensions, FlatList, Image as RNImage, Animated } from 'react-native';
 import Constants from 'expo-constants';
 import {
   VStack,
@@ -50,6 +50,10 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
   const [touchStartX, setTouchStartX] = useState(0);
+  
+  // 애니메이션 관련 상태
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   // 이미지 파일만 필터링
   const imageAttachments = attachments.filter(att => 
@@ -112,22 +116,59 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
     });
   };
 
+  // 애니메이션과 함께 이미지 변경
+  const animateImageChange = (newIndex: number, direction: 'left' | 'right') => {
+    const slideDistance = screenWidth * 0.3; // 슬라이드 거리
+    const slideValue = direction === 'left' ? -slideDistance : slideDistance;
+    
+    // 페이드 아웃과 슬라이드 아웃
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0.3,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: slideValue,
+        duration: 150,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      // 이미지 인덱스 변경
+      setSelectedImageIndex(newIndex);
+      setLoadingImages(new Set());
+      setImageLoadErrors(new Set());
+      
+      // 애니메이션 값 초기화
+      slideAnim.setValue(0);
+      
+      // 페이드 인과 슬라이드 인
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        })
+      ]).start();
+    });
+  };
+
   const handlePreviousImage = () => {
     const newIndex = selectedImageIndex > 0 ? selectedImageIndex - 1 : imageAttachments.length - 1;
     console.log('⬅️ 이전 이미지로 이동:', { from: selectedImageIndex, to: newIndex });
-    setSelectedImageIndex(newIndex);
-    // 로딩 상태 초기화
-    setLoadingImages(new Set());
-    setImageLoadErrors(new Set());
+    animateImageChange(newIndex, 'right');
   };
 
   const handleNextImage = () => {
     const newIndex = selectedImageIndex < imageAttachments.length - 1 ? selectedImageIndex + 1 : 0;
     console.log('➡️ 다음 이미지로 이동:', { from: selectedImageIndex, to: newIndex });
-    setSelectedImageIndex(newIndex);
-    // 로딩 상태 초기화
-    setLoadingImages(new Set());
-    setImageLoadErrors(new Set());
+    animateImageChange(newIndex, 'left');
   };
 
   // 스와이프 제스처 핸들러
@@ -271,51 +312,58 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                 </Text>
               </VStack>
             ) : (
-              <Box position="relative">
-                {(() => {
-                  const currentImage = imageAttachments[selectedImageIndex];
-                  if (!currentImage) {
-                    return <Text color="$gray800">이미지를 찾을 수 없습니다</Text>;
-                  }
+              <Animated.View 
+                style={{
+                  opacity: fadeAnim,
+                  transform: [{ translateX: slideAnim }]
+                }}
+              >
+                <Box position="relative">
+                  {(() => {
+                    const currentImage = imageAttachments[selectedImageIndex];
+                    if (!currentImage) {
+                      return <Text color="$gray800">이미지를 찾을 수 없습니다</Text>;
+                    }
+                    
+                    const imageUrl = getFullImageUrl(currentImage.url);
+                    return (
+                      <RNImage
+                        key={`modal-image-${selectedImageIndex}`}
+                        source={{ uri: imageUrl }}
+                        style={{ 
+                          width: screenWidth - 10, 
+                          height: (screenWidth - 10) * 0.85,
+                          borderRadius: 8
+                        }}
+                        resizeMode="contain"
+                        onLoad={() => {
+                          console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
+                          setLoadingImages(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(selectedImageIndex);
+                            return newSet;
+                          });
+                        }}
+                        onError={(error) => {
+                          console.log('❌ 모달 이미지 로딩 오류:', {
+                            index: selectedImageIndex,
+                            error,
+                            url: imageUrl,
+                            fileName: currentImage.name
+                          });
+                          setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
+                          setLoadingImages(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(selectedImageIndex);
+                            return newSet;
+                          });
+                        }}
+                      />
+                    );
+                  })()}
                   
-                  const imageUrl = getFullImageUrl(currentImage.url);
-                  return (
-                    <RNImage
-                      key={`modal-image-${selectedImageIndex}`}
-                      source={{ uri: imageUrl }}
-                      style={{ 
-                        width: screenWidth - 40, 
-                        height: (screenWidth - 40) * 0.75,
-                        borderRadius: 8
-                      }}
-                      resizeMode="contain"
-                      onLoad={() => {
-                        console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
-                        setLoadingImages(prev => {
-                          const newSet = new Set(prev);
-                          newSet.delete(selectedImageIndex);
-                          return newSet;
-                        });
-                      }}
-                      onError={(error) => {
-                        console.log('❌ 모달 이미지 로딩 오류:', {
-                          index: selectedImageIndex,
-                          error,
-                          url: imageUrl,
-                          fileName: currentImage.name
-                        });
-                        setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
-                        setLoadingImages(prev => {
-                          const newSet = new Set(prev);
-                          newSet.delete(selectedImageIndex);
-                          return newSet;
-                        });
-                      }}
-                    />
-                  );
-                })()}
-                
-              </Box>
+                </Box>
+              </Animated.View>
             )}
           </Center>
         </ModalContent>
