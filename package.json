@@ -27,7 +27,7 @@
     "expo-image-picker": "^16.1.4",
     "expo-splash-screen": "^0.30.10",
     "expo-status-bar": "~2.2.3",
-    "lucide-react-native": "^0.344.0",
+    "lucide-react-native": "^0.543.0",
     "minio": "^8.0.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",

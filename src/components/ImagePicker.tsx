@@ -37,7 +37,6 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
   const handleSelectImages = async () => {
     try {
       console.log('📸 이미지 선택 버튼 클릭됨');
-      Alert.alert('테스트', '이미지 선택 버튼이 클릭되었습니다!');
       
       if (images.length >= maxImages) {
         Alert.alert('알림', `최대 ${maxImages}개의 이미지까지 첨부할 수 있습니다.`);

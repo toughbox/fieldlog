@@ -67,7 +67,9 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
       fileName: imageAttachments[index]?.name,
       originalUrl: imageAttachments[index]?.url,
       fullUrl: imageUrl,
-      imageLoadError: imageLoadErrors.has(index)
+      imageLoadError: imageLoadErrors.has(index),
+      totalImages: imageAttachments.length,
+      allImages: imageAttachments.map((img, i) => ({ index: i, name: img.name, url: img.url }))
     });
     setSelectedImageIndex(index);
     setIsModalOpen(true);
@@ -110,15 +112,21 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   };
 
   const handlePreviousImage = () => {
-    setSelectedImageIndex(prev => 
-      prev > 0 ? prev - 1 : imageAttachments.length - 1
-    );
+    const newIndex = selectedImageIndex > 0 ? selectedImageIndex - 1 : imageAttachments.length - 1;
+    console.log('⬅️ 이전 이미지로 이동:', { from: selectedImageIndex, to: newIndex });
+    setSelectedImageIndex(newIndex);
+    // 로딩 상태 초기화
+    setLoadingImages(new Set());
+    setImageLoadErrors(new Set());
   };
 
   const handleNextImage = () => {
-    setSelectedImageIndex(prev => 
-      prev < imageAttachments.length - 1 ? prev + 1 : 0
-    );
+    const newIndex = selectedImageIndex < imageAttachments.length - 1 ? selectedImageIndex + 1 : 0;
+    console.log('➡️ 다음 이미지로 이동:', { from: selectedImageIndex, to: newIndex });
+    setSelectedImageIndex(newIndex);
+    // 로딩 상태 초기화
+    setLoadingImages(new Set());
+    setImageLoadErrors(new Set());
   };
 
   const renderImageItem = ({ item, index }: { item: any; index: number }) => {
@@ -181,8 +189,16 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
         size="full"
       >
         <ModalBackdrop />
-        <ModalContent bg="black" w="$full" h="$full" m="$0" p="$0">
-          <ModalHeader p="$2" bg="transparent">
+        <ModalContent 
+          bg="black" 
+          w="$full" 
+          h="$full" 
+          m="$0" 
+          p="$0"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <ModalHeader p="$2" bg="transparent" position="absolute" top="$0" right="$0" zIndex={10}>
             <HStack justifyContent="flex-end" alignItems="center" width="$full">
               <ModalCloseButton bg="rgba(0,0,0,0.5)" borderRadius="$full">
                 <ButtonIcon as={X} color="white" />
@@ -191,7 +207,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
           </ModalHeader>
           
           <ModalBody flex={1} p="$0">
-            <Center flex={1} position="relative" w="$full" h="$full">
+            <Box flex={1} w="$full" h="$full" justifyContent="center" alignItems="center">
               {imageLoadErrors.has(selectedImageIndex) ? (
                 <Center flex={1} bg="$gray800" w="$full" h="$full">
                   <VStack alignItems="center" space="md" p="$4">
@@ -229,28 +245,62 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                   </VStack>
                 </Center>
               ) : (
-                <RNImage
-                  source={{ 
-                    uri: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
-                    cache: 'force-cache'
-                  }}
-                  style={{ 
-                    width: '100%', 
-                    height: '100%',
-                    maxWidth: '100%',
-                    maxHeight: '100%'
-                  }}
-                  resizeMode="contain"
-                  onLoadStart={() => handleImageLoadStart(selectedImageIndex)}
-                  onLoad={() => handleImageLoad(selectedImageIndex)}
-                  onError={() => {
-                    console.log('❌ 팝업 이미지 로딩 오류:', {
-                      url: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
-                      fileName: imageAttachments[selectedImageIndex]?.name
+                <Box flex={1} w="$full" h="$full" justifyContent="center" alignItems="center">
+                  {(() => {
+                    const currentImage = imageAttachments[selectedImageIndex];
+                    if (!currentImage) {
+                      console.log('❌ 현재 이미지가 없음:', { selectedImageIndex, totalImages: imageAttachments.length });
+                      return (
+                        <Center flex={1}>
+                          <Text color="white">이미지를 찾을 수 없습니다</Text>
+                        </Center>
+                      );
+                    }
+                    
+                    const imageUrl = getFullImageUrl(currentImage.url);
+                    console.log('🖼️ 모달에서 이미지 렌더링:', {
+                      index: selectedImageIndex,
+                      fileName: currentImage.name,
+                      originalUrl: currentImage.url,
+                      fullUrl: imageUrl
                     });
-                    handleImageError(selectedImageIndex);
-                  }}
-                />
+                    
+                    return (
+                      <RNImage
+                        key={`modal-image-${selectedImageIndex}`}
+                        source={{ uri: imageUrl }}
+                        style={{ 
+                          width: screenWidth - 40, 
+                          height: (screenWidth - 40) * 0.75,
+                          backgroundColor: 'transparent'
+                        }}
+                        resizeMode="contain"
+                        onLoad={() => {
+                          console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
+                          setLoadingImages(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(selectedImageIndex);
+                            return newSet;
+                          });
+                        }}
+                        onError={(error) => {
+                          console.log('❌ 모달 이미지 로딩 오류:', {
+                            index: selectedImageIndex,
+                            error,
+                            url: imageUrl,
+                            fileName: currentImage.name
+                          });
+                          setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
+                          setLoadingImages(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(selectedImageIndex);
+                            return newSet;
+                          });
+                        }}
+                      />
+                    );
+                  })()}
+                </Box>
               )}
               
               {/* 이전/다음 버튼 */}
@@ -265,6 +315,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     bg="rgba(0,0,0,0.5)"
                     borderColor="white"
                     onPress={handlePreviousImage}
+                    zIndex={10}
                   >
                     <ButtonIcon as={ChevronLeft} color="white" />
                   </Button>
@@ -278,12 +329,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     bg="rgba(0,0,0,0.5)"
                     borderColor="white"
                     onPress={handleNextImage}
+                    zIndex={10}
                   >
                     <ButtonIcon as={ChevronRight} color="white" />
                   </Button>
                 </>
               )}
-            </Center>
+            </Box>
           </ModalBody>
         </ModalContent>
       </Modal>
