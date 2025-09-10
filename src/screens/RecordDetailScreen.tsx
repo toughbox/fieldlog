@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, ScrollView, StatusBar, Linking } from 'react-native';
+import { Alert, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Box,
@@ -31,15 +31,14 @@ import {
   Calendar, 
   MapPin, 
   Tag, 
-  FileText, 
   Clock,
   AlertCircle, 
   CheckCircle2, 
   X,
-  Download,
   Share,
   Trash2
 } from 'lucide-react-native';
+import ImageSlider from '../components/ImageSlider';
 import { currentRecordApi, FieldRecord } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -186,18 +185,8 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
     return new Date(record.due_date) < new Date();
   };
 
-  const handleAttachmentPress = (attachment: any) => {
-    // 첨부파일 처리 로직 (다운로드 또는 미리보기)
-    Alert.alert('첨부파일', `${attachment.name}을(를) 열시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      { text: '열기', onPress: () => {
-        // Linking.openURL(attachment.url);
-        Alert.alert('알림', '첨부파일 기능은 개발 중입니다.');
-      }}
-    ]);
-  };
 
-  const renderCustomField = (key: string, value: any, fieldSchema?: any, index: number, isLast: boolean) => {
+  const renderCustomField = (key: string, value: any, index: number, isLast: boolean, fieldSchema: any) => {
     if (!value && value !== 0) return null;
 
     const fieldDef = fieldSchema?.fields?.find((f: any) => f.key === key);
@@ -414,13 +403,13 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
               <VStack space="md">
                 <HStack alignItems="center" space="sm">
-                  <FileText size={20} color="#6366f1" />
+                  <Tag size={20} color="#6366f1" />
                   <Heading size="lg" color="$gray900">상세 정보</Heading>
                 </HStack>
 
                 <VStack space="sm">
                   {Object.entries(record.custom_data).map(([key, value], index, array) =>
-                    renderCustomField(key, value, record.field_schema, index, index === array.length - 1)
+                    renderCustomField(key, value, index, index === array.length - 1, record.field_schema)
                   )}
                 </VStack>
               </VStack>
@@ -457,40 +446,10 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             </Card>
           )}
 
-          {/* 첨부파일 */}
+          {/* 첨부 이미지 슬라이드 */}
           {record.attachment && record.attachment.length > 0 && (
             <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <HStack alignItems="center" space="sm">
-                  <FileText size={20} color="#6366f1" />
-                  <Heading size="lg" color="$gray900">첨부파일</Heading>
-                </HStack>
-
-                <VStack space="sm">
-                  {record.attachment.map((file, index) => (
-                    <Pressable
-                      key={index}
-                      onPress={() => handleAttachmentPress(file)}
-                    >
-                      <HStack 
-                        justifyContent="space-between" 
-                        alignItems="center"
-                        bg="$gray50"
-                        p="$3"
-                        borderRadius="$md"
-                      >
-                        <VStack flex={1}>
-                          <Text color="$gray900" fontWeight="500">{file.name}</Text>
-                          <Text color="$gray600" size="sm">
-                            {file.type} {file.size && `• ${(file.size / 1024).toFixed(1)}KB`}
-                          </Text>
-                        </VStack>
-                        <ButtonIcon as={Download} color="$blue500" />
-                      </HStack>
-                    </Pressable>
-                  ))}
-                </VStack>
-              </VStack>
+              <ImageSlider attachments={record.attachment} />
             </Card>
           )}
 

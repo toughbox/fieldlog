@@ -18,7 +18,6 @@ import {
 } from '@gluestack-ui/themed';
 import { 
   Home, 
-  FileText, 
   Settings, 
   User, 
   Plus, 
@@ -386,7 +385,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     action="secondary"
                     onPress={() => navigation.navigate('RecordsList')}
                   >
-                    <ButtonIcon as={FileText} />
+                    <ButtonIcon as={List} />
                     <ButtonText fontFamily="NotoSansKR_500Medium">기록 목록</ButtonText>
                   </Button>
                 </HStack>
@@ -417,7 +416,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           
           <Pressable alignItems="center" p="$2" flex={1}>
             <Center mb="$1">
-              <FileText size={24} color="#9ca3af" />
+              <List size={24} color="#9ca3af" />
             </Center>
             <Text size="xs" color="$gray500" fontFamily="NotoSansKR_400Regular">기록</Text>
           </Pressable>

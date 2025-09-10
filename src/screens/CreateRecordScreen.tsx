@@ -31,7 +31,7 @@ import {
   Textarea,
   TextareaInput
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Calendar, MapPin, Tag, FileText, Clock } from 'lucide-react-native';
+import { ArrowLeft, Calendar, MapPin, Tag, Clock } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, CreateRecordRequest, Field, FieldSchema } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ImagePickerComponent from '../components/ImagePicker';
