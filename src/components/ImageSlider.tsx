@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dimensions, FlatList, Image as RNImage } from 'react-native';
+import Constants from 'expo-constants';
 import {
   VStack,
   HStack,
@@ -26,7 +27,7 @@ const getFullImageUrl = (url: string): string => {
     return url; // 이미 전체 URL인 경우
   }
   // 상대 경로인 경우 백엔드 API를 통해 서빙
-  const baseUrl = 'http://192.168.206.171:3030';
+  const baseUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3030';
   return `${baseUrl}${url}`;
 };
 
@@ -47,6 +48,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
+  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
 
   // 이미지 파일만 필터링
   const imageAttachments = attachments.filter(att => 
@@ -59,11 +61,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   }
 
   const handleImagePress = (index: number) => {
+    const imageUrl = getFullImageUrl(imageAttachments[index]?.url);
     console.log('🖼️ 이미지 클릭:', {
       index,
       fileName: imageAttachments[index]?.name,
       originalUrl: imageAttachments[index]?.url,
-      fullUrl: getFullImageUrl(imageAttachments[index]?.url)
+      fullUrl: imageUrl,
+      imageLoadError: imageLoadErrors.has(index)
     });
     setSelectedImageIndex(index);
     setIsModalOpen(true);
@@ -76,6 +80,33 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
       url: getFullImageUrl(imageAttachments[index]?.url)
     });
     setImageLoadErrors(prev => new Set(prev).add(index));
+    setLoadingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
+  };
+
+  const handleImageLoadStart = (index: number) => {
+    console.log('🔄 이미지 로딩 시작:', {
+      index,
+      fileName: imageAttachments[index]?.name,
+      url: getFullImageUrl(imageAttachments[index]?.url)
+    });
+    setLoadingImages(prev => new Set(prev).add(index));
+  };
+
+  const handleImageLoad = (index: number) => {
+    console.log('✅ 이미지 로딩 성공:', {
+      index,
+      fileName: imageAttachments[index]?.name,
+      url: getFullImageUrl(imageAttachments[index]?.url)
+    });
+    setLoadingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
   };
 
   const handlePreviousImage = () => {
@@ -150,20 +181,20 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
         size="full"
       >
         <ModalBackdrop />
-        <ModalContent bg="black">
-          <ModalHeader>
+        <ModalContent bg="black" w="$full" h="$full" m="$0" p="$0">
+          <ModalHeader p="$2" bg="transparent">
             <HStack justifyContent="flex-end" alignItems="center" width="$full">
-              <ModalCloseButton>
+              <ModalCloseButton bg="rgba(0,0,0,0.5)" borderRadius="$full">
                 <ButtonIcon as={X} color="white" />
               </ModalCloseButton>
             </HStack>
           </ModalHeader>
           
-          <ModalBody flex={1}>
-            <Center flex={1} position="relative">
+          <ModalBody flex={1} p="$0">
+            <Center flex={1} position="relative" w="$full" h="$full">
               {imageLoadErrors.has(selectedImageIndex) ? (
-                <Center flex={1} bg="$gray800">
-                  <VStack alignItems="center" space="md">
+                <Center flex={1} bg="$gray800" w="$full" h="$full">
+                  <VStack alignItems="center" space="md" p="$4">
                     <Text color="white" textAlign="center" fontSize={18}>
                       이미지를 불러올 수 없습니다
                     </Text>
@@ -173,6 +204,28 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     <Text color="white" textAlign="center" fontSize={12} opacity={0.5}>
                       URL: {getFullImageUrl(imageAttachments[selectedImageIndex]?.url)}
                     </Text>
+                    <Button 
+                      variant="outline" 
+                      borderColor="white"
+                      onPress={() => {
+                        setImageLoadErrors(prev => {
+                          const newSet = new Set(prev);
+                          newSet.delete(selectedImageIndex);
+                          return newSet;
+                        });
+                      }}
+                    >
+                      <ButtonText color="white">다시 시도</ButtonText>
+                    </Button>
+                  </VStack>
+                </Center>
+              ) : loadingImages.has(selectedImageIndex) ? (
+                <Center flex={1} bg="$gray900" w="$full" h="$full">
+                  <VStack alignItems="center" space="md">
+                    <Text color="white" fontSize={18}>이미지 로딩 중...</Text>
+                    <Text color="white" fontSize={12} opacity={0.7}>
+                      {imageAttachments[selectedImageIndex]?.name}
+                    </Text>
                   </VStack>
                 </Center>
               ) : (
@@ -181,20 +234,21 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     uri: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
                     cache: 'force-cache'
                   }}
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
+                  }}
                   resizeMode="contain"
+                  onLoadStart={() => handleImageLoadStart(selectedImageIndex)}
+                  onLoad={() => handleImageLoad(selectedImageIndex)}
                   onError={() => {
                     console.log('❌ 팝업 이미지 로딩 오류:', {
                       url: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
                       fileName: imageAttachments[selectedImageIndex]?.name
                     });
                     handleImageError(selectedImageIndex);
-                  }}
-                  onLoad={() => {
-                    console.log('✅ 팝업 이미지 로딩 성공:', {
-                      url: getFullImageUrl(imageAttachments[selectedImageIndex]?.url),
-                      fileName: imageAttachments[selectedImageIndex]?.name
-                    });
                   }}
                 />
               )}

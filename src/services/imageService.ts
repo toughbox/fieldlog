@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import Constants from 'expo-constants';
 
 export interface ImageFile {
   uri: string;
@@ -107,7 +108,8 @@ export const uploadImages = async (
       });
       
       // API URL 설정
-      const apiUrl = 'http://192.168.206.171:3030/api/upload/image';
+      const baseUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3030';
+      const apiUrl = `${baseUrl}/api/upload/image`;
       console.log(`📸 업로드 URL: ${apiUrl}`);
       
       // 백엔드 API 호출
