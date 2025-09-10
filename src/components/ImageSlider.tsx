@@ -283,7 +283,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                   <>
                     <Button
                       position="absolute"
-                      left={-60}
+                      left="$4"
                       top="50%"
                       transform={[{ translateY: -20 }]}
                       variant="outline"
@@ -297,7 +297,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                     
                     <Button
                       position="absolute"
-                      right={-60}
+                      right="$4"
                       top="50%"
                       transform={[{ translateY: -20 }]}
                       variant="outline"
