@@ -34,6 +34,8 @@ import {
 import { ArrowLeft, Calendar, MapPin, Tag, FileText, Clock } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, CreateRecordRequest, Field, FieldSchema } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import ImagePickerComponent from '../components/ImagePicker';
+import { UploadedImage } from '../services/imageService';
 import { TokenService } from '../services/tokenService';
 
 interface CreateRecordScreenProps {
@@ -72,6 +74,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   // 사용자 정의 필드 데이터
   const [customData, setCustomData] = useState<Record<string, any>>({});
@@ -220,6 +223,12 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
         priority: priority,
         due_date: dueDate || undefined,
         custom_data: customData,
+        attachment: images.map(img => ({
+          type: 'image',
+          url: img.url,
+          name: img.fileName,
+          size: img.size
+        })),
         tags: tags
       };
 
@@ -573,6 +582,22 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                   ))}
                 </HStack>
               )}
+            </VStack>
+          </Card>
+
+          {/* 사진 첨부 */}
+          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <VStack space="md">
+              <HStack alignItems="center" space="sm">
+                <Calendar size={20} color="#6366f1" />
+                <Heading size="lg" color="$gray900">사진 첨부</Heading>
+              </HStack>
+              
+              <ImagePickerComponent
+                images={images}
+                onImagesChange={setImages}
+                maxImages={10}
+              />
             </VStack>
           </Card>
 

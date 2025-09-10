@@ -36,6 +36,8 @@ import { currentRecordApi, currentFieldApi, UpdateRecordRequest, Field, FieldRec
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { TokenService } from '../services/tokenService';
+import ImagePickerComponent from '../components/ImagePicker';
+import { UploadedImage } from '../services/imageService';
 
 interface EditRecordScreenProps {
   navigation: any;
@@ -74,6 +76,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   // 사용자 정의 필드 데이터
   const [customData, setCustomData] = useState<Record<string, any>>({});
@@ -86,7 +89,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
 
   useFocusEffect(
     useCallback(() => {
-      loadInitialData();
+    loadInitialData();
     }, [recordId])
   );
 
@@ -162,6 +165,18 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
         }
         setTags(recordData.tags || []);
         setCustomData(recordData.custom_data || {});
+        
+        // 기존 이미지 정보 로드
+        if (recordData.attachment && Array.isArray(recordData.attachment)) {
+          const imageAttachments = recordData.attachment
+            .filter(att => att.type === 'image')
+            .map(att => ({
+              fileName: att.name,
+              url: att.url,
+              size: att.size || 0
+            }));
+          setImages(imageAttachments);
+        }
       } else {
         Alert.alert('오류', recordResponse.error || '기록을 불러올 수 없습니다.');
         navigation.goBack();
@@ -243,6 +258,12 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
         priority: priority,
         due_date: dueDate || undefined,
         custom_data: customData,
+        attachment: images.map(img => ({
+          type: 'image',
+          url: img.url,
+          name: img.fileName,
+          size: img.size
+        })),
         tags: tags
       };
 
@@ -525,7 +546,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                 <Text size="sm" color="$gray600">마감일</Text>
                 <Pressable onPress={() => setShowDatePicker(true)}>
                   <Input isReadOnly={true}>
-                    <InputField
+                  <InputField
                       placeholder="날짜 선택"
                       value={formatDisplayDate(dueDate)}
                       editable={false}
@@ -593,6 +614,23 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                   ))}
                 </HStack>
               )}
+            </VStack>
+          </Card>
+
+          {/* 사진 첨부 */}
+          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <VStack space="md">
+              <HStack alignItems="center" space="sm">
+                <Calendar size={20} color="#6366f1" />
+                <Heading size="lg" color="$gray900">사진 첨부</Heading>
+              </HStack>
+              
+              <ImagePickerComponent
+                images={images}
+                onImagesChange={setImages}
+                maxImages={10}
+                recordId={record?.id}
+              />
             </VStack>
           </Card>
 
