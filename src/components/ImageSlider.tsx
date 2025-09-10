@@ -189,154 +189,130 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
         size="full"
       >
         <ModalBackdrop />
-        <ModalContent 
-          bg="black" 
-          w="$full" 
-          h="$full" 
-          m="$0" 
-          p="$0"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <ModalHeader p="$2" bg="transparent" position="absolute" top="$0" right="$0" zIndex={10}>
-            <HStack justifyContent="flex-end" alignItems="center" width="$full">
-              <ModalCloseButton bg="rgba(0,0,0,0.5)" borderRadius="$full">
-                <ButtonIcon as={X} color="white" />
-              </ModalCloseButton>
-            </HStack>
-          </ModalHeader>
+        <ModalContent bg="black" w="$full" h="$full" m="$0" p="$0">
+          {/* 닫기 버튼 */}
+          <Box position="absolute" top="$4" right="$4" zIndex={10}>
+            <Button
+              variant="outline"
+              bg="rgba(0,0,0,0.5)"
+              borderColor="white"
+              borderRadius="$full"
+              onPress={() => setIsModalOpen(false)}
+            >
+              <ButtonIcon as={X} color="white" />
+            </Button>
+          </Box>
           
-          <ModalBody flex={1} p="$0">
-            <Box flex={1} w="$full" h="$full" justifyContent="center" alignItems="center">
-              {imageLoadErrors.has(selectedImageIndex) ? (
-                <Center flex={1} bg="$gray800" w="$full" h="$full">
-                  <VStack alignItems="center" space="md" p="$4">
-                    <Text color="white" textAlign="center" fontSize={18}>
-                      이미지를 불러올 수 없습니다
-                    </Text>
-                    <Text color="white" textAlign="center" fontSize={14} opacity={0.7}>
-                      {imageAttachments[selectedImageIndex]?.name}
-                    </Text>
-                    <Text color="white" textAlign="center" fontSize={12} opacity={0.5}>
-                      URL: {getFullImageUrl(imageAttachments[selectedImageIndex]?.url)}
-                    </Text>
-                    <Button 
-                      variant="outline" 
-                      borderColor="white"
-                      onPress={() => {
-                        setImageLoadErrors(prev => {
+          {/* 이미지 컨테이너 */}
+          <Center flex={1} w="$full" h="$full">
+            {imageLoadErrors.has(selectedImageIndex) ? (
+              <VStack alignItems="center" space="md" p="$4">
+                <Text color="white" textAlign="center" fontSize={18}>
+                  이미지를 불러올 수 없습니다
+                </Text>
+                <Text color="white" textAlign="center" fontSize={14} opacity={0.7}>
+                  {imageAttachments[selectedImageIndex]?.name}
+                </Text>
+                <Button 
+                  variant="outline" 
+                  borderColor="white"
+                  onPress={() => {
+                    setImageLoadErrors(prev => {
+                      const newSet = new Set(prev);
+                      newSet.delete(selectedImageIndex);
+                      return newSet;
+                    });
+                  }}
+                >
+                  <ButtonText color="white">다시 시도</ButtonText>
+                </Button>
+              </VStack>
+            ) : loadingImages.has(selectedImageIndex) ? (
+              <VStack alignItems="center" space="md">
+                <Text color="white" fontSize={18}>이미지 로딩 중...</Text>
+                <Text color="white" fontSize={12} opacity={0.7}>
+                  {imageAttachments[selectedImageIndex]?.name}
+                </Text>
+              </VStack>
+            ) : (
+              <Box position="relative">
+                {(() => {
+                  const currentImage = imageAttachments[selectedImageIndex];
+                  if (!currentImage) {
+                    return <Text color="white">이미지를 찾을 수 없습니다</Text>;
+                  }
+                  
+                  const imageUrl = getFullImageUrl(currentImage.url);
+                  return (
+                    <RNImage
+                      key={`modal-image-${selectedImageIndex}`}
+                      source={{ uri: imageUrl }}
+                      style={{ 
+                        width: screenWidth - 40, 
+                        height: (screenWidth - 40) * 0.75
+                      }}
+                      resizeMode="contain"
+                      onLoad={() => {
+                        console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
+                        setLoadingImages(prev => {
                           const newSet = new Set(prev);
                           newSet.delete(selectedImageIndex);
                           return newSet;
                         });
                       }}
+                      onError={(error) => {
+                        console.log('❌ 모달 이미지 로딩 오류:', {
+                          index: selectedImageIndex,
+                          error,
+                          url: imageUrl,
+                          fileName: currentImage.name
+                        });
+                        setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
+                        setLoadingImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.delete(selectedImageIndex);
+                          return newSet;
+                        });
+                      }}
+                    />
+                  );
+                })()}
+                
+                {/* 이전/다음 버튼 */}
+                {imageAttachments.length > 1 && (
+                  <>
+                    <Button
+                      position="absolute"
+                      left={-60}
+                      top="50%"
+                      transform={[{ translateY: -20 }]}
+                      variant="outline"
+                      bg="rgba(0,0,0,0.5)"
+                      borderColor="white"
+                      onPress={handlePreviousImage}
+                      zIndex={10}
                     >
-                      <ButtonText color="white">다시 시도</ButtonText>
+                      <ButtonIcon as={ChevronLeft} color="white" />
                     </Button>
-                  </VStack>
-                </Center>
-              ) : loadingImages.has(selectedImageIndex) ? (
-                <Center flex={1} bg="$gray900" w="$full" h="$full">
-                  <VStack alignItems="center" space="md">
-                    <Text color="white" fontSize={18}>이미지 로딩 중...</Text>
-                    <Text color="white" fontSize={12} opacity={0.7}>
-                      {imageAttachments[selectedImageIndex]?.name}
-                    </Text>
-                  </VStack>
-                </Center>
-              ) : (
-                <Box flex={1} w="$full" h="$full" justifyContent="center" alignItems="center">
-                  {(() => {
-                    const currentImage = imageAttachments[selectedImageIndex];
-                    if (!currentImage) {
-                      console.log('❌ 현재 이미지가 없음:', { selectedImageIndex, totalImages: imageAttachments.length });
-                      return (
-                        <Center flex={1}>
-                          <Text color="white">이미지를 찾을 수 없습니다</Text>
-                        </Center>
-                      );
-                    }
                     
-                    const imageUrl = getFullImageUrl(currentImage.url);
-                    console.log('🖼️ 모달에서 이미지 렌더링:', {
-                      index: selectedImageIndex,
-                      fileName: currentImage.name,
-                      originalUrl: currentImage.url,
-                      fullUrl: imageUrl
-                    });
-                    
-                    return (
-                      <RNImage
-                        key={`modal-image-${selectedImageIndex}`}
-                        source={{ uri: imageUrl }}
-                        style={{ 
-                          width: screenWidth - 40, 
-                          height: (screenWidth - 40) * 0.75,
-                          backgroundColor: 'transparent'
-                        }}
-                        resizeMode="contain"
-                        onLoad={() => {
-                          console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
-                          setLoadingImages(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(selectedImageIndex);
-                            return newSet;
-                          });
-                        }}
-                        onError={(error) => {
-                          console.log('❌ 모달 이미지 로딩 오류:', {
-                            index: selectedImageIndex,
-                            error,
-                            url: imageUrl,
-                            fileName: currentImage.name
-                          });
-                          setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
-                          setLoadingImages(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(selectedImageIndex);
-                            return newSet;
-                          });
-                        }}
-                      />
-                    );
-                  })()}
-                </Box>
-              )}
-              
-              {/* 이전/다음 버튼 */}
-              {imageAttachments.length > 1 && (
-                <>
-                  <Button
-                    position="absolute"
-                    left="$4"
-                    top="50%"
-                    transform={[{ translateY: -20 }]}
-                    variant="outline"
-                    bg="rgba(0,0,0,0.5)"
-                    borderColor="white"
-                    onPress={handlePreviousImage}
-                    zIndex={10}
-                  >
-                    <ButtonIcon as={ChevronLeft} color="white" />
-                  </Button>
-                  
-                  <Button
-                    position="absolute"
-                    right="$4"
-                    top="50%"
-                    transform={[{ translateY: -20 }]}
-                    variant="outline"
-                    bg="rgba(0,0,0,0.5)"
-                    borderColor="white"
-                    onPress={handleNextImage}
-                    zIndex={10}
-                  >
-                    <ButtonIcon as={ChevronRight} color="white" />
-                  </Button>
-                </>
-              )}
-            </Box>
-          </ModalBody>
+                    <Button
+                      position="absolute"
+                      right={-60}
+                      top="50%"
+                      transform={[{ translateY: -20 }]}
+                      variant="outline"
+                      bg="rgba(0,0,0,0.5)"
+                      borderColor="white"
+                      onPress={handleNextImage}
+                      zIndex={10}
+                    >
+                      <ButtonIcon as={ChevronRight} color="white" />
+                    </Button>
+                  </>
+                )}
+              </Box>
+            )}
+          </Center>
         </ModalContent>
       </Modal>
     </>
