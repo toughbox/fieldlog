@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Alert, ScrollView, StatusBar } from 'react-native';
+import { Alert, ScrollView, StatusBar, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   Box,
   VStack,
@@ -67,6 +68,8 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   const [status, setStatus] = useState<'pending' | 'in_progress' | 'completed' | 'cancelled'>('pending');
   const [priority, setPriority] = useState<number>(1);
   const [dueDate, setDueDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
 
@@ -107,6 +110,33 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
       setCustomData({});
     }
   }, [selectedFieldId, fields]);
+
+  // 날짜 변경 처리 함수
+  const onDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    
+    if (date) {
+      setSelectedDate(date);
+      // YYYY-MM-DD 형식으로 변환
+      const formattedDate = date.toISOString().split('T')[0];
+      setDueDate(formattedDate);
+    }
+  };
+
+  // 날짜 포맷팅 함수
+  const formatDisplayDate = (dateString: string) => {
+    if (!dateString) return '날짜 선택';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short'
+    });
+  };
 
   const loadFields = async () => {
     try {
@@ -473,13 +503,24 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
 
               <VStack space="xs">
                 <Text size="sm" color="$gray600">마감일</Text>
-                <Input>
-                  <InputField
-                    placeholder="YYYY-MM-DD 형식으로 입력"
-                    value={dueDate}
-                    onChangeText={setDueDate}
+                <Pressable onPress={() => setShowDatePicker(true)}>
+                  <Input isReadOnly={true}>
+                    <InputField
+                      placeholder="날짜 선택"
+                      value={formatDisplayDate(dueDate)}
+                      editable={false}
+                    />
+                  </Input>
+                </Pressable>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onDateChange}
+                    minimumDate={new Date()}
                   />
-                </Input>
+                )}
               </VStack>
             </VStack>
           </Card>

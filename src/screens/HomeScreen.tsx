@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshControl, ScrollView, Alert, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -30,37 +30,15 @@ import {
   List
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
+import { currentRecordApi } from '../services/api';
+import { TokenService } from '../services/tokenService';
 
 interface HomeScreenProps {
   navigation: any;
 }
 
-// 임시 데이터
+// 최근 활동 목 데이터 (나중에 실제 데이터로 교체 예정)
 const mockData = {
-  todayStats: {
-    pending: 5,
-    inProgress: 3,
-    completed: 12,
-    urgent: 2
-  },
-  upcomingTasks: [
-    {
-      id: 1,
-      title: '101동 전기하자',
-      field: '건설현장',
-      dueDate: '오늘',
-      priority: 'high',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      title: '서버점검',
-      field: '서버관리',
-      dueDate: '내일',
-      priority: 'medium',
-      status: 'pending'
-    }
-  ],
   recentActivities: [
     {
       id: 1,
@@ -79,13 +57,95 @@ const mockData = {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
+  const [todayStats, setTodayStats] = useState({
+    pending: 0,
+    in_progress: 0,
+    completed: 0,
+    urgent: 0
+  });
+  const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { logout, user } = useAuth();
 
-  const onRefresh = React.useCallback(() => {
+  const loadTodayStats = async () => {
+    try {
+      const accessToken = await TokenService.getAccessToken();
+      if (!accessToken) return;
+
+      // 모든 기록을 가져와서 상태별로 집계
+      const response = await currentRecordApi.getRecords(accessToken, {
+        page: 1,
+        limit: 1000 // 충분히 큰 수로 모든 기록 가져오기
+      });
+
+      if (response.success && response.data) {
+        const records = response.data.records;
+        
+        // 상태별 집계
+        const stats = {
+          pending: records.filter(r => r.status === 'pending').length,
+          in_progress: records.filter(r => r.status === 'in_progress').length,
+          completed: records.filter(r => r.status === 'completed').length,
+          urgent: records.filter(r => r.priority >= 4).length // 우선순위 4,5가 긴급
+        };
+        
+        setTodayStats(stats);
+        
+        // 마감 임박 기록들 필터링 (진행중이거나 대기중이면서 마감일이 7일 이내)
+        const today = new Date();
+        const sevenDaysLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        const upcoming = records
+          .filter(record => 
+            (record.status === 'pending' || record.status === 'in_progress') &&
+            record.due_date &&
+            new Date(record.due_date) <= sevenDaysLater
+          )
+          .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
+          .slice(0, 5) // 최대 5개만
+          .map(record => ({
+            id: record.id,
+            title: record.title,
+            field: record.field_name || '현장',
+            dueDate: formatDueDate(record.due_date!),
+            priority: record.priority >= 4 ? 'high' : record.priority >= 3 ? 'medium' : 'low',
+            status: record.status,
+            recordData: record
+          }));
+          
+        setUpcomingTasks(upcoming);
+      }
+    } catch (error) {
+      console.error('❌ 통계 데이터 로드 오류:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 마감일 포맷팅 함수
+  const formatDueDate = (dateString: string) => {
+    const dueDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return '오늘';
+    if (diffDays === 1) return '내일';
+    if (diffDays === -1) return '어제';
+    if (diffDays < 0) return `${Math.abs(diffDays)}일 지남`;
+    if (diffDays <= 7) return `${diffDays}일 후`;
+    
+    return dueDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  };
+
+  useEffect(() => {
+    loadTodayStats();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadTodayStats();
+    setRefreshing(false);
   }, []);
 
   const handleLogout = () => {
@@ -153,7 +213,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       </Box>
       
       <ScrollView
-        flex={1}
+        style={{ flex: 1 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -178,7 +238,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     mb="$2"
                   >
                     <Text size="lg" fontWeight="bold" color="$orange600">
-                      {mockData.todayStats.pending}
+                      {todayStats.pending}
                     </Text>
                   </Center>
                   <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">대기중</Text>
@@ -193,7 +253,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     mb="$2"
                   >
                     <Text size="lg" fontWeight="bold" color="$blue600">
-                      {mockData.todayStats.inProgress}
+                      {todayStats.in_progress}
                     </Text>
                   </Center>
                   <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">진행중</Text>
@@ -208,7 +268,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     mb="$2"
                   >
                     <Text size="lg" fontWeight="bold" color="$green600">
-                      {mockData.todayStats.completed}
+                      {todayStats.completed}
                     </Text>
                   </Center>
                   <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">완료</Text>
@@ -223,7 +283,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     mb="$2"
                   >
                     <Text size="lg" fontWeight="bold" color="$red600">
-                      {mockData.todayStats.urgent}
+                      {todayStats.urgent}
                     </Text>
                   </Center>
                   <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">긴급</Text>
@@ -240,19 +300,38 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <Heading size="lg" color="$gray900" fontFamily="NotoSansKR_700Bold">마감 임박</Heading>
               </HStack>
               
-              {mockData.upcomingTasks.map((task) => (
-                <Card key={task.id} bg="$orange50" p="$3" borderRadius="$md" borderLeftWidth={4} borderLeftColor="$orange500">
-                  <VStack space="xs">
-                    <Text fontWeight="semibold" color="$gray900" fontFamily="NotoSansKR_500Medium">{task.title}</Text>
-                    <HStack justifyContent="space-between" alignItems="center">
-                      <Badge bg="$orange100" borderRadius="$sm">
-                        <Text size="xs" color="$orange700" fontFamily="NotoSansKR_400Regular">{task.field}</Text>
-                      </Badge>
-                      <Text size="xs" color="$orange600" fontWeight="medium" fontFamily="NotoSansKR_400Regular">{task.dueDate}</Text>
+              {upcomingTasks.length > 0 ? (
+                upcomingTasks.map((task) => (
+                  <Pressable 
+                    key={task.id} 
+                    onPress={() => navigation.navigate('RecordDetail', { recordId: task.id })}
+                  >
+                    <HStack 
+                      bg="$red100" 
+                      p="$2" 
+                      borderRadius="$sm" 
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <VStack flex={1} space="xs">
+                        <Text size="sm" fontWeight="medium" color="$gray900" fontFamily="NotoSansKR_500Medium" numberOfLines={1}>
+                          {task.title}
+                        </Text>
+                        <Text size="xs" color="$red600" fontFamily="NotoSansKR_400Regular">
+                          {task.field}
+                        </Text>
+                      </VStack>
+                      <Text size="xs" color="$red600" fontWeight="bold" fontFamily="NotoSansKR_500Medium">
+                        {task.dueDate}
+                      </Text>
                     </HStack>
-                  </VStack>
-                </Card>
-              ))}
+                  </Pressable>
+                ))
+              ) : (
+                <Text size="sm" color="$gray500" textAlign="center" fontFamily="NotoSansKR_400Regular" py="$3">
+                  마감 임박한 작업이 없습니다
+                </Text>
+              )}
             </VStack>
           </Card>
 
