@@ -19,7 +19,7 @@ import {
   ButtonText,
   ButtonIcon
 } from '@gluestack-ui/themed';
-import { X, ChevronLeft, ChevronRight, Camera } from 'lucide-react-native';
+import { X, Camera } from 'lucide-react-native';
 
 // 이미지 URL 생성 함수
 const getFullImageUrl = (url: string): string => {
@@ -49,6 +49,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
+  const [touchStartX, setTouchStartX] = useState(0);
 
   // 이미지 파일만 필터링
   const imageAttachments = attachments.filter(att => 
@@ -127,6 +128,27 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
     // 로딩 상태 초기화
     setLoadingImages(new Set());
     setImageLoadErrors(new Set());
+  };
+
+  // 스와이프 제스처 핸들러
+  const handleTouchStart = (event: any) => {
+    setTouchStartX(event.nativeEvent.pageX);
+  };
+
+  const handleTouchEnd = (event: any) => {
+    const touchEndX = event.nativeEvent.pageX;
+    const deltaX = touchStartX - touchEndX;
+    const minSwipeDistance = 50; // 최소 스와이프 거리
+
+    if (Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        // 왼쪽으로 스와이프 (다음 이미지)
+        handleNextImage();
+      } else {
+        // 오른쪽으로 스와이프 (이전 이미지)
+        handlePreviousImage();
+      }
+    }
   };
 
   const renderImageItem = ({ item, index }: { item: any; index: number }) => {
@@ -211,7 +233,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
           </Box>
           
           {/* 이미지 컨테이너 */}
-          <Center flex={1} w="$full" h="$full">
+          <Center 
+            flex={1} 
+            w="$full" 
+            h="$full"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {imageLoadErrors.has(selectedImageIndex) ? (
               <VStack alignItems="center" space="md" p="$4">
                 <Text color="$gray800" textAlign="center" fontSize={18}>
@@ -287,42 +315,6 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                   );
                 })()}
                 
-                {/* 이전/다음 버튼 */}
-                {imageAttachments.length > 1 && (
-                  <>
-                    <Button
-                      position="absolute"
-                      left="$4"
-                      top="50%"
-                      transform={[{ translateY: -20 }]}
-                      variant="outline"
-                      bg="white"
-                      borderColor="$gray300"
-                      borderRadius="$full"
-                      size="md"
-                      onPress={handlePreviousImage}
-                      zIndex={10}
-                    >
-                      <ButtonIcon as={ChevronLeft} color="$gray600" />
-                    </Button>
-                    
-                    <Button
-                      position="absolute"
-                      right="$4"
-                      top="50%"
-                      transform={[{ translateY: -20 }]}
-                      variant="outline"
-                      bg="white"
-                      borderColor="$gray300"
-                      borderRadius="$full"
-                      size="md"
-                      onPress={handleNextImage}
-                      zIndex={10}
-                    >
-                      <ButtonIcon as={ChevronRight} color="$gray600" />
-                    </Button>
-                  </>
-                )}
               </Box>
             )}
           </Center>
