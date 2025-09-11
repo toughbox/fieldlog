@@ -347,16 +347,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   <Button 
                     flex={1}
                     size="lg" 
-                    action="primary" 
-                    onPress={() => navigation.navigate('CreateRecord')}
-                  >
-                    <ButtonIcon as={Edit} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">새 기록</ButtonText>
-                  </Button>
-
-                  <Button 
-                    flex={1}
-                    size="lg" 
                     variant="outline" 
                     action="secondary"
                     onPress={() => navigation.navigate('CreateField')}
@@ -364,9 +354,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     <ButtonIcon as={Building} />
                     <ButtonText fontFamily="NotoSansKR_500Medium">새 현장</ButtonText>
                   </Button>
-                </HStack>
 
-                <HStack space="sm">
                   <Button 
                     flex={1}
                     size="lg" 
@@ -376,6 +364,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   >
                     <ButtonIcon as={List} />
                     <ButtonText fontFamily="NotoSansKR_500Medium">현장 관리</ButtonText>
+                  </Button>
+                </HStack>
+
+                <HStack space="sm">
+                  <Button 
+                    flex={1}
+                    size="lg" 
+                    action="primary" 
+                    onPress={() => navigation.navigate('CreateRecord')}
+                  >
+                    <ButtonIcon as={Edit} />
+                    <ButtonText fontFamily="NotoSansKR_500Medium">새 기록</ButtonText>
                   </Button>
 
                   <Button 
