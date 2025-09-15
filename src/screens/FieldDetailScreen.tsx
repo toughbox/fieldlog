@@ -91,7 +91,10 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
   };
 
   const handleEditField = () => {
-    Alert.alert('알림', '현장 편집 기능은 준비 중입니다.');
+    navigation.navigate('EditField', { 
+      fieldId: fieldId, 
+      field: field 
+    });
   };
 
   const handleDeleteField = () => {
@@ -111,7 +114,7 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
               const response = await currentFieldApi.deleteField(fieldId, accessToken);
               if (response.success) {
                 Alert.alert('성공', '현장이 삭제되었습니다.', [
-                  { text: '확인', onPress: () => navigation.goBack() }
+                  { text: '확인', onPress: () => navigation.navigate('FieldList') }
                 ]);
               } else {
                 Alert.alert('오류', response.error || '현장 삭제에 실패했습니다.');
@@ -243,7 +246,7 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
         <HStack justifyContent="space-between" alignItems="center">
           <HStack alignItems="center" space="sm">
-            <Button variant="ghost" size="sm" onPress={() => navigation.goBack()}>
+            <Button variant="ghost" size="sm" onPress={() => navigation.navigate('FieldList')}>
               <ButtonIcon as={ArrowLeft} />
             </Button>
             <VStack>
