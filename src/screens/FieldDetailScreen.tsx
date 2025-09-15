@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, Alert, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Box,
   VStack,
@@ -55,6 +56,13 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
   const { user } = useAuth();
   const [records, setRecords] = useState<Record[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // 화면 포커스시 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      loadRecords();
+    }, [])
+  );
 
   useEffect(() => {
     loadRecords();

@@ -236,7 +236,16 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
       
       if (response.success) {
         Alert.alert('성공', '현장 기록이 성공적으로 생성되었습니다.', [
-          { text: '확인', onPress: () => navigation.goBack() }
+          { 
+            text: '확인', 
+            onPress: () => {
+              // 현장 상세 화면으로 이동
+              navigation.navigate('FieldDetail', { 
+                fieldId: selectedFieldId, 
+                field: selectedField 
+              });
+            }
+          }
         ]);
       } else {
         Alert.alert('오류', response.error || '현장 기록 생성에 실패했습니다.');
@@ -371,7 +380,10 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                   onValueChange={(value) => setSelectedFieldId(value ? parseInt(value) : null)}
                 >
                   <SelectTrigger>
-                    <SelectInput placeholder="현장을 선택하세요" />
+                    <SelectInput 
+                      placeholder="현장을 선택하세요"
+                      value={selectedField ? selectedField.name : ''}
+                    />
                     <SelectIcon />
                   </SelectTrigger>
                   <SelectPortal>
