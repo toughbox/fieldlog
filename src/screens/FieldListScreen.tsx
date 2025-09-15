@@ -21,7 +21,7 @@ import {
   Center,
   Spinner
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Plus, Trash2, Search, MoreVertical, Building } from 'lucide-react-native';
+import { ArrowLeft, Plus, Trash2, Search, Building } from 'lucide-react-native';
 import { currentFieldApi, Field } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
@@ -99,59 +99,11 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   };
 
   const handleFieldPress = (field: Field) => {
-    // 현장 상세 화면으로 이동 (추후 구현)
-    Alert.alert('현장 선택', `${field.name} 현장을 선택했습니다.`);
-  };
-
-  const handleFieldOptions = (field: Field) => {
-    Alert.alert(
-      '현장 관리',
-      `${field.name} 현장을 어떻게 하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '편집', onPress: () => handleEditField(field) },
-        { text: '삭제', style: 'destructive', onPress: () => handleDeleteField(field) }
-      ]
-    );
-  };
-
-  const handleEditField = (field: Field) => {
-    // 편집 화면으로 이동 (추후 구현)
-    Alert.alert('알림', '현장 편집 기능은 준비 중입니다.');
-  };
-
-  const handleDeleteField = async (field: Field) => {
-    Alert.alert(
-      '현장 삭제',
-      `정말 "${field.name}" 현장을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const accessToken = await TokenService.getAccessToken();
-              if (!accessToken) {
-                Alert.alert('오류', '접근권한이 없습니다.');
-                return;
-              }
-
-              const response = await currentFieldApi.deleteField(field.id, accessToken);
-              if (response.success) {
-                Alert.alert('성공', '현장이 삭제되었습니다.');
-                loadFields(); // 목록 새로고침
-              } else {
-                Alert.alert('오류', response.message || '현장 삭제에 실패했습니다.');
-              }
-            } catch (error) {
-              console.error('현장 삭제 오류:', error);
-              Alert.alert('오류', '현장 삭제 중 오류가 발생했습니다.');
-            }
-          }
-        }
-      ]
-    );
+    // 현장 상세 화면으로 이동
+    navigation.navigate('FieldDetail', { 
+      fieldId: field.id, 
+      field: field 
+    });
   };
 
   const handleCreateField = () => {
@@ -197,17 +149,6 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
                 </Text>
               </HStack>
             </VStack>
-            
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onPress={(e) => {
-                e.stopPropagation();
-                handleFieldOptions(item);
-              }}
-            >
-              <ButtonIcon as={MoreVertical} />
-            </Button>
           </HStack>
         </VStack>
       </Card>

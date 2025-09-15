@@ -60,6 +60,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import CreateFieldScreen from './src/screens/CreateFieldScreen';
 import FieldListScreen from './src/screens/FieldListScreen';
+import FieldDetailScreen from './src/screens/FieldDetailScreen';
 import CreateRecordScreen from './src/screens/CreateRecordScreen';
 import RecordsListScreen from './src/screens/RecordsListScreen';
 import RecordDetailScreen from './src/screens/RecordDetailScreen';
@@ -100,6 +101,7 @@ const AppNavigator = () => {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="CreateField" component={CreateFieldScreen} />
             <Stack.Screen name="FieldList" component={FieldListScreen} />
+            <Stack.Screen name="FieldDetail" component={FieldDetailScreen} />
             <Stack.Screen name="CreateRecord" component={CreateRecordScreen} />
             <Stack.Screen name="RecordsList" component={RecordsListScreen} />
             <Stack.Screen name="RecordDetail" component={RecordDetailScreen} />

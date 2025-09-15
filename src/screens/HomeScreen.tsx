@@ -414,7 +414,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text size="xs" color="$primary600" fontWeight="medium" fontFamily="NotoSansKR_400Regular">홈</Text>
           </Pressable>
           
-          <Pressable alignItems="center" p="$2" flex={1}>
+          <Pressable 
+            alignItems="center" 
+            p="$2" 
+            flex={1}
+            onPress={() => navigation.navigate('RecordsList')}
+          >
             <Center mb="$1">
               <List size={24} color="#9ca3af" />
             </Center>
