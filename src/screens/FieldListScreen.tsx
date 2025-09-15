@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, RefreshControl, FlatList, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Box,
   VStack,
@@ -39,9 +40,12 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'created' | 'updated'>('name');
 
-  useEffect(() => {
-    loadFields();
-  }, []);
+  // 화면 포커스시 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      loadFields();
+    }, [])
+  );
 
   useEffect(() => {
     filterAndSortFields();
