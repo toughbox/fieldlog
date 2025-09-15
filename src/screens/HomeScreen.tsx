@@ -31,6 +31,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { currentRecordApi } from '../services/api';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface HomeScreenProps {
   navigation: any;
@@ -396,61 +397,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       </ScrollView>
 
       {/* 하단 네비게이션 */}
-      <Box 
-        bg="white" 
-        px="$4" 
-        py="$2" 
-        shadowOpacity={0.1} 
-        shadowRadius={8} 
-        shadowOffset={{ width: 0, height: -2 }}
-        borderTopWidth={1}
-        borderTopColor="$gray200"
-      >
-        <HStack justifyContent="space-around" alignItems="center">
-          <Pressable alignItems="center" p="$2" flex={1}>
-            <Center mb="$1">
-              <Home size={24} color="#6366f1" />
-            </Center>
-            <Text size="xs" color="$primary600" fontWeight="medium" fontFamily="NotoSansKR_400Regular">홈</Text>
-          </Pressable>
-          
-          <Pressable 
-            alignItems="center" 
-            p="$2" 
-            flex={1}
-            onPress={() => navigation.navigate('RecordsList')}
-          >
-            <Center mb="$1">
-              <List size={24} color="#9ca3af" />
-            </Center>
-            <Text size="xs" color="$gray500" fontFamily="NotoSansKR_400Regular">기록</Text>
-          </Pressable>
-          
-          <Pressable 
-            alignItems="center" 
-            p="$2" 
-            flex={1}
-            onPress={() => navigation.navigate('FieldList')}
-          >
-            <Center mb="$1">
-              <Building size={24} color="#9ca3af" />
-            </Center>
-            <Text size="xs" color="$gray500" fontFamily="NotoSansKR_400Regular">현장</Text>
-          </Pressable>
-          
-          <Pressable 
-            alignItems="center" 
-            p="$2" 
-            flex={1}
-            onPress={handleLogout}
-          >
-            <Center mb="$1">
-              <LogOut size={24} color="#ef4444" />
-            </Center>
-            <Text size="xs" color="$red500" fontFamily="NotoSansKR_400Regular">로그아웃</Text>
-          </Pressable>
-        </HStack>
-      </Box>
+      <BottomNavigation navigation={navigation} currentScreen="Home" />
     </SafeAreaView>
   );
 };

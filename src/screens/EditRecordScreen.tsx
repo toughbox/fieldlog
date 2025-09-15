@@ -492,7 +492,10 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                     onValueChange={(value) => setStatus(value as any)}
                   >
                     <SelectTrigger>
-                      <SelectInput placeholder="상태 선택" />
+                      <SelectInput 
+                        placeholder="상태 선택"
+                        value={STATUS_OPTIONS.find(option => option.value === status)?.label || ''}
+                      />
                       <SelectIcon />
                     </SelectTrigger>
                     <SelectPortal>
@@ -520,7 +523,10 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                     onValueChange={(value) => setPriority(parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectInput placeholder="우선순위 선택" />
+                      <SelectInput 
+                        placeholder="우선순위 선택"
+                        value={PRIORITY_OPTIONS.find(option => option.value === priority)?.label || ''}
+                      />
                       <SelectIcon />
                     </SelectTrigger>
                     <SelectPortal>
@@ -661,6 +667,9 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
           </HStack>
         </VStack>
       </ScrollView>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };

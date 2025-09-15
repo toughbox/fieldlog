@@ -37,6 +37,7 @@ import { useAuth } from '../context/AuthContext';
 import ImagePickerComponent from '../components/ImagePicker';
 import { UploadedImage } from '../services/imageService';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface CreateRecordScreenProps {
   navigation: any;
@@ -472,7 +473,10 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                     onValueChange={(value) => setStatus(value as any)}
                   >
                     <SelectTrigger>
-                      <SelectInput placeholder="상태 선택" />
+                      <SelectInput 
+                        placeholder="상태 선택"
+                        value={STATUS_OPTIONS.find(option => option.value === status)?.label || ''}
+                      />
                       <SelectIcon />
                     </SelectTrigger>
                     <SelectPortal>
@@ -500,7 +504,10 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                     onValueChange={(value) => setPriority(parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectInput placeholder="우선순위 선택" />
+                      <SelectInput 
+                        placeholder="우선순위 선택"
+                        value={PRIORITY_OPTIONS.find(option => option.value === priority)?.label || ''}
+                      />
                       <SelectIcon />
                     </SelectTrigger>
                     <SelectPortal>
@@ -637,6 +644,9 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
           </HStack>
         </VStack>
       </ScrollView>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };

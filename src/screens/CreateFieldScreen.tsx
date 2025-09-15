@@ -25,7 +25,6 @@ import {
   SelectDragIndicatorWrapper,
   SelectDragIndicator,
   SelectItem,
-  Switch,
   Divider,
   Center,
   Spinner
@@ -34,6 +33,7 @@ import { ArrowLeft, Plus, Trash2, ChevronDown, Palette } from 'lucide-react-nati
 import { currentFieldApi, CreateFieldRequest, FieldSchema } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface CreateFieldScreenProps {
   navigation: any;
@@ -92,6 +92,13 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
     };
     setFields([...fields, newField]);
   };
+
+  // 화면 로딩 시 기본 필드 추가
+  React.useEffect(() => {
+    if (fields.length === 0) {
+      addField();
+    }
+  }, []);
 
   const removeField = (fieldId: string) => {
     const updatedFields = fields.filter(field => field.id !== fieldId);
@@ -166,7 +173,8 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
       }
     } catch (error) {
       console.error('현장 생성 오류:', error);
-      Alert.alert('오류', '현장 생성 중 오류가 발생했습니다.');
+      console.error('오류 상세:', JSON.stringify(error, null, 2));
+      Alert.alert('오류', `현장 생성 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
     } finally {
       setIsLoading(false);
     }
@@ -300,6 +308,9 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
             </HStack>
           </VStack>
       </ScrollView>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };
@@ -381,10 +392,25 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
 
         <HStack justifyContent="space-between" alignItems="center">
           <Text size="sm" color="$gray600">필수 입력</Text>
-          <Switch
-            value={field.required}
-            onValueChange={(value) => onUpdate({ required: value })}
-          />
+          <Pressable
+            onPress={() => onUpdate({ required: !field.required })}
+            bg={field.required ? "$primary600" : "$gray300"}
+            w="$12"
+            h="$6"
+            borderRadius="$full"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Box
+              w="$4"
+              h="$4"
+              bg="white"
+              borderRadius="$full"
+              position="absolute"
+              left={field.required ? "$6" : "$1"}
+              transition="all 0.2s"
+            />
+          </Pressable>
         </HStack>
 
         {field.type === 'select' && (

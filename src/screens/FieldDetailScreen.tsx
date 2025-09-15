@@ -30,6 +30,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { currentRecordApi, currentFieldApi } from '../services/api';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface FieldDetailScreenProps {
   navigation: any;
@@ -337,6 +338,9 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
           renderEmptyState()
         )}
       </ScrollView>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };

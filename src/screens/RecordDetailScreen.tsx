@@ -43,6 +43,7 @@ import { currentRecordApi, FieldRecord } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface RecordDetailScreenProps {
   navigation: any;
@@ -520,6 +521,9 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
           </ModalFooter>
         </ModalContent>
       </Modal>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };

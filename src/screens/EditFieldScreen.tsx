@@ -29,6 +29,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { currentFieldApi, Field } from '../services/api';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface EditFieldScreenProps {
   navigation: any;
@@ -294,6 +295,9 @@ const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) 
           </VStack>
         </Card>
       </ScrollView>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };

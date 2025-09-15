@@ -34,6 +34,7 @@ import { Plus, Search, Filter, MoreVertical, Calendar, AlertCircle, CheckCircle2
 import { currentRecordApi, currentFieldApi, FieldRecord, Field, RecordsListResponse } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 import { useFocusEffect } from '@react-navigation/native';
 
 interface RecordsListScreenProps {
@@ -538,6 +539,9 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
           showsVerticalScrollIndicator={false}
         />
       )}
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} currentScreen="RecordsList" />
     </SafeAreaView>
   );
 };

@@ -26,6 +26,7 @@ import { ArrowLeft, Plus, Trash2, Search, Building } from 'lucide-react-native';
 import { currentFieldApi, Field } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface FieldListScreenProps {
   navigation: any;
@@ -259,6 +260,9 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
       >
         <FabIcon as={Plus} color="white" />
       </Fab>
+      
+      {/* 하단 네비게이션 */}
+      <BottomNavigation navigation={navigation} currentScreen="FieldList" />
     </SafeAreaView>
   );
 };
