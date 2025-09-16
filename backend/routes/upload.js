@@ -31,11 +31,11 @@ const authenticateToken = (req, res, next) => {
 
 // MinIO 클라이언트 설정
 const minioClient = new Client({
-  endPoint: 'toughbox.iptime.org',
-  port: 9000,
-  useSSL: false,
-  accessKey: 'tough',
-  secretKey: '12345678'
+  endPoint: process.env.MINIO_ENDPOINT || 'toughbox.iptime.org',
+  port: parseInt(process.env.MINIO_PORT) || 9000,
+  useSSL: process.env.MINIO_USE_SSL === 'true' || false,
+  accessKey: process.env.MINIO_ACCESS_KEY || 'tough',
+  secretKey: process.env.MINIO_SECRET_KEY || '12345678'
 });
 
 // Multer 설정 (메모리 저장)
