@@ -361,32 +361,50 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
           {/* 일정 정보 */}
           <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="sm">
+            <VStack space="md">
               <HStack alignItems="center" space="sm">
                 <Calendar size={20} color="#6366f1" />
                 <Heading size="lg" color="$gray900">일정 정보</Heading>
               </HStack>
 
-              <VStack space="xs">
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Text color="$gray600" size="sm">생성일</Text>
-                  <Text color="$gray900">{formatDate(record.created_at)}</Text>
-                </HStack>
-
-                {record.due_date && (
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <Text color="$gray600" size="sm">마감일</Text>
-                    <Text color={overdue ? "$red600" : "$gray900"}>
-                      {formatDate(record.due_date)}
+              <VStack space="sm">
+                <VStack space="xs">
+                  <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
+                    <Text size="sm" color="$gray600" fontWeight="500">
+                      생성일:
+                    </Text>
+                    <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+                      {formatDate(record.created_at)}
                     </Text>
                   </HStack>
+                  <Divider bg="$gray200" opacity={0.5} />
+                </VStack>
+
+                {record.due_date && (
+                  <VStack space="xs">
+                    <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
+                      <Text size="sm" color="$gray600" fontWeight="500">
+                        마감일:
+                      </Text>
+                      <Text size="sm" color={overdue ? "$red600" : "$gray900"} fontWeight="600" flex={1} flexShrink={1}>
+                        {formatDate(record.due_date)}
+                      </Text>
+                    </HStack>
+                    <Divider bg="$gray200" opacity={0.5} />
+                  </VStack>
                 )}
 
                 {record.completed_at && (
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <Text color="$gray600" size="sm">완료일</Text>
-                    <Text color="$green600">{formatDate(record.completed_at)}</Text>
-                  </HStack>
+                  <VStack space="xs">
+                    <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
+                      <Text size="sm" color="$gray600" fontWeight="500">
+                        완료일:
+                      </Text>
+                      <Text size="sm" color="$green600" fontWeight="600" flex={1} flexShrink={1}>
+                        {formatDate(record.completed_at)}
+                      </Text>
+                    </HStack>
+                  </VStack>
                 )}
               </VStack>
             </VStack>
@@ -518,7 +536,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
       </Modal>
       
       {/* 하단 네비게이션 */}
-      <BottomNavigation navigation={navigation} />
+      <BottomNavigation navigation={navigation} currentScreen="RecordDetail" />
     </SafeAreaView>
   );
 };
