@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Alert, ScrollView, StatusBar, RefreshControl } from 'react-native';
+import { Alert, ScrollView, StatusBar, RefreshControl, FlatList, ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Box,
@@ -28,7 +28,6 @@ import {
   Divider,
   Spinner,
   Center,
-  FlatList
 } from '@gluestack-ui/themed';
 import { Plus, Search, Filter, MoreVertical, Calendar, AlertCircle, CheckCircle2, Clock, X } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, FieldRecord, Field, RecordsListResponse } from '../services/api';
@@ -54,6 +53,20 @@ const PRIORITY_CONFIG = {
   2: { label: '보통', color: '#3B82F6' },
   3: { label: '긴급', color: '#EF4444' }
 };
+
+interface SafeRecordsListResponse {
+  success: boolean;
+  data?: {
+    records: FieldRecord[];
+    pagination: {
+      current_page: number;
+      total_pages: number;
+      total_records: number;
+      limit: number;
+    };
+  };
+  error?: string;
+}
 
 const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route }) => {
   const { user } = useAuth();
@@ -143,21 +156,31 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
         sort_order: 'DESC'
       };
 
-      const response = await currentRecordApi.getRecords(accessToken, params);
+      const response: SafeRecordsListResponse = await currentRecordApi.getRecords(accessToken, params);
       
-      if (response.success && response.data) {
+      const recordsData = response.data?.records || [];
+      const paginationData = response.data?.pagination || { 
+        current_page: 1, 
+        total_pages: 1, 
+        total_records: 0, 
+        limit: 20 
+      };
+
+      if (response.success) {
         if (reset) {
-          setRecords(response.data.records);
+          setRecords(recordsData);
         } else {
-          setRecords(prev => [...prev, ...response.data.records]);
+          setRecords(prev => [...prev, ...recordsData]);
         }
-        setPagination(response.data.pagination);
+        setPagination(paginationData);
       } else {
         Alert.alert('오류', response.error || '기록 목록을 불러올 수 없습니다.');
+        setRecords([]);
       }
     } catch (error) {
       console.error('기록 목록 로드 오류:', error);
       Alert.alert('오류', '기록 목록을 불러오는 중 오류가 발생했습니다.');
+      setRecords([]);
     }
   };
 
@@ -210,7 +233,9 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
     return new Date(record.due_date) < new Date();
   };
 
-  const renderRecordItem = ({ item }: { item: FieldRecord }) => {
+  const renderRecordItem: ListRenderItem<FieldRecord> = ({ item }) => {
+    if (!item) return null;
+    
     const statusConfig = STATUS_CONFIG[item.status];
     const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG];
     const StatusIcon = statusConfig.icon;

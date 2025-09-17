@@ -38,6 +38,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { TokenService } from '../services/tokenService';
 import ImagePickerComponent from '../components/ImagePicker';
 import { UploadedImage } from '../services/imageService';
+import BottomNavigation from '../components/BottomNavigation';
 
 interface EditRecordScreenProps {
   navigation: any;

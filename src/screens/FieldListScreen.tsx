@@ -22,7 +22,17 @@ import {
   Center,
   Spinner
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Plus, Trash2, Search, Building, Construction, Home, Warehouse, Factory, Office, School, Hospital, Store, Apartment } from 'lucide-react-native';
+import { 
+  ArrowLeft, 
+  Plus, 
+  Trash2, 
+  Search, 
+  Building, 
+  Construction, 
+  Home, 
+  Warehouse, 
+  Factory 
+} from 'lucide-react-native';
 import { currentFieldApi, Field } from '../services/api';
 import { currentRecordApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -155,11 +165,6 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
       case 'home': return Home;
       case 'warehouse': return Warehouse;
       case 'factory': return Factory;
-      case 'office': return Office;
-      case 'school': return School;
-      case 'hospital': return Hospital;
-      case 'store': return Store;
-      case 'apartment': return Apartment;
       default: return Building;
     }
   };
@@ -240,7 +245,7 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
         <HStack justifyContent="space-between" alignItems="center">
           <HStack alignItems="center" space="sm">
-            <Button variant="ghost" size="sm" onPress={() => navigation.goBack()}>
+            <Button variant="solid" size="sm" onPress={() => navigation.goBack()}>
               <ButtonIcon as={ArrowLeft} />
             </Button>
             <Heading size="xl" color="$gray900">현장 관리</Heading>
