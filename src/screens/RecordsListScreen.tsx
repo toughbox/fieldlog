@@ -335,7 +335,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
               <HStack space="xs" flexWrap="wrap">
                 {item.tags.slice(0, 3).map((tag) => (
                   <Badge key={tag} variant="outline" size="sm">
-                    <Text size="xs">{tag}</Text>
+                    <Text size="xs">#{tag}</Text>
                   </Badge>
                 ))}
                 {item.tags.length > 3 && (
