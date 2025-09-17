@@ -54,9 +54,7 @@ const STATUS_OPTIONS = [
 const PRIORITY_OPTIONS = [
   { value: 1, label: '1 (낮음)', color: '#10B981' },
   { value: 2, label: '2 (보통)', color: '#3B82F6' },
-  { value: 3, label: '3 (중간)', color: '#F59E0B' },
-  { value: 4, label: '4 (높음)', color: '#EF4444' },
-  { value: 5, label: '5 (긴급)', color: '#DC2626' }
+  { value: 3, label: '3 (긴급)', color: '#EF4444' }
 ];
 
 const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, route }) => {
@@ -317,8 +315,8 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                   <SelectDragIndicatorWrapper>
                     <SelectDragIndicator />
                   </SelectDragIndicatorWrapper>
-                  {options?.map((option: string, index: number) => (
-                    <SelectItem key={index} label={option} value={option} />
+                  {options?.map((option: string) => (
+                    <SelectItem key={option} label={option} value={option} />
                   ))}
                 </SelectContent>
               </SelectPortal>
@@ -587,8 +585,8 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
 
               {tags.length > 0 && (
                 <HStack space="xs" flexWrap="wrap">
-                  {tags.map((tag, index) => (
-                    <Pressable key={index} onPress={() => removeTag(tag)}>
+                  {tags.map((tag) => (
+                    <Pressable key={tag} onPress={() => removeTag(tag)}>
                       <Badge 
                         variant="solid" 
                         mb="$1" 

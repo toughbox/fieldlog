@@ -236,9 +236,9 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
                   <Heading size="lg" color="$gray900">색상 선택</Heading>
                 </HStack>
                 <HStack space="sm" flexWrap="wrap">
-                  {COLORS.map((color, index) => (
+                  {COLORS.map((color) => (
                     <Pressable
-                      key={index}
+                      key={color}
                       onPress={() => setSelectedColor(color)}
                       w="$10"
                       h="$10"
@@ -431,10 +431,10 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
             </HStack>
 
             <VStack space="xs">
-              {field.options?.map((option, optionIndex) => (
-                <HStack key={optionIndex} justifyContent="space-between" alignItems="center" bg="white" p="$2" borderRadius="$sm">
+              {field.options?.map((option) => (
+                <HStack key={option} justifyContent="space-between" alignItems="center" bg="white" p="$2" borderRadius="$sm">
                   <Text size="sm" color="$gray800">{option}</Text>
-                  <Button variant="link" size="sm" onPress={() => removeOption(optionIndex)} style={{ backgroundColor: 'transparent' }}>
+                  <Button variant="link" size="sm" onPress={() => removeOption(field.options?.indexOf(option) || 0)} style={{ backgroundColor: 'transparent' }}>
                     <ButtonIcon as={Trash2} color="$red500" />
                   </Button>
                 </HStack>

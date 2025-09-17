@@ -86,7 +86,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           pending: records.filter(r => r.status === 'pending').length,
           in_progress: records.filter(r => r.status === 'in_progress').length,
           completed: records.filter(r => r.status === 'completed').length,
-          urgent: records.filter(r => r.priority >= 4).length // 우선순위 4,5가 긴급
+          urgent: records.filter(r => r.priority >= 3).length // 우선순위 3이 긴급
         };
         
         setTodayStats(stats);
@@ -108,7 +108,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             title: record.title,
             field: record.field_name || '현장',
             dueDate: formatDueDate(record.due_date!),
-            priority: record.priority >= 4 ? 'high' : record.priority >= 3 ? 'medium' : 'low',
+            priority: record.priority >= 3 ? 'high' : record.priority >= 2 ? 'medium' : 'low',
             status: record.status,
             recordData: record
           }));

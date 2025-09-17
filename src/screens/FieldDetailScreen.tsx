@@ -158,10 +158,22 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
     }
   };
 
+  const getPriorityLabel = (priority: number) => {
+    switch (priority) {
+      case 1: return '낮음';
+      case 2: return '보통';
+      case 3: return '긴급';
+      default: return '낮음';
+    }
+  };
+
   const getPriorityColor = (priority: number) => {
-    if (priority >= 4) return '$red500';
-    if (priority >= 3) return '$orange500';
-    return '$gray500';
+    switch (priority) {
+      case 1: return '#10B981'; // 낮음 - 초록색
+      case 2: return '#3B82F6'; // 보통 - 파란색
+      case 3: return '#EF4444'; // 긴급 - 빨간색
+      default: return '#6B7280'; // 기본값 - 회색
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -191,7 +203,7 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
             <HStack space="sm">
               <Badge bg={getPriorityColor(item.priority)} borderRadius="$sm">
                 <Text size="xs" color="white">
-                  우선순위 {item.priority}
+                  {getPriorityLabel(item.priority)}
                 </Text>
               </Badge>
               {item.due_date && (
@@ -210,8 +222,8 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
 
           {item.tags && item.tags.length > 0 && (
             <HStack space="xs" flexWrap="wrap">
-              {item.tags.map((tag, index) => (
-                <Badge key={index} bg="$gray100" borderRadius="$sm">
+              {item.tags.map((tag) => (
+                <Badge key={tag} bg="$gray100" borderRadius="$sm">
                   <Text size="xs" color="$gray600">
                     {tag}
                   </Text>
@@ -332,7 +344,11 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
         {records.length > 0 ? (
           <VStack space="sm">
             <Heading size="md" color="$gray900">기록 목록</Heading>
-            {records.map((record) => renderRecordItem({ item: record }))}
+            {records.map((record) => (
+              <Box key={record.id}>
+                {renderRecordItem({ item: record })}
+              </Box>
+            ))}
           </VStack>
         ) : (
           renderEmptyState()
@@ -340,7 +356,7 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
       </ScrollView>
       
       {/* 하단 네비게이션 */}
-      <BottomNavigation navigation={navigation} />
+      <BottomNavigation navigation={navigation} currentScreen="FieldDetail" />
     </SafeAreaView>
   );
 };

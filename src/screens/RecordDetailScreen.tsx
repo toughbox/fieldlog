@@ -60,9 +60,7 @@ const STATUS_CONFIG = {
 const PRIORITY_CONFIG = {
   1: { label: '낮음', color: '#10B981', bgColor: '#D1FAE5' },
   2: { label: '보통', color: '#3B82F6', bgColor: '#DBEAFE' },
-  3: { label: '중간', color: '#F59E0B', bgColor: '#FEF3C7' },
-  4: { label: '높음', color: '#EF4444', bgColor: '#FEE2E2' },
-  5: { label: '긴급', color: '#DC2626', bgColor: '#FEE2E2' }
+  3: { label: '긴급', color: '#EF4444', bgColor: '#FEE2E2' }
 };
 
 const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, route }) => {
@@ -317,7 +315,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                     variant="solid" 
                     bg={priorityConfig.color}
                   >
-                    <Text color="white" size="sm">우선순위 {record.priority}</Text>
+                    <Text color="white" size="sm">{priorityConfig.label}</Text>
                   </Badge>
 
                   {overdue && (
@@ -409,9 +407,11 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                 </HStack>
 
                 <VStack space="sm">
-                  {Object.entries(record.custom_data).map(([key, value], index, array) =>
-                    renderCustomField(key, value, index, index === array.length - 1, record.field_schema)
-                  )}
+                  {Object.entries(record.custom_data).map(([key, value], index, array) => (
+                    <Box key={key}>
+                      {renderCustomField(key, value, index, index === array.length - 1, record.field_schema)}
+                    </Box>
+                  ))}
                 </VStack>
               </VStack>
             </Card>
@@ -464,8 +464,8 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                 </HStack>
 
                 <HStack space="xs" flexWrap="wrap">
-                  {record.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline" mb="$1">
+                  {record.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" mb="$1">
                       <Text size="sm">{tag}</Text>
                     </Badge>
                   ))}

@@ -52,9 +52,7 @@ const STATUS_CONFIG = {
 const PRIORITY_CONFIG = {
   1: { label: '낮음', color: '#10B981' },
   2: { label: '보통', color: '#3B82F6' },
-  3: { label: '중간', color: '#F59E0B' },
-  4: { label: '높음', color: '#EF4444' },
-  5: { label: '긴급', color: '#DC2626' }
+  3: { label: '긴급', color: '#EF4444' }
 };
 
 const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route }) => {
@@ -246,7 +244,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
               
               <VStack alignItems="flex-end" space="xs">
                 <Badge variant="solid" bg={priorityConfig.color}>
-                  <Text color="white" size="xs">우선순위 {item.priority}</Text>
+                  <Text color="white" size="xs">{priorityConfig.label}</Text>
                 </Badge>
                 {overdue && (
                   <Badge variant="solid" bg="$red500">
@@ -286,7 +284,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             {/* 사용자 정의 필드 */}
             {item.custom_data && Object.keys(item.custom_data).length > 0 && (
               <VStack space="xs">
-                {Object.entries(item.custom_data).map(([key, value], index) => {
+                {Object.entries(item.custom_data).map(([key, value]) => {
                   if (!value || !value.toString().trim()) return null;
                   
                   // field_schema에서 해당 key의 label 찾기
@@ -294,7 +292,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                   const label = fieldDef?.label || key;
                   
                   return (
-                    <HStack key={index} space="xs" alignItems="center">
+                    <HStack key={key} space="xs" alignItems="center">
                       <Text size="xs" color="$gray500" fontWeight="500" minWidth="$16">
                         {label}:
                       </Text>
@@ -310,8 +308,8 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             {/* 태그 */}
             {item.tags && item.tags.length > 0 && (
               <HStack space="xs" flexWrap="wrap">
-                {item.tags.slice(0, 3).map((tag, index) => (
-                  <Badge key={index} variant="outline" size="sm">
+                {item.tags.slice(0, 3).map((tag) => (
+                  <Badge key={tag} variant="outline" size="sm">
                     <Text size="xs">{tag}</Text>
                   </Badge>
                 ))}

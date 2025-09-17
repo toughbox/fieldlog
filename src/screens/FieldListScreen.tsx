@@ -22,8 +22,9 @@ import {
   Center,
   Spinner
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Plus, Trash2, Search, Building } from 'lucide-react-native';
+import { ArrowLeft, Plus, Trash2, Search, Building, Construction, Home, Warehouse, Factory, Office, School, Hospital, Store, Apartment } from 'lucide-react-native';
 import { currentFieldApi, Field } from '../services/api';
+import { currentRecordApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
 import BottomNavigation from '../components/BottomNavigation';
@@ -36,6 +37,7 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
   const [fields, setFields] = useState<Field[]>([]);
   const [filteredFields, setFilteredFields] = useState<Field[]>([]);
+  const [fieldRecordCounts, setFieldRecordCounts] = useState<Record<number, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,6 +65,8 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
       const response = await currentFieldApi.getFields(accessToken);
       if (response.success && response.data) {
         setFields(response.data);
+        // 현장 목록을 로드한 후 기록 수를 가져옴
+        await loadFieldRecordCounts(response.data, accessToken);
       } else {
         Alert.alert('오류', response.message || '현장 목록을 불러오는데 실패했습니다.');
       }
@@ -71,6 +75,30 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
       Alert.alert('오류', '현장 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadFieldRecordCounts = async (fieldsData: Field[], accessToken: string) => {
+    try {
+      const counts: Record<number, number> = {};
+      
+      // 각 현장별로 기록 수를 가져옴
+      for (const field of fieldsData) {
+        const response = await currentRecordApi.getRecords(accessToken, {
+          field_id: field.id,
+          limit: 1 // 카운트만 필요하므로 최소한으로
+        });
+        
+        if (response.success && response.data) {
+          counts[field.id] = response.data.pagination.total_records;
+        } else {
+          counts[field.id] = 0;
+        }
+      }
+      
+      setFieldRecordCounts(counts);
+    } catch (error) {
+      console.error('현장별 기록 수 로딩 오류:', error);
     }
   };
 
@@ -116,8 +144,24 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   };
 
   const getFieldStats = (field: Field) => {
-    // 추후 실제 통계로 교체
-    return `${Math.floor(Math.random() * 20)} 기록`;
+    const count = fieldRecordCounts[field.id] || 0;
+    return `${count}개 기록`;
+  };
+
+  const getFieldIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'construction': return Construction;
+      case 'building': return Building;
+      case 'home': return Home;
+      case 'warehouse': return Warehouse;
+      case 'factory': return Factory;
+      case 'office': return Office;
+      case 'school': return School;
+      case 'hospital': return Hospital;
+      case 'store': return Store;
+      case 'apartment': return Apartment;
+      default: return Building;
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -135,7 +179,13 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
           <HStack justifyContent="space-between" alignItems="center">
             <VStack space="xs" flex={1}>
               <HStack alignItems="center" space="sm">
-                <Box w="$4" h="$4" borderRadius="$full" bg={item.color} />
+                <HStack alignItems="center" space="xs">
+                  <Box w="$4" h="$4" borderRadius="$full" bg={item.color} />
+                  {item.icon && (() => {
+                    const IconComponent = getFieldIcon(item.icon);
+                    return <IconComponent size={16} color={item.color} />;
+                  })()}
+                </HStack>
                 <Heading size="md" color="$gray900">{item.name}</Heading>
               </HStack>
               {item.description && (
