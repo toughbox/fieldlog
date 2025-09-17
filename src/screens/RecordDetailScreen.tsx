@@ -388,11 +388,6 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                     <Text color="$green600">{formatDate(record.completed_at)}</Text>
                   </HStack>
                 )}
-
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Text color="$gray600" size="sm">최종 수정</Text>
-                  <Text color="$gray900">{formatDate(record.updated_at)}</Text>
-                </HStack>
               </VStack>
             </VStack>
           </Card>
