@@ -8,8 +8,10 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "extra": {
-      "apiUrl": "http://192.168.0.19:3030"
-      //"apiUrl": "http://192.168.206.171:3030"
+      "apiUrl": "http://192.168.0.19:3030",
+      "eas": {
+        "projectId": "88cae799-bf8f-4522-832b-c771a5846ded"
+      }
     },
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -20,6 +22,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.toughbox.fieldlog",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,6 +36,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "toughbox"
   }
 }
