@@ -70,7 +70,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   const [priority, setPriority] = useState<number>(1);
   const [dueDate, setDueDate] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState<{[key: string]: boolean}>({});
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -116,7 +116,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   // 날짜 변경 처리 함수
   const onDateChange = (event: any, date?: Date) => {
     if (Platform.OS === 'android') {
-      setShowDatePicker(false);
+      setShowDatePicker({});
     }
     
     if (date) {
@@ -175,8 +175,8 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   };
 
   const updateCustomField = (key: string, value: any) => {
-    setCustomData(prev => ({
-      ...prev,
+    setCustomData(prevData => ({
+      ...prevData,
       [key]: value
     }));
   };
@@ -337,6 +337,42 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                 onChangeText={(text) => updateCustomField(key, text)}
               />
             </Textarea>
+          </VStack>
+        );
+
+      case 'date':
+        return (
+          <VStack key={key} space="xs">
+            <Text size="sm" color="$gray600">
+              {label} {required && <Text color="$red500">*</Text>}
+            </Text>
+            <Pressable onPress={() => {
+              const newShowDatePicker = { ...showDatePicker };
+              newShowDatePicker[key] = true;
+              setShowDatePicker(newShowDatePicker);
+            }}>
+              <Input>
+                <InputField
+                  placeholder={placeholder || `${label}을(를) 선택하세요`}
+                  value={value ? new Date(value).toLocaleDateString() : ''}
+                  editable={false}
+                />
+              </Input>
+            </Pressable>
+            {showDatePicker && showDatePicker[key] && (
+              <DateTimePicker
+                mode="date"
+                display="default"
+                value={value ? new Date(value) : new Date()}
+                onChange={(event, selectedDate) => {
+                  const currentDate = selectedDate || new Date();
+                  const newShowDatePicker = { ...showDatePicker };
+                  newShowDatePicker[key] = false;
+                  setShowDatePicker(newShowDatePicker);
+                  updateCustomField(key, currentDate.toISOString());
+                }}
+              />
+            )}
           </VStack>
         );
 
@@ -529,7 +565,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
 
               <VStack space="xs">
                 <Text size="sm" color="$gray600">마감일</Text>
-                <Pressable onPress={() => setShowDatePicker(true)}>
+                <Pressable onPress={() => setShowDatePicker({ dueDatePicker: true })}>
                   <Input isReadOnly={true}>
                     <InputField
                       placeholder="날짜 선택"
@@ -538,7 +574,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                     />
                   </Input>
                 </Pressable>
-                {showDatePicker && (
+                {showDatePicker.dueDatePicker && (
                   <DateTimePicker
                     value={selectedDate}
                     mode="date"

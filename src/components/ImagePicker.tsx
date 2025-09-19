@@ -178,9 +178,9 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
       {images.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <HStack space="sm" p="$2">
-            {images.map((image) => (
-              <Box key={image.id}>
-                {renderImageItem(image, images.indexOf(image))}
+            {images.map((image, index) => (
+              <Box key={image.fileName || `image-${index}`}>
+                {renderImageItem(image, index)}
               </Box>
             ))}
             {!isUploading && images.length < maxImages && (
