@@ -72,6 +72,8 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  // 완료 확인 모달 상태
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   // 화면 포커스시 데이터 새로고침
   useFocusEffect(
@@ -109,6 +111,11 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   const handleComplete = async () => {
     if (!record || record.status === 'completed') return;
 
+    // 완료 확인 모달 열기
+    setShowCompleteModal(true);
+  };
+
+  const confirmComplete = async () => {
     try {
       setIsCompleting(true);
       const accessToken = await TokenService.getAccessToken();
@@ -133,6 +140,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
       Alert.alert('오류', '완료 처리 중 오류가 발생했습니다.');
     } finally {
       setIsCompleting(false);
+      setShowCompleteModal(false);
     }
   };
 
@@ -325,25 +333,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                   )}
                 </HStack>
 
-                {/* 완료 버튼 */}
-                {record.status !== 'completed' && record.status !== 'cancelled' && (
-                  <Button
-                    size="sm"
-                    action="primary"
-                    bg="$red500"
-                    onPress={handleComplete}
-                    isDisabled={isCompleting}
-                    ml="$2"
-                  >
-                    {isCompleting ? (
-                      <Spinner color="white" size="small" />
-                    ) : (
-                      <>
-                        <ButtonText size="sm">완료 처리</ButtonText>
-                      </>
-                    )}
-                  </Button>
-                )}
+                {/* 완료 버튼 제거 */}
               </HStack>
 
               {/* 설명 */}
@@ -426,6 +416,26 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                     </Box>
                   ))}
                 </VStack>
+              </VStack>
+            </Card>
+          )}
+
+          {/* 완료 처리 버튼 */}
+          {record.status !== 'completed' && record.status !== 'cancelled' && (
+            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+              <VStack space="md">
+                <Button
+                  action="primary"
+                  bg="$red500"
+                  onPress={handleComplete}
+                  isDisabled={isCompleting}
+                >
+                  {isCompleting ? (
+                    <Spinner color="white" size="small" />
+                  ) : (
+                    <ButtonText size="sm">완료 처리</ButtonText>
+                  )}
+                </Button>
               </VStack>
             </Card>
           )}
@@ -528,6 +538,49 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                   <Spinner color="white" size="small" />
                 ) : (
                   <ButtonText>삭제</ButtonText>
+                )}
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      
+      {/* 완료 확인 모달 */}
+      <Modal isOpen={showCompleteModal} onClose={() => setShowCompleteModal(false)}>
+        <ModalBackdrop />
+        <ModalContent>
+          <ModalHeader>
+            <Heading size="md">기록 완료</Heading>
+            <ModalCloseButton>
+              <ButtonIcon as={X} />
+            </ModalCloseButton>
+          </ModalHeader>
+          <ModalBody>
+            <Text>이 기록을 완료 처리하시겠습니까?</Text>
+            <Text color="$gray600" size="sm" mt="$2">
+              완료 처리된 기록은 상태를 변경할 수 없습니다.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <HStack space="sm">
+              <Button
+                variant="outline"
+                action="secondary"
+                onPress={() => setShowCompleteModal(false)}
+                flex={1}
+              >
+                <ButtonText>취소</ButtonText>
+              </Button>
+              <Button
+                action="positive"
+                onPress={confirmComplete}
+                isDisabled={isCompleting}
+                flex={1}
+              >
+                {isCompleting ? (
+                  <Spinner color="white" size="small" />
+                ) : (
+                  <ButtonText>완료</ButtonText>
                 )}
               </Button>
             </HStack>
