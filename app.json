@@ -8,7 +8,8 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "extra": {
-      "apiUrl": "http://192.168.0.19:3030",
+      //"apiUrl": "http://192.168.0.19:3030",
+      "apiUrl": "http://toughdev.cafe24.com:3030",
       "eas": {
         "projectId": "88cae799-bf8f-4522-832b-c771a5846ded"
       }
