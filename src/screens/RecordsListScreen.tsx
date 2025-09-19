@@ -445,13 +445,6 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
               <ButtonIcon as={Filter} />
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
-              onPress={() => setViewMode(viewMode === 'card' ? 'list' : 'card')}
-            >
-              <ButtonIcon as={viewMode === 'card' ? List : Grid} />
-            </Button>
-            <Button 
               action="primary" 
               size="sm" 
               onPress={() => navigation.navigate('CreateRecord')}
@@ -584,9 +577,18 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
 
       {/* 통계 정보 */}
       <Box px="$4" py="$2">
-        <Text size="sm" color="$gray600">
-          총 {pagination.total_records}개의 기록
-        </Text>
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text size="sm" color="$gray600">
+            총 {pagination.total_records}개의 기록
+          </Text>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onPress={() => setViewMode(viewMode === 'card' ? 'list' : 'card')}
+          >
+            <ButtonIcon as={viewMode === 'card' ? List : Grid} />
+          </Button>
+        </HStack>
       </Box>
 
       {/* 기록 목록 */}
