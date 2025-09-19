@@ -27,28 +27,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 인증 상태 확인
   const checkAuthStatus = async () => {
     try {
-      console.log('🔍 인증 상태 확인 중...');
+      console.log('🔍 인증 상태 확인 시작 - 타임스탬프:', new Date().toISOString());
       setIsLoading(true);
 
+      // 각 단계별 로깅 추가
       const isLoggedIn = await TokenService.isLoggedIn();
+      console.log('1. isLoggedIn:', isLoggedIn);
+
       const isTokenValid = await TokenService.isAccessTokenValid();
-      
-      if (isLoggedIn && isTokenValid) {
-        const userData = await TokenService.getUserData();
-        if (userData) {
-          setUser(userData);
-          setIsAuthenticated(true);
-          console.log('✅ 자동 로그인 성공:', userData.name);
-        } else {
-          await handleInvalidAuth();
-        }
+      console.log('2. isTokenValid:', isTokenValid);
+
+      const userData = await TokenService.getUserData();
+      console.log('3. userData:', userData);
+
+      if (isLoggedIn && isTokenValid && userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log('✅ 자동 로그인 성공:', userData);
       } else {
         await handleInvalidAuth();
+        console.log('❌ 인증 실패');
       }
     } catch (error) {
-      console.error('❌ 인증 상태 확인 오류:', error);
+      console.error('❌ 인증 상태 확인 중 치명적 오류:', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack
+      });
       await handleInvalidAuth();
     } finally {
+      console.log('인증 상태 확인 완료 - 로딩 상태 해제');
       setIsLoading(false);
     }
   };
@@ -75,7 +83,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log('✅ 로그인 완료:', userData.name);
     } catch (error) {
-      console.error('❌ 로그인 처리 오류:', error);
+      console.error('❌ 로그인 처리 오류:', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack
+      });
       throw error;
     }
   };
@@ -94,13 +106,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log('✅ 로그아웃 완료');
     } catch (error) {
-      console.error('❌ 로그아웃 처리 오류:', error);
+      console.error('❌ 로그아웃 처리 오류:', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack
+      });
       throw error;
     }
   };
 
   // 앱 시작 시 인증 상태 확인
   useEffect(() => {
+    console.log('🌟 AuthProvider 마운트 - 인증 상태 확인 시작');
     checkAuthStatus();
   }, []);
 

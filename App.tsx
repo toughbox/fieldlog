@@ -53,8 +53,8 @@ const customConfig = {
   },
 };
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, View, Text, Platform } from 'react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
@@ -122,7 +122,7 @@ const AppNavigator = () => {
 };
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_600SemiBold,
     Inter_700Bold,
@@ -131,14 +131,56 @@ export default function App() {
     NotoSansKR_700Bold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
-  if (!fontsLoaded) {
-    return null;
+  const logDebug = (message: string) => {
+    console.log(`🔍 디버그: ${message}`);
+    setDebugInfo(prev => [...prev, message]);
+  };
+
+  useEffect(() => {
+    logDebug(`폰트 로딩 상태: 로드됨=${fontsLoaded}, 에러=${!!fontError}`);
+    
+    if (fontsLoaded || fontError) {
+      try {
+        SplashScreen.hideAsync();
+        logDebug('SplashScreen 숨기기 성공');
+      } catch (error) {
+        logDebug(`SplashScreen 숨기기 실패: ${error}`);
+      }
+    }
+  }, [fontsLoaded, fontError]);
+
+  // 디버그 정보 표시 컴포넌트
+  const DebugOverlay = () => (
+    <View style={{ 
+      position: 'absolute', 
+      bottom: 0, 
+      left: 0, 
+      right: 0, 
+      backgroundColor: 'rgba(0,0,0,0.7)', 
+      padding: 10,
+      maxHeight: 200
+    }}>
+      <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>
+        디버그 정보:
+      </Text>
+      {debugInfo.slice(-5).map((msg, index) => (
+        <Text key={index} style={{ color: 'white', fontSize: 10 }}>
+          {msg}
+        </Text>
+      ))}
+    </View>
+  );
+
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+        <Text>폰트 로딩 중...</Text>
+        <DebugOverlay />
+      </View>
+    );
   }
 
   return (
@@ -146,6 +188,7 @@ export default function App() {
       <AuthProvider>
         <AppNavigator />
         <StatusBar style="dark" backgroundColor="transparent" />
+        {Platform.OS === 'android' && <DebugOverlay />}
       </AuthProvider>
     </GluestackUIProvider>
   );
