@@ -70,7 +70,7 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
         // recordId가 없으면 임시로 로컬 이미지로 저장 (나중에 업로드)
         const tempImages: UploadedImage[] = imagesToUpload.map((img, index) => ({
           fileName: `temp_${Date.now()}_${index}`,
-          url: img.uri,
+          url: img.uri.startsWith('file://') ? img.uri : `file://${img.uri}`,
           size: img.size,
           tempFile: img // 임시 파일 정보 저장
         }));

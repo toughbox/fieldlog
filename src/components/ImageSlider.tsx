@@ -23,12 +23,21 @@ import { X, Camera } from 'lucide-react-native';
 
 // 이미지 URL 생성 함수
 const getFullImageUrl = (url: string): string => {
-  if (url.startsWith('http')) {
-    return url; // 이미 전체 URL인 경우
+  if (url.startsWith('http') || url.startsWith('file://')) {
+    return url; // 이미 전체 URL이거나 로컬 파일인 경우
   }
+  
   // 상대 경로인 경우 백엔드 API를 통해 서빙
   const baseUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3030';
-  return `${baseUrl}${url}`;
+  const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  
+  console.log('🖼️ 이미지 URL 변환:', { 
+    originalUrl: url, 
+    baseUrl, 
+    fullUrl 
+  });
+  
+  return fullUrl;
 };
 
 interface ImageSliderProps {
