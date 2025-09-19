@@ -29,7 +29,7 @@ import {
   Spinner,
   Center,
 } from '@gluestack-ui/themed';
-import { Plus, Search, Filter, MoreVertical, Calendar, AlertCircle, CheckCircle2, Clock, X } from 'lucide-react-native';
+import { Plus, Search, Filter, MoreVertical, Calendar, AlertCircle, CheckCircle2, Clock, X, Grid, List } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, FieldRecord, Field, RecordsListResponse } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
@@ -94,6 +94,9 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedPriority, setSelectedPriority] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // 보기 모드 상태
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   // 화면 포커스시 데이터 새로고침
   useFocusEffect(
@@ -241,7 +244,8 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
     const StatusIcon = statusConfig.icon;
     const overdue = isOverdue(item);
 
-    return (
+    // 카드형 렌더링
+    const renderCardView = () => (
       <Pressable
         onPress={() => navigation.navigate('RecordDetail', { recordId: item.id })}
         mb="$2"
@@ -303,7 +307,6 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                   </HStack>
                 )}
               </HStack>
-              
             </HStack>
 
             {/* 사용자 정의 필드 */}
@@ -312,7 +315,6 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                 {Object.entries(item.custom_data).map(([key, value]) => {
                   if (!value || !value.toString().trim()) return null;
                   
-                  // field_schema에서 해당 key의 label 찾기
                   const fieldDef = item.field_schema?.fields.find(f => f.key === key);
                   const label = fieldDef?.label || key;
                   
@@ -349,6 +351,53 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
         </Card>
       </Pressable>
     );
+
+    // 목록형 렌더링
+    const renderListView = () => (
+      <Pressable
+        onPress={() => navigation.navigate('RecordDetail', { recordId: item.id })}
+        mb="$2"
+      >
+        <HStack 
+          bg="white" 
+          p="$3" 
+          borderRadius="$lg" 
+          alignItems="center" 
+          space="sm"
+        >
+          <Box 
+            w="$3" 
+            h="$3" 
+            bg={getFieldColor(item.field_id)} 
+            borderRadius="$sm" 
+          />
+          <VStack flex={1} space="xs">
+            <Text fontWeight="bold" color="$gray900" size="sm" numberOfLines={1}>
+              {item.title}
+            </Text>
+            <HStack alignItems="center" space="sm">
+              <Text size="xs" color="$gray600">
+                {item.field_name || getFieldName(item.field_id)}
+              </Text>
+              <Text size="xs" color="$gray500">
+                {formatDate(item.created_at)}
+              </Text>
+            </HStack>
+          </VStack>
+          <VStack alignItems="flex-end" space="xs">
+            <Badge variant="solid" bg={priorityConfig.color} size="sm">
+              <Text color="white" size="xs">{priorityConfig.label}</Text>
+            </Badge>
+            <HStack alignItems="center" space="xs">
+              <StatusIcon size={12} color={statusConfig.color} />
+              <Text size="xs" color="$gray700">{statusConfig.label}</Text>
+            </HStack>
+          </VStack>
+        </HStack>
+      </Pressable>
+    );
+
+    return viewMode === 'card' ? renderCardView() : renderListView();
   };
 
   const renderEmptyState = () => (
@@ -394,6 +443,13 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
               onPress={() => setShowFilters(!showFilters)}
             >
               <ButtonIcon as={Filter} />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onPress={() => setViewMode(viewMode === 'card' ? 'list' : 'card')}
+            >
+              <ButtonIcon as={viewMode === 'card' ? List : Grid} />
             </Button>
             <Button 
               action="primary" 
@@ -547,7 +603,8 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ 
             padding: 16,
-            paddingBottom: 100 
+            paddingBottom: 100,
+            gap: viewMode === 'list' ? 8 : 16
           }}
           refreshControl={
             <RefreshControl
