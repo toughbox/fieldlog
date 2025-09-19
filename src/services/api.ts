@@ -1,8 +1,18 @@
-// API 기본 설정
+// API 기본 URL 설정
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
 const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
 
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}/api`;
+
+console.log('🌐 API 설정:', {
+  host: API_HOST,
+  port: API_PORT,
+  baseUrl: API_BASE_URL,
+  env: {
+    EXPO_PUBLIC_API_HOST: process.env.EXPO_PUBLIC_API_HOST,
+    EXPO_PUBLIC_API_PORT: process.env.EXPO_PUBLIC_API_PORT
+  }
+});
 
 // API 응답 타입 정의
 export interface ApiResponse<T = any> {
@@ -199,6 +209,13 @@ async function apiRequest<T>(
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     
+    console.log('🚀 API 요청 상세 정보:', {
+      url,
+      method: options.method || 'GET',
+      headers: options.headers,
+      body: options.body ? JSON.parse(options.body as string) : null
+    });
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -212,27 +229,39 @@ async function apiRequest<T>(
       },
     };
 
-    console.log(`🚀 API 요청: ${config.method || 'GET'} ${url}`);
-    
     const response = await fetch(url, config);
+    
+    console.log('📡 API 응답 상세:', {
+      status: response.status,
+      headers: Object.fromEntries(response.headers.entries()),
+      ok: response.ok
+    });
+
     const result = await response.json();
 
     if (!response.ok) {
-      console.error(`❌ API 오류 (${response.status}):`, result);
+      console.error(`❌ API 오류 (${response.status}):`, {
+        result,
+        url,
+        method: config.method || 'GET'
+      });
       return {
         success: false,
         error: result.message || result.error || `HTTP ${response.status}`,
       };
     }
 
-    console.log('✅ API 성공:', result);
     return {
       success: true,
       data: result.data || result,
       message: result.message,
     };
   } catch (error) {
-    console.error('❌ 네트워크 오류:', error);
+    console.error('🌐 네트워크 오류 상세:', {
+      errorName: error.name,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.',

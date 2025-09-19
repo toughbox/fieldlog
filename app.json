@@ -1,43 +1,38 @@
 {
   "expo": {
-    "name": "fieldlog-mobile",
-    "slug": "fieldlog-mobile",
+    "name": "FieldLog",
+    "slug": "fieldlog",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "extra": {
-      //"apiUrl": "http://192.168.0.19:3030",
-      "apiUrl": "http://toughdev.cafe24.com:3030",
-      "eas": {
-        "projectId": "88cae799-bf8f-4522-832b-c771a5846ded"
-      }
-    },
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.toughbox.fieldlog",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "permissions": [
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.CAMERA"
-      ]
+      "package": "com.toughbox.fieldlog",
+      "versionCode": 1,
+      "buildType": "apk"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "toughbox"
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
   }
 }
