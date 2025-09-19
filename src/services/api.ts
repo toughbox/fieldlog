@@ -1,11 +1,8 @@
 // API 기본 설정
-//const API_HOST = process.env.EXPO_PUBLIC_API_HOST || '192.168.0.19';
-const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
+const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
 const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
 
-const API_BASE_URL = __DEV__ 
-  ? `http://${API_HOST}:${API_PORT}/api`  // 개발 환경 (환경변수 사용)
-  : 'https://your-production-api.com/api';  // 프로덕션 환경
+const API_BASE_URL = `http://${API_HOST}:${API_PORT}/api`;
 
 // API 응답 타입 정의
 export interface ApiResponse<T = any> {

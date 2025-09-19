@@ -1,6 +1,10 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "types": [
+      "react-native",
+      "@react-native-async-storage/async-storage"
+    ],
     "strict": true
-  }
+  },
+  "extends": "expo/tsconfig.base"
 }
