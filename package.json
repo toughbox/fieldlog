@@ -12,6 +12,7 @@
     "@expo-google-fonts/inter": "^0.4.1",
     "@expo-google-fonts/noto-sans-kr": "^0.4.2",
     "@expo/metro-config": "^54.0.4",
+    "@expo/metro-runtime": "~6.1.2",
     "@gluestack-style/react": "^1.0.57",
     "@gluestack-ui/config": "^1.1.20",
     "@gluestack-ui/themed": "^1.1.73",
@@ -43,13 +44,9 @@
     "react-native-screens": "^4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-svg-transformer": "^1.5.1",
-    "react-native-url-polyfill": "^2.0.0",
     "react-native-vector-icons": "^10.3.0",
     "react-native-worklets": "^0.5.0",
-    "react-native-worklets-core": "^1.6.2",
-    "text-decoder": "^1.2.3",
-    "text-encoding": "^0.7.0",
-    "whatwg-url": "^15.1.0"
+    "react-native-worklets-core": "^1.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

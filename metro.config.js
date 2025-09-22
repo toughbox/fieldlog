@@ -1,26 +1,17 @@
-const { getDefaultConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require('@expo/metro-config');
 
 module.exports = (() => {
   const config = getDefaultConfig(__dirname);
 
-  config.resolver.resolverMainFields = [
-    'react-native',
-    'browser',
-    'module',
-    'main'
-  ];
-
+  // 기본 설정 유지
   config.resolver.sourceExts = [
     ...config.resolver.sourceExts,
     'cjs',
     'mjs',
-    'tsx',
-    'ts',
-    'jsx',
-    'js',
     'json'
   ];
 
+  // SVG 지원
   config.transformer = {
     ...config.transformer,
     babelTransformerPath: require.resolve('react-native-svg-transformer')

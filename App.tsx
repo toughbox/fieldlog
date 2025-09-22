@@ -1,5 +1,3 @@
-import 'react-native-url-polyfill/auto';
-import './polyfills';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -11,6 +9,26 @@ import {
   NotoSansKR_500Medium, 
   NotoSansKR_700Bold 
 } from '@expo-google-fonts/noto-sans-kr';
+import { Platform, View, Text, ActivityIndicator, SafeAreaView } from 'react-native';
+import { useEffect, useState } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import LoginScreen from './src/screens/LoginScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
+import CreateFieldScreen from './src/screens/CreateFieldScreen';
+import FieldListScreen from './src/screens/FieldListScreen';
+import FieldDetailScreen from './src/screens/FieldDetailScreen';
+import EditFieldScreen from './src/screens/EditFieldScreen';
+import CreateRecordScreen from './src/screens/CreateRecordScreen';
+import RecordsListScreen from './src/screens/RecordsListScreen';
+import RecordDetailScreen from './src/screens/RecordDetailScreen';
+import EditRecordScreen from './src/screens/EditRecordScreen';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+
+const Stack = createStackNavigator();
+
+// SplashScreen 유지
+SplashScreen.preventAutoHideAsync();
 
 // 한글 폰트를 포함한 커스텀 설정
 const customConfig = {
@@ -54,26 +72,6 @@ const customConfig = {
     },
   },
 };
-import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, Platform } from 'react-native';
-import LoginScreen from './src/screens/LoginScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import SignUpScreen from './src/screens/SignUpScreen';
-import CreateFieldScreen from './src/screens/CreateFieldScreen';
-import FieldListScreen from './src/screens/FieldListScreen';
-import FieldDetailScreen from './src/screens/FieldDetailScreen';
-import EditFieldScreen from './src/screens/EditFieldScreen';
-import CreateRecordScreen from './src/screens/CreateRecordScreen';
-import RecordsListScreen from './src/screens/RecordsListScreen';
-import RecordDetailScreen from './src/screens/RecordDetailScreen';
-import EditRecordScreen from './src/screens/EditRecordScreen';
-import { AuthProvider, useAuth } from './src/context/AuthContext';
-
-const Stack = createStackNavigator();
-
-// SplashScreen 유지
-SplashScreen.preventAutoHideAsync();
 
 // 로딩 컴포넌트
 const LoadingScreen = () => (
