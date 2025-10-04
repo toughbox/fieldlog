@@ -263,11 +263,11 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                 <Badge
                   size="sm"
                   variant="solid"
-                  bg="$blue100"
+                  bg="$blue600"
                   borderRadius="$md"
                   alignSelf="flex-start"
                 >
-                  <Text size="xs" color="$blue700" fontWeight="$medium">
+                  <Text size="xs" color="$white" fontWeight="$bold">
                     {item.field_name || getFieldName(item.field_id)}
                   </Text>
                 </Badge>
@@ -280,7 +280,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                 <Badge 
                   variant="solid" 
                   bg={priorityConfig.color}
-                  borderRadius="$full"
+                  borderRadius="$md"
                   px="$3"
                 >
                   <Text color="$white" size="xs" fontWeight="$bold">
@@ -288,7 +288,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
                   </Text>
                 </Badge>
                 {overdue && (
-                  <Badge variant="solid" bg="$red500" borderRadius="$full" px="$3">
+                  <Badge variant="solid" bg="$red600" borderRadius="$md" px="$3">
                     <Text color="$white" size="xs" fontWeight="$bold">지연</Text>
                   </Badge>
                 )}
@@ -307,19 +307,19 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             {/* 상태 및 정보 */}
             <HStack justifyContent="space-between" alignItems="center">
               <HStack alignItems="center" space="md">
-                <HStack 
-                  alignItems="center" 
-                  space="xs"
-                  bg={`${statusConfig.color}15`}
-                  px="$2"
-                  py="$1"
+                <Badge
+                  size="sm"
+                  variant="solid"
+                  bg={statusConfig.color}
                   borderRadius="$md"
                 >
-                  <StatusIcon size={14} color={statusConfig.color} strokeWidth={2.5} />
-                  <Text size="sm" color="$gray700" fontWeight="$medium">
-                    {statusConfig.label}
-                  </Text>
-                </HStack>
+                  <HStack alignItems="center" space="xs">
+                    <StatusIcon size={14} color="#ffffff" strokeWidth={2.5} />
+                    <Text size="xs" color="$white" fontWeight="$bold">
+                      {statusConfig.label}
+                    </Text>
+                  </HStack>
+                </Badge>
                 
                 {item.due_date && (
                   <HStack alignItems="center" space="xs">
@@ -359,13 +359,13 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             {item.tags && item.tags.length > 0 && (
               <HStack space="xs" flexWrap="wrap">
                 {item.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="outline" size="sm">
-                    <Text size="xs">#{tag}</Text>
+                  <Badge key={tag} variant="solid" size="sm" bg="$purple600" borderRadius="$md">
+                    <Text size="xs" color="$white" fontWeight="$bold">#{tag}</Text>
                   </Badge>
                 ))}
                 {item.tags.length > 3 && (
-                  <Badge variant="outline" size="sm">
-                    <Text size="xs">+{item.tags.length - 3}</Text>
+                  <Badge variant="solid" size="sm" bg="$purple600" borderRadius="$md">
+                    <Text size="xs" color="$white" fontWeight="$bold">+{item.tags.length - 3}</Text>
                   </Badge>
                 )}
               </HStack>
