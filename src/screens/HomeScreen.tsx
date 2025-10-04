@@ -190,209 +190,251 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
-        <HStack justifyContent="space-between" alignItems="center">
-          <VStack>
-            <Heading size="xl" color="$gray900" fontFamily="NotoSansKR_700Bold">현장기록</Heading>
-            <Text size="sm" color="$gray600" fontFamily="NotoSansKR_400Regular">안녕하세요, {user?.name || '사용자'}님! 👋</Text>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box 
+        bg="$blue600" 
+        px="$6" 
+        pt="$4"
+        pb="$8"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
+        <HStack justifyContent="space-between" alignItems="center" mb="$4">
+          <VStack flex={1}>
+            <Heading size="2xl" color="$white" fontWeight="$bold">
+              FieldLog
+            </Heading>
+            <Text size="md" color="$blue100" fontWeight="$medium" mt="$1">
+              안녕하세요, {user?.name || '사용자'}님! 👋
+            </Text>
           </VStack>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            action="secondary"
+          <Pressable 
             onPress={handleLogout}
+            p="$3"
+            borderRadius="$lg"
+            bg="rgba(255, 255, 255, 0.2)"
           >
-            <ButtonIcon as={LogOut} />
-            <ButtonText fontFamily="NotoSansKR_500Medium">로그아웃</ButtonText>
-          </Button>
+            <LogOut size={20} color="#ffffff" />
+          </Pressable>
+        </HStack>
+
+        {/* 오늘의 현황 - 헤더 안에 통합 */}
+        <HStack justifyContent="space-between" space="xs" mt="$2">
+          <VStack 
+            alignItems="center" 
+            flex={1}
+            bg="rgba(255, 255, 255, 0.15)"
+            p="$3"
+            borderRadius="$xl"
+          >
+            <Text size="2xl" fontWeight="$bold" color="$white">
+              {todayStats.pending}
+            </Text>
+            <Text size="xs" color="$blue100" mt="$1">대기중</Text>
+          </VStack>
+          
+          <VStack 
+            alignItems="center" 
+            flex={1}
+            bg="rgba(255, 255, 255, 0.15)"
+            p="$3"
+            borderRadius="$xl"
+          >
+            <Text size="2xl" fontWeight="$bold" color="$white">
+              {todayStats.in_progress}
+            </Text>
+            <Text size="xs" color="$blue100" mt="$1">진행중</Text>
+          </VStack>
+          
+          <VStack 
+            alignItems="center" 
+            flex={1}
+            bg="rgba(255, 255, 255, 0.15)"
+            p="$3"
+            borderRadius="$xl"
+          >
+            <Text size="2xl" fontWeight="$bold" color="$white">
+              {todayStats.completed}
+            </Text>
+            <Text size="xs" color="$blue100" mt="$1">완료</Text>
+          </VStack>
+          
+          <VStack 
+            alignItems="center" 
+            flex={1}
+            bg="rgba(255, 255, 255, 0.15)"
+            p="$3"
+            borderRadius="$xl"
+          >
+            <Text size="2xl" fontWeight="$bold" color="$white">
+              {todayStats.urgent}
+            </Text>
+            <Text size="xs" color="$blue100" mt="$1">긴급</Text>
+          </VStack>
         </HStack>
       </Box>
       
       <ScrollView
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: '#f9fafb' }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-
-        <VStack space="md" p="$4">
-          {/* 오늘의 현황 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <HStack alignItems="center" space="sm">
-                <BarChart3 size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900" fontFamily="NotoSansKR_700Bold">오늘의 현황</Heading>
-              </HStack>
-              
-              <HStack justifyContent="space-between" space="sm">
-                <VStack alignItems="center" flex={1}>
-                  <Center 
-                    w="$12" 
-                    h="$12" 
-                    bg="$orange100" 
-                    borderRadius="$full"
-                    mb="$2"
-                  >
-                    <Text size="lg" fontWeight="bold" color="$orange600">
-                      {todayStats.pending}
-                    </Text>
-                  </Center>
-                  <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">대기중</Text>
-                </VStack>
-                
-                <VStack alignItems="center" flex={1}>
-                  <Center 
-                    w="$12" 
-                    h="$12" 
-                    bg="$blue100" 
-                    borderRadius="$full"
-                    mb="$2"
-                  >
-                    <Text size="lg" fontWeight="bold" color="$blue600">
-                      {todayStats.in_progress}
-                    </Text>
-                  </Center>
-                  <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">진행중</Text>
-                </VStack>
-                
-                <VStack alignItems="center" flex={1}>
-                  <Center 
-                    w="$12" 
-                    h="$12" 
-                    bg="$green100" 
-                    borderRadius="$full"
-                    mb="$2"
-                  >
-                    <Text size="lg" fontWeight="bold" color="$green600">
-                      {todayStats.completed}
-                    </Text>
-                  </Center>
-                  <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">완료</Text>
-                </VStack>
-                
-                <VStack alignItems="center" flex={1}>
-                  <Center 
-                    w="$12" 
-                    h="$12" 
-                    bg="$red100" 
-                    borderRadius="$full"
-                    mb="$2"
-                  >
-                    <Text size="lg" fontWeight="bold" color="$red600">
-                      {todayStats.urgent}
-                    </Text>
-                  </Center>
-                  <Text size="xs" color="$gray600" fontFamily="NotoSansKR_400Regular">긴급</Text>
-                </VStack>
-              </HStack>
-            </VStack>
-          </Card>
+        <VStack space="lg" p="$6" mt="$4">
 
           {/* 마감 임박 작업 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="sm">
-              <HStack alignItems="center" space="sm">
-                <Calendar size={20} color="#f59e0b" />
-                <Heading size="lg" color="$gray900" fontFamily="NotoSansKR_700Bold">마감 임박</Heading>
-              </HStack>
-              
-              {upcomingTasks.length > 0 ? (
-                upcomingTasks.map((task) => (
+          <VStack space="md">
+            <HStack alignItems="center" space="sm" px="$1">
+              <Box bg="$orange100" p="$2" borderRadius="$lg">
+                <Calendar size={18} color="#f59e0b" strokeWidth={2.5} />
+              </Box>
+              <Heading size="lg" color="$gray900" fontWeight="$semibold">
+                마감 임박 작업
+              </Heading>
+            </HStack>
+            
+            {upcomingTasks.length > 0 ? (
+              <VStack space="sm">
+                {upcomingTasks.map((task) => (
                   <Pressable 
                     key={task.id} 
                     onPress={() => navigation.navigate('RecordDetail', { recordId: task.id })}
                   >
-                    <HStack 
-                      bg="$red100" 
-                      p="$2" 
-                      borderRadius="$sm" 
-                      justifyContent="space-between"
-                      alignItems="center"
+                    <Card
+                      bg="$white"
+                      p="$4"
+                      borderRadius="$xl"
+                      borderLeftWidth={4}
+                      borderLeftColor={
+                        task.priority === 'high' ? '$red500' : 
+                        task.priority === 'medium' ? '$orange500' : 
+                        '$green500'
+                      }
                     >
-                      <VStack flex={1} space="xs">
-                        <Text size="sm" fontWeight="medium" color="$gray900" fontFamily="NotoSansKR_500Medium" numberOfLines={1}>
-                          {task.title}
-                        </Text>
-                        <Text size="xs" color="$red600" fontFamily="NotoSansKR_400Regular">
-                          {task.field}
-                        </Text>
-                      </VStack>
-                      <Text size="xs" color="$red600" fontWeight="bold" fontFamily="NotoSansKR_500Medium">
-                        {task.dueDate}
-                      </Text>
-                    </HStack>
+                      <HStack justifyContent="space-between" alignItems="center">
+                        <VStack flex={1} space="xs" pr="$3">
+                          <Text size="md" fontWeight="$semibold" color="$gray900" numberOfLines={1}>
+                            {task.title}
+                          </Text>
+                          <HStack space="sm" alignItems="center">
+                            <Badge
+                              size="sm"
+                              variant="solid"
+                              bg="$blue100"
+                              borderRadius="$md"
+                            >
+                              <Text size="xs" color="$blue700" fontWeight="$medium">
+                                {task.field}
+                              </Text>
+                            </Badge>
+                          </HStack>
+                        </VStack>
+                        <VStack alignItems="flex-end" space="xs">
+                          <Badge
+                            size="sm"
+                            variant="solid"
+                            bg="$red100"
+                            borderRadius="$full"
+                            px="$3"
+                          >
+                            <Text size="xs" color="$red700" fontWeight="$bold">
+                              {task.dueDate}
+                            </Text>
+                          </Badge>
+                        </VStack>
+                      </HStack>
+                    </Card>
                   </Pressable>
-                ))
-              ) : (
-                <Text size="sm" color="$gray500" textAlign="center" fontFamily="NotoSansKR_400Regular" py="$3">
+                ))}
+              </VStack>
+            ) : (
+              <Card bg="$white" p="$8" borderRadius="$xl" alignItems="center">
+                <Calendar size={40} color="#d1d5db" strokeWidth={1.5} />
+                <Text size="sm" color="$gray500" textAlign="center" mt="$3">
                   마감 임박한 작업이 없습니다
                 </Text>
-              )}
-            </VStack>
-          </Card>
+              </Card>
+            )}
+          </VStack>
 
-          {/* 빠른 액션 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <HStack alignItems="center" space="sm">
-                <Plus size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900" fontFamily="NotoSansKR_700Bold">빠른 작업</Heading>
+          {/* 빠른 작업 */}
+          <VStack space="md">
+            <HStack alignItems="center" space="sm" px="$1">
+              <Box bg="$blue100" p="$2" borderRadius="$lg">
+                <Plus size={18} color="#2563eb" strokeWidth={2.5} />
+              </Box>
+              <Heading size="lg" color="$gray900" fontWeight="$semibold">
+                빠른 작업
+              </Heading>
+            </HStack>
+            
+            <VStack space="sm">
+              {/* 새 기록 작성 - 주요 액션 */}
+              <Pressable onPress={() => navigation.navigate('CreateRecord')}>
+                <Card
+                  bg="$blue600"
+                  p="$5"
+                  borderRadius="$xl"
+                >
+                  <HStack space="md" alignItems="center">
+                    <Box bg="rgba(255, 255, 255, 0.2)" p="$3" borderRadius="$lg">
+                      <Edit size={24} color="#ffffff" strokeWidth={2.5} />
+                    </Box>
+                    <VStack flex={1}>
+                      <Text size="lg" fontWeight="$bold" color="$white">
+                        새 기록 작성
+                      </Text>
+                      <Text size="sm" color="$blue100">
+                        현장 기록을 빠르게 등록하세요
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Card>
+              </Pressable>
+
+              {/* 기타 액션 */}
+              <HStack space="sm">
+                <Pressable flex={1} onPress={() => navigation.navigate('CreateField')}>
+                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
+                    <Box bg="$green100" p="$3" borderRadius="$lg" mb="$2">
+                      <Building size={24} color="#16a34a" strokeWidth={2} />
+                    </Box>
+                    <Text size="sm" fontWeight="$semibold" color="$gray900">
+                      새 현장
+                    </Text>
+                  </Card>
+                </Pressable>
+
+                <Pressable flex={1} onPress={() => navigation.navigate('FieldList')}>
+                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
+                    <Box bg="$purple100" p="$3" borderRadius="$lg" mb="$2">
+                      <List size={24} color="#9333ea" strokeWidth={2} />
+                    </Box>
+                    <Text size="sm" fontWeight="$semibold" color="$gray900">
+                      현장 관리
+                    </Text>
+                  </Card>
+                </Pressable>
+
+                <Pressable flex={1} onPress={() => navigation.navigate('RecordsList')}>
+                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
+                    <Box bg="$orange100" p="$3" borderRadius="$lg" mb="$2">
+                      <BarChart3 size={24} color="#ea580c" strokeWidth={2} />
+                    </Box>
+                    <Text size="sm" fontWeight="$semibold" color="$gray900">
+                      기록 목록
+                    </Text>
+                  </Card>
+                </Pressable>
               </HStack>
-              
-              <VStack space="sm">
-                <HStack space="sm">
-                  <Button 
-                    flex={1}
-                    size="lg" 
-                    variant="outline" 
-                    action="secondary"
-                    onPress={() => navigation.navigate('CreateField')}
-                  >
-                    <ButtonIcon as={Building} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">새 현장</ButtonText>
-                  </Button>
-
-                  <Button 
-                    flex={1}
-                    size="lg" 
-                    variant="outline" 
-                    action="secondary"
-                    onPress={() => navigation.navigate('FieldList')}
-                  >
-                    <ButtonIcon as={List} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">현장 관리</ButtonText>
-                  </Button>
-                </HStack>
-
-                <HStack space="sm">
-                  <Button 
-                    flex={1}
-                    size="lg" 
-                    action="primary" 
-                    onPress={() => navigation.navigate('CreateRecord')}
-                  >
-                    <ButtonIcon as={Edit} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">새 기록</ButtonText>
-                  </Button>
-
-                  <Button 
-                    flex={1}
-                    size="lg" 
-                    variant="outline" 
-                    action="secondary"
-                    onPress={() => navigation.navigate('RecordsList')}
-                  >
-                    <ButtonIcon as={List} />
-                    <ButtonText fontFamily="NotoSansKR_500Medium">기록 목록</ButtonText>
-                  </Button>
-                </HStack>
-              </VStack>
             </VStack>
-          </Card>
+          </VStack>
+
+          {/* 하단 여백 */}
+          <Box h="$16" />
         </VStack>
       </ScrollView>
 
