@@ -325,7 +325,7 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
           bg="rgba(255, 255, 255, 0.9)"
           borderWidth={0}
         >
-          <Box pl="$4">
+          <Box pl="$4" alignItems="center" justifyContent="center">
             <Search size={20} color="#6b7280" />
           </Box>
           <InputField
