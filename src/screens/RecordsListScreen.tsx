@@ -248,36 +248,48 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
     const renderCardView = () => (
       <Pressable
         onPress={() => navigation.navigate('RecordDetail', { recordId: item.id })}
-        mb="$2"
       >
-        <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={4}>
+        <Card 
+          bg="$white" 
+          p="$4" 
+          borderRadius="$xl"
+          borderLeftWidth={4}
+          borderLeftColor={getFieldColor(item.field_id)}
+        >
           <VStack space="sm">
             {/* 헤더 */}
             <HStack justifyContent="space-between" alignItems="flex-start">
               <VStack flex={1} space="xs">
-                <HStack alignItems="center" space="xs">
-                  <Box 
-                    w="$3" 
-                    h="$3" 
-                    bg={getFieldColor(item.field_id)} 
-                    borderRadius="$sm" 
-                  />
-                  <Text size="xs" color="$gray600">
+                <Badge
+                  size="sm"
+                  variant="solid"
+                  bg="$blue100"
+                  borderRadius="$md"
+                  alignSelf="flex-start"
+                >
+                  <Text size="xs" color="$blue700" fontWeight="$medium">
                     {item.field_name || getFieldName(item.field_id)}
                   </Text>
-                </HStack>
-                <Text fontWeight="bold" color="$gray900" size="md">
+                </Badge>
+                <Text fontWeight="$bold" color="$gray900" size="lg">
                   {item.title}
                 </Text>
               </VStack>
               
               <VStack alignItems="flex-end" space="xs">
-                <Badge variant="solid" bg={priorityConfig.color}>
-                  <Text color="white" size="xs">{priorityConfig.label}</Text>
+                <Badge 
+                  variant="solid" 
+                  bg={priorityConfig.color}
+                  borderRadius="$full"
+                  px="$3"
+                >
+                  <Text color="$white" size="xs" fontWeight="$bold">
+                    {priorityConfig.label}
+                  </Text>
                 </Badge>
                 {overdue && (
-                  <Badge variant="solid" bg="$red500">
-                    <Text color="white" size="xs">지연</Text>
+                  <Badge variant="solid" bg="$red500" borderRadius="$full" px="$3">
+                    <Text color="$white" size="xs" fontWeight="$bold">지연</Text>
                   </Badge>
                 )}
               </VStack>
@@ -285,23 +297,34 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
 
             {/* 설명 */}
             {item.description && (
-              <Text color="$gray600" size="sm" numberOfLines={2}>
+              <Text color="$gray600" size="md" numberOfLines={2} lineHeight="$lg">
                 {item.description}
               </Text>
             )}
 
+            <Divider bg="$gray200" />
+
             {/* 상태 및 정보 */}
             <HStack justifyContent="space-between" alignItems="center">
-              <HStack alignItems="center" space="sm">
-                <HStack alignItems="center" space="xs">
-                  <StatusIcon size={16} color={statusConfig.color} />
-                  <Text size="sm" color="$gray700">{statusConfig.label}</Text>
+              <HStack alignItems="center" space="md">
+                <HStack 
+                  alignItems="center" 
+                  space="xs"
+                  bg={`${statusConfig.color}15`}
+                  px="$2"
+                  py="$1"
+                  borderRadius="$md"
+                >
+                  <StatusIcon size={14} color={statusConfig.color} strokeWidth={2.5} />
+                  <Text size="sm" color="$gray700" fontWeight="$medium">
+                    {statusConfig.label}
+                  </Text>
                 </HStack>
                 
                 {item.due_date && (
                   <HStack alignItems="center" space="xs">
-                    <Calendar size={14} color="#6366f1" />
-                    <Text size="xs" color={overdue ? "$red600" : "$gray600"}>
+                    <Calendar size={14} color={overdue ? "#ef4444" : "#6b7280"} />
+                    <Text size="xs" color={overdue ? "$red600" : "$gray600"} fontWeight="$medium">
                       {formatDate(item.due_date)}
                     </Text>
                   </HStack>
@@ -401,19 +424,29 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
   };
 
   const renderEmptyState = () => (
-    <Center flex={1} py="$10">
-      <VStack alignItems="center" space="md">
-        <Text color="$gray500" size="lg">기록이 없습니다</Text>
-        <Text color="$gray400" size="sm" textAlign="center">
-          새로운 현장 기록을 작성해보세요
-        </Text>
+    <Center flex={1} py="$20">
+      <VStack alignItems="center" space="lg">
+        <Box bg="$gray100" p="$6" borderRadius="$full">
+          <Search size={48} color="#9ca3af" strokeWidth={1.5} />
+        </Box>
+        <VStack alignItems="center" space="sm">
+          <Text color="$gray900" size="xl" fontWeight="$bold">
+            기록이 없습니다
+          </Text>
+          <Text color="$gray500" size="md" textAlign="center" maxWidth="$64">
+            새로운 현장 기록을 작성해보세요
+          </Text>
+        </VStack>
         <Button 
-          action="primary" 
+          size="lg"
+          bg="$blue600"
+          borderRadius="$xl"
           onPress={() => navigation.navigate('CreateRecord')}
           mt="$4"
+          px="$6"
         >
-          <ButtonIcon as={Plus} mr="$1" />
-          <ButtonText>첫 번째 기록 작성</ButtonText>
+          <ButtonIcon as={Plus} size="xl" mr="$2" />
+          <ButtonText fontWeight="$semibold">첫 번째 기록 작성</ButtonText>
         </Button>
       </VStack>
     </Center>
@@ -429,197 +462,229 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
-        <HStack justifyContent="space-between" alignItems="center">
-          <Heading size="xl" color="$gray900">현장 기록</Heading>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box 
+        bg="$blue600" 
+        px="$6" 
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
+        <HStack justifyContent="space-between" alignItems="center" mb="$4">
+          <Heading size="2xl" color="$white" fontWeight="$bold">
+            현장 기록
+          </Heading>
+          <Pressable 
+            onPress={() => navigation.navigate('CreateRecord')}
+            p="$3"
+            borderRadius="$full"
+            bg="rgba(255, 255, 255, 0.2)"
+          >
+            <Plus size={24} color="#ffffff" strokeWidth={2.5} />
+          </Pressable>
+        </HStack>
+
+        {/* 검색창 */}
+        <Input
+          variant="rounded"
+          size="xl"
+          bg="rgba(255, 255, 255, 0.9)"
+          borderWidth={0}
+        >
+          <Box pl="$4">
+            <Search size={20} color="#6b7280" />
+          </Box>
+          <InputField
+            placeholder="기록 검색..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            fontSize="$md"
+            pl="$2"
+          />
+        </Input>
+
+        {/* 필터 및 통계 */}
+        <HStack justifyContent="space-between" alignItems="center" mt="$4">
+          <Text size="sm" color="$blue100">
+            총 {pagination.total_records}개의 기록
+          </Text>
           <HStack space="sm">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Pressable 
               onPress={() => setShowFilters(!showFilters)}
+              p="$2"
+              borderRadius="$lg"
+              bg={showFilters ? "rgba(255, 255, 255, 0.25)" : "rgba(255, 255, 255, 0.15)"}
             >
-              <ButtonIcon as={Filter} />
-            </Button>
-            <Button 
-              action="primary" 
-              size="sm" 
-              onPress={() => navigation.navigate('CreateRecord')}
+              <Filter size={18} color="#ffffff" />
+            </Pressable>
+            <Pressable 
+              onPress={() => setViewMode(viewMode === 'card' ? 'list' : 'card')}
+              p="$2"
+              borderRadius="$lg"
+              bg="rgba(255, 255, 255, 0.15)"
             >
-              <ButtonIcon as={Plus} />
-            </Button>
+              {viewMode === 'card' ? 
+                <List size={18} color="#ffffff" /> : 
+                <Grid size={18} color="#ffffff" />
+              }
+            </Pressable>
           </HStack>
         </HStack>
       </Box>
 
-      {/* 검색 및 필터 */}
-      <Box bg="white" px="$4" pb="$3">
-        <VStack space="sm">
-          {/* 검색창 */}
-          <Input>
-            <ButtonIcon as={Search} ml="$3" color="$gray500" />
-            <InputField
-              placeholder="기록 검색..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </Input>
-
-          {/* 필터 옵션 */}
-          {showFilters && (
-            <VStack space="sm">
-              <HStack space="sm">
-                <VStack flex={1} space="xs">
-                  <Text size="sm" color="$gray600">현장</Text>
-                  <Select
-                    selectedValue={selectedFieldId?.toString() || ''}
-                    onValueChange={(value) => setSelectedFieldId(value ? parseInt(value) : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectInput placeholder="전체" />
-                      <SelectIcon />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        <SelectItem label="전체" value="" />
-                        {fields.map((field) => (
-                          <SelectItem 
-                            key={field.id} 
-                            label={field.name} 
-                            value={field.id.toString()} 
-                          />
-                        ))}
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
-                </VStack>
-
-                <VStack flex={1} space="xs">
-                  <Text size="sm" color="$gray600">상태</Text>
-                  <Select
-                    selectedValue={selectedStatus}
-                    onValueChange={setSelectedStatus}
-                  >
-                    <SelectTrigger>
-                      <SelectInput placeholder="전체" />
-                      <SelectIcon />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        <SelectItem label="전체" value="" />
-                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                          <SelectItem 
-                            key={key} 
-                            label={config.label} 
-                            value={key} 
-                          />
-                        ))}
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
-                </VStack>
-              </HStack>
-
-              <HStack justifyContent="space-between" alignItems="center">
-                <VStack flex={1} space="xs" mr="$2">
-                  <Text size="sm" color="$gray600">우선순위</Text>
-                  <Select
-                    selectedValue={selectedPriority}
-                    onValueChange={setSelectedPriority}
-                  >
-                    <SelectTrigger>
-                      <SelectInput placeholder="전체" />
-                      <SelectIcon />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        <SelectItem label="전체" value="" />
-                        {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                          <SelectItem 
-                            key={key} 
-                            label={`${key} (${config.label})`} 
-                            value={key} 
-                          />
-                        ))}
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
-                </VStack>
-
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onPress={clearFilters}
-                  mt="$5"
+      {/* 필터 옵션 */}
+      {showFilters && (
+        <Box bg="$gray50" px="$4" py="$4" borderBottomWidth={1} borderBottomColor="$gray200">
+          <VStack space="md">
+            <HStack space="sm">
+              <VStack flex={1} space="xs">
+                <Text size="sm" color="$gray700" fontWeight="$medium">현장</Text>
+                <Select
+                  selectedValue={selectedFieldId?.toString() || ''}
+                  onValueChange={(value) => setSelectedFieldId(value ? parseInt(value) : null)}
                 >
-                  <ButtonText>초기화</ButtonText>
-                </Button>
-              </HStack>
-            </VStack>
-          )}
-        </VStack>
-      </Box>
+                  <SelectTrigger
+                    size="md"
+                    borderRadius="$lg"
+                  >
+                    <SelectInput placeholder="전체" />
+                    <SelectIcon />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      <SelectItem label="전체" value="" />
+                      {fields.map((field) => (
+                        <SelectItem 
+                          key={field.id} 
+                          label={field.name} 
+                          value={field.id.toString()} 
+                        />
+                      ))}
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
+              </VStack>
 
-      {/* 통계 정보 */}
-      <Box px="$4" py="$2">
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text size="sm" color="$gray600">
-            총 {pagination.total_records}개의 기록
-          </Text>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onPress={() => setViewMode(viewMode === 'card' ? 'list' : 'card')}
-          >
-            <ButtonIcon as={viewMode === 'card' ? List : Grid} />
-          </Button>
-        </HStack>
-      </Box>
+              <VStack flex={1} space="xs">
+                <Text size="sm" color="$gray700" fontWeight="$medium">상태</Text>
+                <Select
+                  selectedValue={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
+                  <SelectTrigger
+                    size="md"
+                    borderRadius="$lg"
+                  >
+                    <SelectInput placeholder="전체" />
+                    <SelectIcon />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      <SelectItem label="전체" value="" />
+                      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                        <SelectItem 
+                          key={key} 
+                          label={config.label} 
+                          value={key} 
+                        />
+                      ))}
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
+              </VStack>
+            </HStack>
+
+            <HStack space="sm" alignItems="flex-end">
+              <VStack flex={1} space="xs">
+                <Text size="sm" color="$gray700" fontWeight="$medium">우선순위</Text>
+                <Select
+                  selectedValue={selectedPriority}
+                  onValueChange={setSelectedPriority}
+                >
+                  <SelectTrigger
+                    size="md"
+                    borderRadius="$lg"
+                  >
+                    <SelectInput placeholder="전체" />
+                    <SelectIcon />
+                  </SelectTrigger>
+                  <SelectPortal>
+                    <SelectBackdrop />
+                    <SelectContent>
+                      <SelectDragIndicatorWrapper>
+                        <SelectDragIndicator />
+                      </SelectDragIndicatorWrapper>
+                      <SelectItem label="전체" value="" />
+                      {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
+                        <SelectItem 
+                          key={key} 
+                          label={`${config.label}`} 
+                          value={key} 
+                        />
+                      ))}
+                    </SelectContent>
+                  </SelectPortal>
+                </Select>
+              </VStack>
+
+              <Button 
+                size="md" 
+                variant="outline"
+                onPress={clearFilters}
+                borderRadius="$lg"
+                px="$4"
+              >
+                <ButtonText fontWeight="$medium">초기화</ButtonText>
+              </Button>
+            </HStack>
+          </VStack>
+        </Box>
+      )}
 
       {/* 기록 목록 */}
       {isLoading ? (
         <Center flex={1}>
-          <Spinner size="large" />
-          <Text mt="$2" color="$gray600">기록을 불러오는 중...</Text>
+          <Spinner size="large" color="$blue600" />
+          <Text mt="$4" color="$gray600" fontWeight="$medium">기록을 불러오는 중...</Text>
         </Center>
       ) : (
-        <FlatList
-          ref={flatListRef}
-          data={records}
-          renderItem={renderRecordItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ 
-            padding: 16,
-            paddingBottom: 100,
-            gap: viewMode === 'list' ? 8 : 16
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-            />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={renderFooter}
-          ListEmptyComponent={renderEmptyState}
-          showsVerticalScrollIndicator={false}
-        />
+        <Box flex={1} bg="$gray50">
+          <FlatList
+            ref={flatListRef}
+            data={records}
+            renderItem={renderRecordItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{ 
+              padding: 16,
+              paddingBottom: 100,
+              gap: viewMode === 'list' ? 8 : 12
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                tintColor="#2563eb"
+              />
+            }
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.3}
+            ListFooterComponent={renderFooter}
+            ListEmptyComponent={renderEmptyState}
+            showsVerticalScrollIndicator={false}
+          />
+        </Box>
       )}
       
       {/* 하단 네비게이션 */}
