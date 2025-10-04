@@ -22,10 +22,10 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate Limiting
+// Rate Limiting (개발 환경에서는 더 관대하게 설정)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15분
-  max: 100, // 최대 100회 요청
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 개발: 1000회, 프로덕션: 100회
   message: {
     error: '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.'
   }
