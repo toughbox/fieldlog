@@ -408,13 +408,15 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             </HStack>
           </VStack>
           <VStack alignItems="flex-end" space="xs">
-            <Badge variant="solid" bg={priorityConfig.color} size="sm">
-              <Text color="white" size="xs">{priorityConfig.label}</Text>
+            <Badge variant="solid" bg={priorityConfig.color} size="sm" borderRadius="$md">
+              <Text color="$white" size="xs" fontWeight="$bold">{priorityConfig.label}</Text>
             </Badge>
-            <HStack alignItems="center" space="xs">
-              <StatusIcon size={12} color={statusConfig.color} />
-              <Text size="xs" color="$gray700">{statusConfig.label}</Text>
-            </HStack>
+            <Badge variant="solid" bg={statusConfig.color} size="sm" borderRadius="$md">
+              <HStack alignItems="center" space="xs">
+                <StatusIcon size={12} color="#ffffff" strokeWidth={2.5} />
+                <Text size="xs" color="$white" fontWeight="$bold">{statusConfig.label}</Text>
+              </HStack>
+            </Badge>
           </VStack>
         </HStack>
       </Pressable>

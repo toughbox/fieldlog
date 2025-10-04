@@ -178,8 +178,6 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
   };
 
   const renderFieldItem = ({ item }: { item: Field }) => {
-    const IconComponent = item.icon ? getFieldIcon(item.icon) : Building;
-    
     return (
       <Pressable onPress={() => handleFieldPress(item)}>
         <Card
@@ -197,12 +195,12 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
                 <Box
                   w="$12"
                   h="$12"
-                  bg={`${item.color}20` || '#6366f120'}
+                  bg={item.color || '#6366f1'}
                   borderRadius="$xl"
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <IconComponent size={24} color={item.color || '#6366f1'} />
+                  <Building size={24} color="#ffffff" strokeWidth={2.5} />
                 </Box>
                 <VStack flex={1} space="xs">
                   <Heading size="lg" color="$gray900" fontWeight="$bold">
@@ -212,10 +210,10 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
                     <Badge
                       size="sm"
                       variant="solid"
-                      bg="$blue100"
+                      bg="$blue600"
                       borderRadius="$md"
                     >
-                      <Text size="xs" color="$blue700" fontWeight="$medium">
+                      <Text size="xs" color="$white" fontWeight="$bold">
                         {getFieldStats(item)}
                       </Text>
                     </Badge>
@@ -241,11 +239,11 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
               <Pressable
                 onPress={() => handleFieldPress(item)}
                 px="$3"
-                py="$1"
-                borderRadius="$lg"
-                bg="$blue50"
+                py="$1.5"
+                borderRadius="$md"
+                bg="$blue600"
               >
-                <Text size="xs" color="$blue600" fontWeight="$bold">
+                <Text size="xs" color="$white" fontWeight="$bold">
                   자세히 보기 →
                 </Text>
               </Pressable>
