@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StatusBar } from 'react-native';
+import { Alert, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import {
   Box,
   VStack,
@@ -8,15 +8,15 @@ import {
   Button,
   Input,
   InputField,
-  Card,
+  InputSlot,
+  InputIcon,
   Heading,
   SafeAreaView,
   ButtonText,
   ButtonIcon,
-  Center,
   Spinner
 } from '@gluestack-ui/themed';
-import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { LogIn, Mail, Lock, Eye, EyeOff, Building2 } from 'lucide-react-native';
 import { currentApi, LoginRequest } from '../services/api';
 import { validateEmail } from '../utils/validation';
 import { useAuth } from '../context/AuthContext';
@@ -28,7 +28,10 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   
   const { login } = useAuth();
 
@@ -90,75 +93,183 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView flex={1} bg="$coolGray50">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={false} />
-      <ScrollView flex={1} contentContainerStyle={{ paddingTop: 20 }}>
-        {/* 로고 및 타이틀 */}
-        <Box alignItems="center" mt="$20" mb="$10">
-          <Text fontSize="$3xl">🏗️</Text>
-          <Heading size="xl">현장기록</Heading>
-        </Box>
-
-        {/* 로그인 폼 */}
-        <Card bg="white" p="$6" mx="$4" borderRadius="$xl" shadowOpacity={0.1} shadowRadius={8} mb="$6">
-          <VStack space="md">
-            <VStack space="xs">
-              <Text size="sm" color="$gray600">이메일</Text>
-              <Input variant="outline" size="lg">
-                <InputField
-                  placeholder="이메일을 입력하세요"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </Input>
+    <SafeAreaView flex={1} bg="$white">
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <KeyboardAvoidingView 
+        flex={1}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView 
+          flex={1} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          {/* 상단 헤더 영역 */}
+          <Box 
+            bg="$blue600" 
+            pt="$16" 
+            pb="$12" 
+            px="$6"
+            borderBottomLeftRadius="$3xl"
+            borderBottomRightRadius="$3xl"
+          >
+            <VStack space="md" alignItems="center">
+              {/* 로고 아이콘 */}
+              <Box 
+                bg="$white" 
+                p="$4" 
+                borderRadius="$2xl"
+              >
+                <Building2 size={48} color="#2563eb" strokeWidth={2.5} />
+              </Box>
+              
+              {/* 타이틀 */}
+              <VStack space="xs" alignItems="center">
+                <Heading size="2xl" color="$white" fontWeight="$bold">
+                  FieldLog
+                </Heading>
+                <Text size="md" color="$blue100" fontWeight="$medium">
+                  현장 기록 관리 시스템
+                </Text>
+              </VStack>
             </VStack>
+          </Box>
 
-            <VStack space="xs">
-              <Text size="sm" color="$gray600">비밀번호</Text>
-              <Input variant="outline" size="lg">
-                <InputField
-                  placeholder="비밀번호를 입력하세요"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                />
-              </Input>
+          {/* 로그인 폼 영역 */}
+          <Box flex={1} px="$6" pt="$8">
+            <VStack space="xl">
+              {/* 환영 메시지 */}
+              <VStack space="xs">
+                <Heading size="xl" color="$gray900">
+                  환영합니다!
+                </Heading>
+                <Text size="md" color="$gray600">
+                  계정에 로그인하여 시작하세요
+                </Text>
+              </VStack>
+
+              {/* 이메일 입력 */}
+              <VStack space="sm">
+                <Text size="sm" color="$gray700" fontWeight="$medium">
+                  이메일
+                </Text>
+                <Input 
+                  variant="outline" 
+                  size="xl"
+                  borderColor={emailFocused ? '$blue600' : '$gray300'}
+                  borderWidth={emailFocused ? 2 : 1}
+                  bg="$gray50"
+                >
+                  <InputSlot pl="$4">
+                    <InputIcon as={Mail} color={emailFocused ? "$blue600" : "$gray500"} />
+                  </InputSlot>
+                  <InputField
+                    placeholder="your@email.com"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                    fontSize="$md"
+                    pl="$2"
+                  />
+                </Input>
+              </VStack>
+
+              {/* 비밀번호 입력 */}
+              <VStack space="sm">
+                <Text size="sm" color="$gray700" fontWeight="$medium">
+                  비밀번호
+                </Text>
+                <Input 
+                  variant="outline" 
+                  size="xl"
+                  borderColor={passwordFocused ? '$blue600' : '$gray300'}
+                  borderWidth={passwordFocused ? 2 : 1}
+                  bg="$gray50"
+                >
+                  <InputSlot pl="$4">
+                    <InputIcon as={Lock} color={passwordFocused ? "$blue600" : "$gray500"} />
+                  </InputSlot>
+                  <InputField
+                    placeholder="••••••••"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
+                    fontSize="$md"
+                    pl="$2"
+                  />
+                  <InputSlot pr="$4" onPress={() => setShowPassword(!showPassword)}>
+                    <InputIcon 
+                      as={showPassword ? Eye : EyeOff} 
+                      color="$gray500"
+                    />
+                  </InputSlot>
+                </Input>
+              </VStack>
+
+              {/* 로그인 버튼 */}
+              <Button
+                size="xl"
+                bg="$blue600"
+                borderRadius="$xl"
+                onPress={handleLogin}
+                isDisabled={isLoading}
+                mt="$2"
+              >
+                {isLoading ? (
+                  <HStack alignItems="center" space="sm">
+                    <Spinner color="$white" size="small" />
+                    <ButtonText fontSize="$md" fontWeight="$semibold">
+                      로그인 중...
+                    </ButtonText>
+                  </HStack>
+                ) : (
+                  <HStack alignItems="center" space="sm">
+                    <ButtonIcon as={LogIn} size="xl" />
+                    <ButtonText fontSize="$md" fontWeight="$semibold">
+                      로그인
+                    </ButtonText>
+                  </HStack>
+                )}
+              </Button>
+
+              {/* 구분선 */}
+              <HStack alignItems="center" space="md" my="$2">
+                <Box flex={1} h={1} bg="$gray300" />
+                <Text size="sm" color="$gray500">또는</Text>
+                <Box flex={1} h={1} bg="$gray300" />
+              </HStack>
+
+              {/* 회원가입 버튼 */}
+              <Button
+                size="xl"
+                variant="outline"
+                borderRadius="$xl"
+                borderColor="$blue600"
+                borderWidth={2}
+                onPress={handleSignUp}
+                bg="$white"
+              >
+                <ButtonText 
+                  fontSize="$md" 
+                  fontWeight="$semibold"
+                  color="$blue600"
+                >
+                  회원가입
+                </ButtonText>
+              </Button>
+
+              {/* 하단 여백 */}
+              <Box h="$8" />
             </VStack>
-
-            <Button
-              action="primary"
-              size="lg"
-              onPress={handleLogin}
-              isDisabled={isLoading}
-              mt="$4"
-            >
-              {isLoading ? (
-                <HStack alignItems="center" space="sm">
-                  <Spinner color="white" size="small" />
-                  <ButtonText>로그인 중...</ButtonText>
-                </HStack>
-              ) : (
-                <>
-                  <ButtonIcon as={LogIn} />
-                  <ButtonText>로그인</ButtonText>
-                </>
-              )}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              onPress={handleSignUp}
-            >
-              <ButtonText>회원가입</ButtonText>
-            </Button>
-          </VStack>
-        </Card>
-
-      </ScrollView>
+          </Box>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
