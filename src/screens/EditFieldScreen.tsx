@@ -15,16 +15,16 @@ import {
   TextareaInput,
   ButtonText,
   ButtonIcon,
+  Pressable,
   Center,
   Spinner
 } from '@gluestack-ui/themed';
 import { 
   ArrowLeft, 
   Save, 
-  Building,
   Palette,
-  Type,
-  FileText
+  FileText,
+  CheckCircle2
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { currentFieldApi, Field } from '../services/api';
@@ -48,11 +48,6 @@ const FIELD_COLORS = [
   '#FD79A8', '#FDCB6E', '#E17055', '#00B894', '#74B9FF'
 ];
 
-const FIELD_ICONS = [
-  'construction', 'building', 'home', 'warehouse', 'factory',
-  'office', 'school', 'hospital', 'store', 'apartment'
-];
-
 const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) => {
   const { fieldId, field } = route.params;
   const { user } = useAuth();
@@ -63,7 +58,6 @@ const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) 
   const [name, setName] = useState(field.name);
   const [description, setDescription] = useState(field.description || '');
   const [color, setColor] = useState(field.color);
-  const [icon, setIcon] = useState(field.icon);
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -82,8 +76,7 @@ const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) 
       const updateData = {
         name: name.trim(),
         description: description.trim() || undefined,
-        color: color,
-        icon: icon
+        color: color
       };
 
       const response = await currentFieldApi.updateField(fieldId, updateData, accessToken);
@@ -110,95 +103,93 @@ const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) 
   };
 
   const renderColorPicker = () => (
-    <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
-      <VStack space="md">
+    <Card 
+      bg="white" 
+      p="$5" 
+      borderRadius="$xl"
+      borderWidth={1}
+      borderColor="$gray200"
+    >
+      <VStack space="lg">
         <HStack alignItems="center" space="sm">
-          <Palette size={20} color="#6366f1" />
-          <Heading size="md" color="$gray900">현장 색상</Heading>
+          <Box
+            w="$10"
+            h="$10"
+            bg="$blue50"
+            borderRadius="$lg"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Palette size={22} color="#2563eb" strokeWidth={2} />
+          </Box>
+          <Heading size="xl" color="$gray900" fontWeight="$bold">색상 선택</Heading>
         </HStack>
-        
-        <Box flexDirection="row" flexWrap="wrap" gap="$2">
-          {FIELD_COLORS.map((colorOption) => (
-            <Button
-              key={colorOption}
-              size="sm"
-              variant={color === colorOption ? "solid" : "outline"}
-              bg={color === colorOption ? colorOption : "transparent"}
-              borderColor={colorOption}
-              onPress={() => setColor(colorOption)}
-              style={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: 20,
-                borderWidth: color === colorOption ? 3 : 1
-              }}
-            >
-              {color === colorOption && (
-                <ButtonIcon as={Save} size={16} color="white" />
-              )}
-            </Button>
-          ))}
-        </Box>
+        <VStack space="sm">
+          <Text size="sm" color="$gray600">
+            현장을 구분할 색상을 선택하세요
+          </Text>
+          <HStack space="md" flexWrap="wrap">
+            {FIELD_COLORS.map((colorOption) => (
+              <Pressable
+                key={colorOption}
+                onPress={() => setColor(colorOption)}
+                w="$12"
+                h="$12"
+                bg={colorOption}
+                borderRadius="$xl"
+                borderWidth={color === colorOption ? 4 : 2}
+                borderColor={color === colorOption ? "$gray900" : "$gray200"}
+                m="$1"
+                alignItems="center"
+                justifyContent="center"
+              >
+                {color === colorOption && (
+                  <CheckCircle2 size={20} color="#ffffff" strokeWidth={3} />
+                )}
+              </Pressable>
+            ))}
+          </HStack>
+        </VStack>
       </VStack>
     </Card>
   );
 
-  const renderIconPicker = () => (
-    <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
-      <VStack space="md">
-        <HStack alignItems="center" space="sm">
-          <Building size={20} color="#6366f1" />
-          <Heading size="md" color="$gray900">현장 아이콘</Heading>
-        </HStack>
-        
-        <Box flexDirection="row" flexWrap="wrap" gap="$2">
-          {FIELD_ICONS.map((iconOption) => (
-            <Button
-              key={iconOption}
-              size="sm"
-              variant={icon === iconOption ? "solid" : "outline"}
-              action={icon === iconOption ? "primary" : "secondary"}
-              onPress={() => setIcon(iconOption)}
-              style={{ minWidth: 60 }}
-            >
-              <ButtonText fontSize={12}>
-                {iconOption === 'construction' ? '건설' :
-                 iconOption === 'building' ? '건물' :
-                 iconOption === 'home' ? '집' :
-                 iconOption === 'warehouse' ? '창고' :
-                 iconOption === 'factory' ? '공장' :
-                 iconOption === 'office' ? '사무실' :
-                 iconOption === 'school' ? '학교' :
-                 iconOption === 'hospital' ? '병원' :
-                 iconOption === 'store' ? '상점' :
-                 iconOption === 'apartment' ? '아파트' : iconOption}
-              </ButtonText>
-            </Button>
-          ))}
-        </Box>
-      </VStack>
-    </Card>
-  );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
         <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm">
-            <Button variant="ghost" size="sm" onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <VStack>
-              <Heading size="lg" color="$gray900">현장 편집</Heading>
-              <Text size="sm" color="$gray600">{field.name}</Text>
+          <HStack alignItems="center" space="md" flex={1}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              w="$10"
+              h="$10"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <ArrowLeft size={20} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <VStack flex={1}>
+              <Heading size="xl" color="$white" fontWeight="$bold">현장 편집</Heading>
+              <Text size="sm" color="$blue100">{field.name}</Text>
             </VStack>
           </HStack>
           <Button 
-            action="primary" 
-            size="sm"
+            bg="$green600" 
+            size="lg"
+            borderRadius="$xl"
             onPress={handleSave}
             disabled={isSaving}
           >
@@ -206,94 +197,113 @@ const EditFieldScreen: React.FC<EditFieldScreenProps> = ({ navigation, route }) 
               <Spinner size="small" color="white" />
             ) : (
               <>
-                <ButtonIcon as={Save} />
-                <ButtonText>저장</ButtonText>
+                <ButtonIcon as={Save} mr="$2" />
+                <ButtonText fontWeight="$bold">저장</ButtonText>
               </>
             )}
           </Button>
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
-        {/* 기본 정보 */}
-        <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
-          <VStack space="md">
-            <HStack alignItems="center" space="sm">
-              <Type size={20} color="#6366f1" />
-              <Heading size="md" color="$gray900">기본 정보</Heading>
-            </HStack>
-            
-            <VStack space="sm">
-              <Text size="sm" color="$gray700" fontWeight="medium">현장 이름 *</Text>
-              <Input>
-                <InputField
-                  placeholder="현장 이름을 입력하세요"
-                  value={name}
-                  onChangeText={setName}
-                  fontFamily="NotoSansKR_400Regular"
-                />
-              </Input>
-            </VStack>
-
-            <VStack space="sm">
-              <Text size="sm" color="$gray700" fontWeight="medium">설명</Text>
-              <Textarea>
-                <TextareaInput
-                  placeholder="현장에 대한 설명을 입력하세요 (선택사항)"
-                  value={description}
-                  onChangeText={setDescription}
-                  fontFamily="NotoSansKR_400Regular"
-                  multiline
-                  numberOfLines={3}
-                />
-              </Textarea>
-            </VStack>
-          </VStack>
-        </Card>
-
-        {/* 색상 선택 */}
-        {renderColorPicker()}
-
-        {/* 아이콘 선택 */}
-        {renderIconPicker()}
-
-        {/* 미리보기 */}
-        <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
-          <VStack space="md">
-            <HStack alignItems="center" space="sm">
-              <FileText size={20} color="#6366f1" />
-              <Heading size="md" color="$gray900">미리보기</Heading>
-            </HStack>
-            
-            <Card bg="white" p="$4" borderRadius="$lg" borderWidth={1} borderColor="$gray200">
-              <HStack alignItems="center" space="sm">
-                <Box w="$6" h="$6" borderRadius="$full" bg={color} />
-                <VStack flex={1}>
-                  <Heading size="md" color="$gray900">{name || '현장 이름'}</Heading>
-                  {description && (
-                    <Text size="sm" color="$gray600" numberOfLines={2}>
-                      {description}
-                    </Text>
-                  )}
-                </VStack>
-                <Box bg="$blue100" px="$2" py="$1" borderRadius="$sm">
-                  <Text size="xs" color="$blue700" fontWeight="medium">
-                    {icon === 'construction' ? '건설' :
-                     icon === 'building' ? '건물' :
-                     icon === 'home' ? '집' :
-                     icon === 'warehouse' ? '창고' :
-                     icon === 'factory' ? '공장' :
-                     icon === 'office' ? '사무실' :
-                     icon === 'school' ? '학교' :
-                     icon === 'hospital' ? '병원' :
-                     icon === 'store' ? '상점' :
-                     icon === 'apartment' ? '아파트' : icon}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <VStack space="lg">
+          {/* 기본 정보 */}
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl" 
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">기본 정보</Heading>
+              
+              <VStack space="md">
+                <VStack space="sm">
+                  <Text size="md" color="$gray700" fontWeight="$medium">
+                    현장 이름 <Text color="$red500">*</Text>
                   </Text>
+                  <Input
+                    size="xl"
+                    borderRadius="$lg"
+                    borderWidth={2}
+                    borderColor="$gray300"
+                    $focus-borderColor="$blue500"
+                  >
+                    <InputField
+                      placeholder="예: 강남 아파트 A동"
+                      value={name}
+                      onChangeText={setName}
+                      fontSize="$md"
+                    />
+                  </Input>
+                </VStack>
+
+                <VStack space="sm">
+                  <Text size="md" color="$gray700" fontWeight="$medium">설명</Text>
+                  <Input
+                    size="xl"
+                    borderRadius="$lg"
+                    borderWidth={2}
+                    borderColor="$gray300"
+                    $focus-borderColor="$blue500"
+                  >
+                    <InputField
+                      placeholder="현장에 대한 설명을 입력하세요"
+                      value={description}
+                      onChangeText={setDescription}
+                      multiline
+                      numberOfLines={3}
+                      fontSize="$md"
+                    />
+                  </Input>
+                </VStack>
+              </VStack>
+            </VStack>
+          </Card>
+
+          {/* 색상 선택 */}
+          {renderColorPicker()}
+
+          {/* 미리보기 */}
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <HStack alignItems="center" space="sm">
+                <Box
+                  w="$10"
+                  h="$10"
+                  bg="$blue50"
+                  borderRadius="$lg"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <FileText size={22} color="#2563eb" strokeWidth={2} />
                 </Box>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">미리보기</Heading>
               </HStack>
-            </Card>
-          </VStack>
-        </Card>
+              
+              <Card bg="$gray50" p="$4" borderRadius="$xl" borderWidth={1} borderColor="$gray200">
+                <HStack alignItems="center" space="sm">
+                  <Box w="$8" h="$8" borderRadius="$full" bg={color} />
+                  <VStack flex={1}>
+                    <Heading size="lg" color="$gray900">{name || '현장 이름'}</Heading>
+                    {description && (
+                      <Text size="sm" color="$gray600" numberOfLines={2}>
+                        {description}
+                      </Text>
+                    )}
+                  </VStack>
+                </HStack>
+              </Card>
+            </VStack>
+          </Card>
+        </VStack>
       </ScrollView>
       
       {/* 하단 네비게이션 */}
