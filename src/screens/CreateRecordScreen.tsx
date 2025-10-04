@@ -640,19 +640,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
             borderColor="$gray200"
           >
             <VStack space="lg">
-              <HStack alignItems="center" space="sm">
-                <Box
-                  w="$10"
-                  h="$10"
-                  bg="$blue50"
-                  borderRadius="$lg"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Tag size={22} color="#2563eb" strokeWidth={2} />
-                </Box>
-                <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
-              </HStack>
+              <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
               
               <HStack space="sm">
                 <Input flex={1}>
@@ -696,19 +684,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
             borderColor="$gray200"
           >
             <VStack space="lg">
-              <HStack alignItems="center" space="sm">
-                <Box
-                  w="$10"
-                  h="$10"
-                  bg="$blue50"
-                  borderRadius="$lg"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Calendar size={22} color="#2563eb" strokeWidth={2} />
-                </Box>
-                <Heading size="xl" color="$gray900" fontWeight="$bold">사진 첨부</Heading>
-              </HStack>
+              <Heading size="xl" color="$gray900" fontWeight="$bold">사진 첨부</Heading>
               
               <ImagePickerComponent
                 images={images}

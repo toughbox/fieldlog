@@ -402,9 +402,15 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
       <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         <VStack space="md">
           {/* 현장 선택 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <Heading size="lg" color="$gray900">현장 선택</Heading>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">현장 선택</Heading>
               
               <Select
                 selectedValue={selectedFieldId?.toString() || ''}
@@ -456,9 +462,15 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
           </Card>
 
           {/* 기본 정보 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <Heading size="lg" color="$gray900">기본 정보</Heading>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">기본 정보</Heading>
               
               <VStack space="xs">
                 <Text size="sm" color="$gray600">제목 <Text color="$red500">*</Text></Text>
@@ -573,21 +585,30 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
 
           {/* 사용자 정의 필드 */}
           {selectedField && selectedField.field_schema.fields.length > 0 && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <Heading size="lg" color="$gray900">상세 정보</Heading>
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
+                <Heading size="xl" color="$gray900" fontWeight="$bold">상세 정보</Heading>
                 {selectedField.field_schema.fields.map(renderCustomField)}
               </VStack>
             </Card>
           )}
 
           {/* 태그 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <HStack alignItems="center" space="sm">
-                <Tag size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900">태그</Heading>
-              </HStack>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
               
               <HStack space="sm">
                 <Input flex={1}>
@@ -611,9 +632,10 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                         variant="solid" 
                         mb="$1" 
                         mr="$1"
-                        bg="$blue500"
+                        bg="$purple600"
+                        borderRadius="$md"
                       >
-                        <Text color="white" size="sm">{tag} ×</Text>
+                        <Text color="$white" size="sm" fontWeight="$bold">#{tag} ×</Text>
                       </Badge>
                     </Pressable>
                   ))}
@@ -623,12 +645,15 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
           </Card>
 
           {/* 사진 첨부 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <HStack alignItems="center" space="sm">
-                <Calendar size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900">사진 첨부</Heading>
-              </HStack>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">사진 첨부</Heading>
               
               <ImagePickerComponent
                 images={images}
@@ -641,28 +666,38 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
 
           {/* 하단 버튼 */}
           <HStack space="md" mb="$10">
-            <Button
+            <Pressable
               flex={1}
-              variant="outline"
+              py="$2.5"
+              px="$3"
+              borderRadius="$md"
+              borderWidth={1}
+              borderColor="$gray300"
+              bg="$white"
+              alignItems="center"
+              justifyContent="center"
               onPress={() => navigation.goBack()}
             >
-              <ButtonText>취소</ButtonText>
-            </Button>
-            <Button
+              <Text color="$gray700" fontWeight="$semibold" size="sm">취소</Text>
+            </Pressable>
+            <Pressable
               flex={1}
-              action="primary"
+              py="$2.5"
+              px="$3"
+              borderRadius="$md"
+              bg="$blue600"
+              alignItems="center"
+              justifyContent="center"
               onPress={handleSave}
               isDisabled={isSaving}
+              opacity={isSaving ? 0.5 : 1}
             >
               {isSaving ? (
-                <Spinner color="white" />
+                <Spinner color="white" size="small" />
               ) : (
-                <>
-                  <ButtonIcon as={Save} mr="$1" />
-                  <ButtonText>저장</ButtonText>
-                </>
+                <Text color="$white" fontWeight="$bold" size="sm">저장</Text>
               )}
-            </Button>
+            </Pressable>
           </HStack>
         </VStack>
       </ScrollView>
