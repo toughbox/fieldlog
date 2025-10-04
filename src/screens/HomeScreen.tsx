@@ -368,6 +368,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HStack>
             
             <VStack space="sm">
+              {/* 새 현장 - 주요 액션 */}
+              <Pressable onPress={() => navigation.navigate('CreateField')}>
+                <Card
+                  bg="$green600"
+                  p="$5"
+                  borderRadius="$xl"
+                >
+                  <HStack space="md" alignItems="center">
+                    <Box bg="rgba(255, 255, 255, 0.2)" p="$3" borderRadius="$lg">
+                      <Building size={24} color="#ffffff" strokeWidth={2.5} />
+                    </Box>
+                    <VStack flex={1}>
+                      <Text size="lg" fontWeight="$bold" color="$white">
+                        새 현장
+                      </Text>
+                      <Text size="sm" color="rgba(255, 255, 255, 0.7)">
+                        새로운 현장을 등록하세요
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Card>
+              </Pressable>
+
               {/* 새 기록 작성 - 주요 액션 */}
               <Pressable onPress={() => navigation.navigate('CreateRecord')}>
                 <Card
@@ -393,17 +416,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
               {/* 기타 액션 */}
               <HStack space="sm">
-                <Pressable flex={1} onPress={() => navigation.navigate('CreateField')}>
-                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
-                    <Box bg="$green100" p="$3" borderRadius="$lg" mb="$2">
-                      <Building size={24} color="#16a34a" strokeWidth={2} />
-                    </Box>
-                    <Text size="sm" fontWeight="$semibold" color="$gray900">
-                      새 현장
-                    </Text>
-                  </Card>
-                </Pressable>
-
                 <Pressable flex={1} onPress={() => navigation.navigate('FieldList')}>
                   <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
                     <Box bg="$purple100" p="$3" borderRadius="$lg" mb="$2">
