@@ -218,11 +218,11 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
   if (isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-        <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
         <Center flex={1}>
-          <Spinner size="large" />
-          <Text mt="$2" color="$gray600">기록을 불러오는 중...</Text>
+          <Spinner size="large" color="$blue600" />
+          <Text mt="$3" color="$gray600" size="md" fontWeight="$medium">기록을 불러오는 중...</Text>
         </Center>
       </SafeAreaView>
     );
@@ -230,12 +230,29 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
   if (!record) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-        <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
         <Center flex={1}>
-          <Text color="$gray600">기록을 찾을 수 없습니다.</Text>
-          <Button mt="$4" onPress={() => navigation.goBack()}>
-            <ButtonText>돌아가기</ButtonText>
+          <Box 
+            w="$24" 
+            h="$24" 
+            bg="$gray100" 
+            borderRadius="$full" 
+            alignItems="center" 
+            justifyContent="center"
+            mb="$4"
+          >
+            <AlertCircle size={48} color="#6b7280" />
+          </Box>
+          <Text color="$gray900" size="lg" fontWeight="$bold" mb="$2">기록을 찾을 수 없습니다</Text>
+          <Text color="$gray600" mb="$6">요청하신 기록이 존재하지 않습니다</Text>
+          <Button 
+            bg="$blue600" 
+            size="lg"
+            borderRadius="$xl"
+            onPress={() => navigation.goBack()}
+          >
+            <ButtonText fontWeight="$bold">돌아가기</ButtonText>
           </Button>
         </Center>
       </SafeAreaView>
@@ -248,43 +265,63 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   const overdue = isOverdue(record);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
         <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm" flex={1}>
-            <Button variant="link" size="sm" onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <Heading size="lg" color="$gray900" flex={1} numberOfLines={1}>
+          <HStack alignItems="center" space="md" flex={1}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              p="$2"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+            >
+              <ArrowLeft size={20} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Heading size="xl" color="$white" fontWeight="$bold" flex={1} numberOfLines={1}>
               기록 상세
             </Heading>
           </HStack>
           <HStack space="sm">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Pressable
               onPress={() => navigation.navigate('EditRecord', { recordId: record.id })}
+              p="$2"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
             >
-              <ButtonIcon as={Edit3} />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+              <Edit3 size={18} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Pressable
               onPress={() => setShowDeleteModal(true)}
+              p="$2"
+              borderRadius="$full"
+              bg="rgba(239, 68, 68, 0.2)"
             >
-              <ButtonIcon as={Trash2} color="$red500" />
-            </Button>
+              <Trash2 size={18} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
           </HStack>
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
-        <VStack space="md">
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <VStack space="lg">
           {/* 기본 정보 카드 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
             <VStack space="md">
               {/* 현장 정보 */}
               <HStack alignItems="center" space="sm">
@@ -350,11 +387,26 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
           </Card>
 
           {/* 일정 정보 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
               <HStack alignItems="center" space="sm">
-                <Calendar size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900">일정 정보</Heading>
+                <Box
+                  w="$10"
+                  h="$10"
+                  bg="$blue50"
+                  borderRadius="$lg"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Calendar size={22} color="#2563eb" strokeWidth={2} />
+                </Box>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">일정 정보</Heading>
               </HStack>
 
               <VStack space="sm">
@@ -402,11 +454,26 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
           {/* 사용자 정의 필드 */}
           {record.custom_data && Object.keys(record.custom_data).length > 0 && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
                 <HStack alignItems="center" space="sm">
-                  <Tag size={20} color="#6366f1" />
-                  <Heading size="lg" color="$gray900">상세 정보</Heading>
+                  <Box
+                    w="$10"
+                    h="$10"
+                    bg="$blue50"
+                    borderRadius="$lg"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Tag size={22} color="#2563eb" strokeWidth={2} />
+                  </Box>
+                  <Heading size="xl" color="$gray900" fontWeight="$bold">상세 정보</Heading>
                 </HStack>
 
                 <VStack space="sm">
@@ -422,31 +489,46 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
           {/* 완료 처리 버튼 */}
           {record.status !== 'completed' && record.status !== 'cancelled' && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <Button
-                  action="primary"
-                  bg="$red500"
-                  onPress={handleComplete}
-                  isDisabled={isCompleting}
-                >
-                  {isCompleting ? (
-                    <Spinner color="white" size="small" />
-                  ) : (
-                    <ButtonText size="sm">완료 처리</ButtonText>
-                  )}
-                </Button>
-              </VStack>
-            </Card>
+            <Button
+              bg="$green600"
+              onPress={handleComplete}
+              isDisabled={isCompleting}
+              size="xl"
+              borderRadius="$xl"
+            >
+              {isCompleting ? (
+                <Spinner color="white" size="small" />
+              ) : (
+                <>
+                  <ButtonIcon as={CheckCircle2} mr="$2" />
+                  <ButtonText fontWeight="$bold">완료 처리</ButtonText>
+                </>
+              )}
+            </Button>
           )}
 
           {/* 위치 정보 */}
           {record.location && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
                 <HStack alignItems="center" space="sm">
-                  <MapPin size={20} color="#6366f1" />
-                  <Heading size="lg" color="$gray900">위치 정보</Heading>
+                  <Box
+                    w="$10"
+                    h="$10"
+                    bg="$blue50"
+                    borderRadius="$lg"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <MapPin size={22} color="#2563eb" strokeWidth={2} />
+                  </Box>
+                  <Heading size="xl" color="$gray900" fontWeight="$bold">위치 정보</Heading>
                 </HStack>
 
                 <VStack space="sm">
@@ -472,18 +554,39 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
           {/* 첨부 이미지 슬라이드 */}
           {record.attachment && record.attachment.length > 0 && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
               <ImageSlider attachments={record.attachment} />
             </Card>
           )}
 
           {/* 태그 */}
           {record.tags && record.tags.length > 0 && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
                 <HStack alignItems="center" space="sm">
-                  <Tag size={20} color="#6366f1" />
-                  <Heading size="lg" color="$gray900">태그</Heading>
+                  <Box
+                    w="$10"
+                    h="$10"
+                    bg="$blue50"
+                    borderRadius="$lg"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Tag size={22} color="#2563eb" strokeWidth={2} />
+                  </Box>
+                  <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
                 </HStack>
 
                 <HStack space="xs" flexWrap="wrap">

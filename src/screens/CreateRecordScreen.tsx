@@ -382,27 +382,47 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
         <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm">
-            <Button variant="link" size="sm" onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <Heading size="xl" color="$gray900">새 기록 작성</Heading>
+          <HStack alignItems="center" space="md" flex={1}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              p="$2"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+            >
+              <ArrowLeft size={20} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Heading size="xl" color="$white" fontWeight="$bold">
+              새 기록 작성
+            </Heading>
           </HStack>
         </HStack>
       </Box>
 
-      <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
-        <VStack space="md">
+      <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <VStack space="lg">
           {/* 현장 선택 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <Heading size="lg" color="$gray900">현장 선택</Heading>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">현장 선택</Heading>
               
               {isFieldsLoading ? (
                 <Box flexDirection="row" alignItems="center" justifyContent="center" py="$4">
@@ -472,9 +492,15 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
           </Card>
 
           {/* 기본 정보 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
-              <Heading size="lg" color="$gray900">기본 정보</Heading>
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
+              <Heading size="xl" color="$gray900" fontWeight="$bold">기본 정보</Heading>
               
               <VStack space="xs">
                 <Text size="sm" color="$gray600">제목 <Text color="$red500">*</Text></Text>
@@ -589,20 +615,43 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
 
           {/* 사용자 정의 필드 */}
           {selectedField && selectedField.field_schema.fields.length > 0 && (
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <Heading size="lg" color="$gray900">상세 정보</Heading>
-                {selectedField.field_schema.fields.map(renderCustomField)}
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
+                <Heading size="xl" color="$gray900" fontWeight="$bold">상세 정보</Heading>
+                <VStack space="md">
+                  {selectedField.field_schema.fields.map(renderCustomField)}
+                </VStack>
               </VStack>
             </Card>
           )}
 
           {/* 태그 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
               <HStack alignItems="center" space="sm">
-                <Tag size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900">태그</Heading>
+                <Box
+                  w="$10"
+                  h="$10"
+                  bg="$blue50"
+                  borderRadius="$lg"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Tag size={22} color="#2563eb" strokeWidth={2} />
+                </Box>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
               </HStack>
               
               <HStack space="sm">
@@ -639,11 +688,26 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
           </Card>
 
           {/* 사진 첨부 */}
-          <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-            <VStack space="md">
+          <Card 
+            bg="white" 
+            p="$5" 
+            borderRadius="$xl"
+            borderWidth={1}
+            borderColor="$gray200"
+          >
+            <VStack space="lg">
               <HStack alignItems="center" space="sm">
-                <Calendar size={20} color="#6366f1" />
-                <Heading size="lg" color="$gray900">사진 첨부</Heading>
+                <Box
+                  w="$10"
+                  h="$10"
+                  bg="$blue50"
+                  borderRadius="$lg"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Calendar size={22} color="#2563eb" strokeWidth={2} />
+                </Box>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">사진 첨부</Heading>
               </HStack>
               
               <ImagePickerComponent
@@ -655,24 +719,29 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
           </Card>
 
           {/* 하단 버튼 */}
-          <HStack space="md" mb="$10">
+          <HStack space="md">
             <Button
               flex={1}
               variant="outline"
               onPress={() => navigation.goBack()}
+              size="xl"
+              borderRadius="$xl"
+              borderWidth={2}
             >
-              <ButtonText>취소</ButtonText>
+              <ButtonText fontWeight="$bold">취소</ButtonText>
             </Button>
             <Button
               flex={1}
-              action="primary"
+              bg="$blue600"
               onPress={handleCreateRecord}
               isDisabled={isLoading}
+              size="xl"
+              borderRadius="$xl"
             >
               {isLoading ? (
                 <Spinner color="white" />
               ) : (
-                <ButtonText>기록 생성</ButtonText>
+                <ButtonText fontWeight="$bold">기록 생성</ButtonText>
               )}
             </Button>
           </HStack>

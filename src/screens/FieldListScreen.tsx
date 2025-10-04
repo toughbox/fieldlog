@@ -177,116 +177,188 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
     });
   };
 
-  const renderFieldItem = ({ item }: { item: Field }) => (
-    <Pressable onPress={() => handleFieldPress(item)} mb="$3">
-      <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-        <VStack space="sm">
-          <HStack justifyContent="space-between" alignItems="center">
-            <VStack space="xs" flex={1}>
-              <HStack alignItems="center" space="sm">
-                <HStack alignItems="center" space="xs">
-                  <Box w="$4" h="$4" borderRadius="$full" bg={item.color} />
-                  {item.icon && (() => {
-                    const IconComponent = getFieldIcon(item.icon);
-                    return <IconComponent size={16} color={item.color} />;
-                  })()}
-                </HStack>
-                <Heading size="md" color="$gray900">{item.name}</Heading>
+  const renderFieldItem = ({ item }: { item: Field }) => {
+    const IconComponent = item.icon ? getFieldIcon(item.icon) : Building;
+    
+    return (
+      <Pressable onPress={() => handleFieldPress(item)}>
+        <Card
+          bg="$white"
+          p="$4"
+          mb="$3"
+          borderRadius="$xl"
+          borderWidth={1}
+          borderColor="$gray200"
+        >
+          <VStack space="sm">
+            {/* 헤더 */}
+            <HStack justifyContent="space-between" alignItems="flex-start">
+              <HStack alignItems="center" space="sm" flex={1}>
+                <Box
+                  w="$12"
+                  h="$12"
+                  bg={`${item.color}20` || '#6366f120'}
+                  borderRadius="$xl"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <IconComponent size={24} color={item.color || '#6366f1'} />
+                </Box>
+                <VStack flex={1} space="xs">
+                  <Heading size="lg" color="$gray900" fontWeight="$bold">
+                    {item.name}
+                  </Heading>
+                  <HStack alignItems="center" space="xs">
+                    <Badge
+                      size="sm"
+                      variant="solid"
+                      bg="$blue100"
+                      borderRadius="$md"
+                    >
+                      <Text size="xs" color="$blue700" fontWeight="$medium">
+                        {getFieldStats(item)}
+                      </Text>
+                    </Badge>
+                  </HStack>
+                </VStack>
               </HStack>
-              {item.description && (
-                <Text size="sm" color="$gray600" numberOfLines={2}>
-                  {item.description}
+            </HStack>
+
+            {/* 설명 */}
+            {item.description && (
+              <Text color="$gray600" size="md" numberOfLines={2} lineHeight="$lg">
+                {item.description}
+              </Text>
+            )}
+
+            <Divider bg="$gray200" />
+
+            {/* 하단 정보 */}
+            <HStack justifyContent="space-between" alignItems="center">
+              <Text size="xs" color="$gray500">
+                생성: {formatDate(item.created_at)}
+              </Text>
+              <Pressable
+                onPress={() => handleFieldPress(item)}
+                px="$3"
+                py="$1"
+                borderRadius="$lg"
+                bg="$blue50"
+              >
+                <Text size="xs" color="$blue600" fontWeight="$bold">
+                  자세히 보기 →
                 </Text>
-              )}
-              <HStack justifyContent="space-between" alignItems="center">
-                <Badge bg="$blue100" borderRadius="$sm">
-                  <Text size="xs" color="$blue700">
-                    {getFieldStats(item)}
-                  </Text>
-                </Badge>
-                <Text size="xs" color="$gray500">
-                  생성: {formatDate(item.created_at)}
-                </Text>
-              </HStack>
-            </VStack>
-          </HStack>
-        </VStack>
-      </Card>
-    </Pressable>
-  );
+              </Pressable>
+            </HStack>
+          </VStack>
+        </Card>
+      </Pressable>
+    );
+  };
 
   const renderEmptyState = () => (
     <Center flex={1} p="$8">
       <VStack alignItems="center" space="lg">
-        <Box w="$20" h="$20" bg="$gray100" borderRadius="$full" alignItems="center" justifyContent="center">
-          <Building size={40} color="#9ca3af" />
+        <Box 
+          w="$24" 
+          h="$24" 
+          bg="$blue50" 
+          borderRadius="$full" 
+          alignItems="center" 
+          justifyContent="center"
+        >
+          <Building size={48} color="#2563eb" strokeWidth={2} />
         </Box>
         <VStack alignItems="center" space="sm">
-          <Heading size="lg" color="$gray900">현장이 없습니다</Heading>
-          <Text size="sm" color="$gray600" textAlign="center">
-            첫 번째 현장을 만들어 기록 관리를 시작해보세요
+          <Heading size="xl" color="$gray900" fontWeight="$bold">
+            현장이 없습니다
+          </Heading>
+          <Text size="md" color="$gray600" textAlign="center" lineHeight="$lg">
+            첫 번째 현장을 만들어{'\n'}기록 관리를 시작해보세요
           </Text>
         </VStack>
         <Button 
-          action="primary"
+          bg="$blue600"
+          size="lg"
           onPress={handleCreateField}
+          borderRadius="$xl"
+          px="$6"
         >
-          <ButtonIcon as={Plus} />
-          <ButtonText>첫 현장 만들기</ButtonText>
+          <ButtonIcon as={Plus} mr="$2" />
+          <ButtonText fontWeight="$bold">첫 현장 만들기</ButtonText>
         </Button>
       </VStack>
     </Center>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
-        <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm">
-            <Button variant="solid" size="sm" onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <Heading size="xl" color="$gray900">현장 관리</Heading>
-          </HStack>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
+        <HStack justifyContent="space-between" alignItems="center" mb="$4">
+          <Heading size="2xl" color="$white" fontWeight="$bold">
+            현장 관리
+          </Heading>
+          <Pressable
+            onPress={handleCreateField}
+            p="$3"
+            borderRadius="$full"
+            bg="rgba(255, 255, 255, 0.2)"
+          >
+            <Plus size={24} color="#ffffff" strokeWidth={2.5} />
+          </Pressable>
         </HStack>
-      </Box>
 
-      {/* 검색바 */}
-      <Box px="$4" py="$3" bg="white">
-        <Input>
-          <ButtonIcon as={Search} ml="$3" color="$gray400" />
+        {/* 검색창 */}
+        <Input
+          variant="rounded"
+          size="xl"
+          bg="rgba(255, 255, 255, 0.9)"
+          borderWidth={0}
+        >
+          <Box pl="$4">
+            <Search size={20} color="#6b7280" />
+          </Box>
           <InputField
-            placeholder="현장 이름이나 설명으로 검색..."
+            placeholder="현장 검색..."
             value={searchQuery}
             onChangeText={setSearchQuery}
+            fontSize="$md"
+            pl="$2"
           />
         </Input>
-      </Box>
 
-      {/* 통계 */}
-      {fields.length > 0 && (
-        <Box bg="white" px="$4" py="$3" mb="$1">
-          <HStack justifyContent="space-around" alignItems="center">
+        {/* 통계 */}
+        {fields.length > 0 && (
+          <HStack justifyContent="space-around" alignItems="center" mt="$4">
             <VStack alignItems="center">
-              <Text size="2xl" fontWeight="bold" color="$primary600">{fields.length}</Text>
-              <Text size="xs" color="$gray600">전체 현장</Text>
+              <Text size="2xl" fontWeight="$bold" color="$white">{fields.length}</Text>
+              <Text size="sm" color="$blue100">전체 현장</Text>
             </VStack>
-            <Divider orientation="vertical" h="$10" />
+            <Box w="$px" h="$12" bg="rgba(255, 255, 255, 0.3)" />
             <VStack alignItems="center">
-              <Text size="2xl" fontWeight="bold" color="$green600">{filteredFields.length}</Text>
-              <Text size="xs" color="$gray600">검색 결과</Text>
+              <Text size="2xl" fontWeight="$bold" color="$white">{filteredFields.length}</Text>
+              <Text size="sm" color="$blue100">검색 결과</Text>
             </VStack>
           </HStack>
-        </Box>
-      )}
+        )}
+      </Box>
 
       {/* 현장 목록 */}
-      <Box flex={1} px="$4">
+      <Box flex={1} px="$4" pt="$4">
         {isLoading ? (
           <Center flex={1}>
-            <Spinner size="large" color="$primary600" />
+            <Spinner size="large" color="$blue600" />
+            <Text mt="$3" color="$gray600" size="md">로딩 중...</Text>
           </Center>
         ) : filteredFields.length > 0 ? (
           <FlatList
@@ -294,7 +366,7 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
             renderItem={renderFieldItem}
             keyExtractor={(item) => item.id.toString()}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2563eb']} />
             }
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
@@ -303,18 +375,6 @@ const FieldListScreen: React.FC<FieldListScreenProps> = ({ navigation }) => {
           renderEmptyState()
         )}
       </Box>
-
-      {/* FAB */}
-      <Fab
-        size="lg"
-        placement="bottom right"
-        onPress={handleCreateField}
-        bg="$primary600"
-        mb="$20"
-        mr="$4"
-      >
-        <FabIcon as={Plus} color="white" />
-      </Fab>
       
       {/* 하단 네비게이션 */}
       <BottomNavigation navigation={navigation} currentScreen="FieldList" />

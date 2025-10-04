@@ -307,12 +307,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       bg="$white"
                       p="$4"
                       borderRadius="$xl"
-                      borderLeftWidth={4}
-                      borderLeftColor={
-                        task.priority === 'high' ? '$red500' : 
-                        task.priority === 'medium' ? '$orange500' : 
-                        '$green500'
-                      }
+                      borderWidth={1}
+                      borderColor="$gray200"
                     >
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1} space="xs" pr="$3">

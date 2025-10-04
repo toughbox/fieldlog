@@ -29,7 +29,7 @@ import {
   Center,
   Spinner
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Plus, Trash2, ChevronDown, Palette } from 'lucide-react-native';
+import { ArrowLeft, Plus, Trash2, ChevronDown, Palette, CheckCircle2 } from 'lucide-react-native';
 import { currentFieldApi, CreateFieldRequest, FieldSchema } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { TokenService } from '../services/tokenService';
@@ -181,89 +181,190 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
         <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm">
-            <Button variant="link" size="sm" onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <Heading size="xl" color="$gray900">새 현장 만들기</Heading>
+          <HStack alignItems="center" space="md" flex={1}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              p="$2"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+            >
+              <ArrowLeft size={20} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Heading size="xl" color="$white" fontWeight="$bold">
+              새 현장 만들기
+            </Heading>
           </HStack>
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         {/* 기본 정보 */}
-        <VStack space="md">
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <Heading size="lg" color="$gray900">기본 정보</Heading>
+        <VStack space="lg">
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl" 
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
+                <Heading size="xl" color="$gray900" fontWeight="$bold">기본 정보</Heading>
                 
-                <VStack space="xs">
-                  <Text size="sm" color="$gray600">현장 이름 *</Text>
-                  <Input>
-                    <InputField
-                      placeholder="현장 이름을 입력하세요"
-                      value={name}
-                      onChangeText={setName}
-                    />
-                  </Input>
-                </VStack>
+                <VStack space="md">
+                  <VStack space="sm">
+                    <Text size="md" color="$gray700" fontWeight="$medium">
+                      현장 이름 <Text color="$red500">*</Text>
+                    </Text>
+                    <Input
+                      size="xl"
+                      borderRadius="$lg"
+                      borderWidth={2}
+                      borderColor="$gray300"
+                      $focus-borderColor="$blue500"
+                    >
+                      <InputField
+                        placeholder="예: 강남 아파트 A동"
+                        value={name}
+                        onChangeText={setName}
+                        fontSize="$md"
+                      />
+                    </Input>
+                  </VStack>
 
-                <VStack space="xs">
-                  <Text size="sm" color="$gray600">설명</Text>
-                  <Input>
-                    <InputField
-                      placeholder="현장에 대한 설명을 입력하세요"
-                      value={description}
-                      onChangeText={setDescription}
-                      multiline
-                      numberOfLines={3}
-                    />
-                  </Input>
+                  <VStack space="sm">
+                    <Text size="md" color="$gray700" fontWeight="$medium">설명</Text>
+                    <Input
+                      size="xl"
+                      borderRadius="$lg"
+                      borderWidth={2}
+                      borderColor="$gray300"
+                      $focus-borderColor="$blue500"
+                    >
+                      <InputField
+                        placeholder="현장에 대한 설명을 입력하세요"
+                        value={description}
+                        onChangeText={setDescription}
+                        multiline
+                        numberOfLines={3}
+                        fontSize="$md"
+                      />
+                    </Input>
+                  </VStack>
                 </VStack>
               </VStack>
             </Card>
 
             {/* 색상 선택 */}
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
                 <HStack alignItems="center" space="sm">
-                  <Palette size={20} color="#6366f1" />
-                  <Heading size="lg" color="$gray900">색상 선택</Heading>
+                  <Box
+                    w="$10"
+                    h="$10"
+                    bg="$blue50"
+                    borderRadius="$lg"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Palette size={22} color="#2563eb" strokeWidth={2} />
+                  </Box>
+                  <Heading size="xl" color="$gray900" fontWeight="$bold">색상 선택</Heading>
                 </HStack>
-                <HStack space="sm" flexWrap="wrap">
-                  {COLORS.map((color) => (
-                    <Pressable
-                      key={color}
-                      onPress={() => setSelectedColor(color)}
-                      w="$10"
-                      h="$10"
-                      bg={color}
-                      borderRadius="$md"
-                      borderWidth={selectedColor === color ? 3 : 0}
-                      borderColor="$gray800"
-                      m="$1"
-                    />
-                  ))}
-                </HStack>
+                <VStack space="sm">
+                  <Text size="sm" color="$gray600">
+                    현장을 구분할 색상을 선택하세요
+                  </Text>
+                  <HStack space="md" flexWrap="wrap">
+                    {COLORS.map((color) => (
+                      <Pressable
+                        key={color}
+                        onPress={() => setSelectedColor(color)}
+                        w="$12"
+                        h="$12"
+                        bg={color}
+                        borderRadius="$xl"
+                        borderWidth={selectedColor === color ? 4 : 2}
+                        borderColor={selectedColor === color ? "$gray900" : "$gray200"}
+                        m="$1"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        {selectedColor === color && (
+                          <CheckCircle2 size={20} color="#ffffff" strokeWidth={3} />
+                        )}
+                      </Pressable>
+                    ))}
+                  </HStack>
+                </VStack>
               </VStack>
             </Card>
 
             {/* 필드 설정 */}
-            <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
-              <VStack space="md">
-                <Heading size="lg" color="$gray900">입력 항목 설정</Heading>
+            <Card 
+              bg="white" 
+              p="$5" 
+              borderRadius="$xl"
+              borderWidth={1}
+              borderColor="$gray200"
+            >
+              <VStack space="lg">
+                <HStack alignItems="center" justifyContent="space-between">
+                  <Heading size="xl" color="$gray900" fontWeight="$bold">입력 항목 설정</Heading>
+                  <Badge size="md" variant="solid" bg="$blue100" borderRadius="$lg">
+                    <Text color="$blue700" fontWeight="$bold">{fields.length}개</Text>
+                  </Badge>
+                </HStack>
+
+                <Text size="sm" color="$gray600" lineHeight="$lg">
+                  각 기록에서 입력받을 정보들을 정의할 수 있습니다.
+                </Text>
 
                 {fields.length === 0 ? (
-                  <Text color="$gray600" textAlign="center" py="$4">
-                    입력 항목을 추가해주세요. 각 기록에서 입력받을 정보들을 정의할 수 있습니다.
-                  </Text>
+                  <Box 
+                    bg="$gray50" 
+                    p="$6" 
+                    borderRadius="$xl" 
+                    borderWidth={2}
+                    borderColor="$gray200"
+                    borderStyle="dashed"
+                  >
+                    <VStack alignItems="center" space="md">
+                      <Box
+                        w="$16"
+                        h="$16"
+                        bg="$blue50"
+                        borderRadius="$full"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Plus size={32} color="#2563eb" strokeWidth={2} />
+                      </Box>
+                      <Text color="$gray600" textAlign="center" size="md">
+                        입력 항목을 추가해주세요
+                      </Text>
+                    </VStack>
+                  </Box>
                 ) : (
-                  <VStack space="sm">
+                  <VStack space="md">
                     {fields.map((field, index) => (
                       <FieldEditor
                         key={field.id}
@@ -276,33 +377,45 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
                   </VStack>
                 )}
 
-                {/* 항목 추가 버튼을 아래쪽으로 이동 */}
-                <Button variant="outline" onPress={addField} mt="$2">
-                  <ButtonIcon as={Plus} />
-                  <ButtonText>항목 추가</ButtonText>
+                {/* 항목 추가 버튼 */}
+                <Button 
+                  variant="outline" 
+                  onPress={addField} 
+                  size="lg"
+                  borderRadius="$xl"
+                  borderWidth={2}
+                  borderColor="$blue600"
+                >
+                  <ButtonIcon as={Plus} color="$blue600" mr="$2" />
+                  <ButtonText color="$blue600" fontWeight="$bold">항목 추가</ButtonText>
                 </Button>
               </VStack>
             </Card>
 
             {/* 하단 버튼 */}
-            <HStack space="md" mb="$10">
+            <HStack space="md">
               <Button
                 flex={1}
                 variant="outline"
                 onPress={() => navigation.goBack()}
+                size="xl"
+                borderRadius="$xl"
+                borderWidth={2}
               >
-                <ButtonText>취소</ButtonText>
+                <ButtonText fontWeight="$bold">취소</ButtonText>
               </Button>
               <Button
                 flex={1}
-                action="primary"
+                bg="$blue600"
                 onPress={handleCreateField}
                 isDisabled={isLoading}
+                size="xl"
+                borderRadius="$xl"
               >
                 {isLoading ? (
                   <Spinner color="white" />
                 ) : (
-                  <ButtonText>현장 만들기</ButtonText>
+                  <ButtonText fontWeight="$bold">현장 만들기</ButtonText>
                 )}
               </Button>
             </HStack>
@@ -339,19 +452,40 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
   };
 
   return (
-    <Card bg="$gray50" p="$3" borderRadius="$md" borderWidth={1} borderColor="$gray200">
-      <VStack space="sm">
+    <Card 
+      bg="$gray50" 
+      p="$4" 
+      borderRadius="$xl" 
+      borderWidth={2} 
+      borderColor="$gray300"
+    >
+      <VStack space="md">
         <HStack justifyContent="space-between" alignItems="center">
-          <Text fontWeight="bold" color="$gray900">항목 {index + 1}</Text>
-          <Button variant="link" size="sm" onPress={onRemove} style={{ backgroundColor: 'transparent' }}>
-            <ButtonIcon as={Trash2} color="$red500" />
-          </Button>
+          <Badge size="md" variant="solid" bg="$blue600" borderRadius="$lg">
+            <Text color="$white" fontWeight="$bold">항목 {index + 1}</Text>
+          </Badge>
+          <Pressable 
+            onPress={onRemove}
+            p="$2"
+            borderRadius="$lg"
+            bg="$red50"
+          >
+            <Trash2 size={18} color="#ef4444" strokeWidth={2} />
+          </Pressable>
         </HStack>
 
 
-        <VStack space="xs">
-          <Text size="sm" color="$gray600">라벨 (화면에 표시될 이름) *</Text>
-          <Input>
+        <VStack space="sm">
+          <Text size="md" color="$gray700" fontWeight="$medium">
+            라벨 (화면에 표시될 이름) <Text color="$red500">*</Text>
+          </Text>
+          <Input
+            size="lg"
+            borderRadius="$lg"
+            borderWidth={2}
+            borderColor="$gray300"
+            bg="$white"
+          >
             <InputField
               placeholder="예: 동, 하자유형, 담당자..."
               value={field.label}
@@ -360,9 +494,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
           </Input>
         </VStack>
 
-        <VStack space="xs">
-          <Text size="sm" color="$gray600">타입:</Text>
-          <HStack space="xs" flexWrap="wrap">
+        <VStack space="sm">
+          <Text size="md" color="$gray700" fontWeight="$medium">입력 타입</Text>
+          <HStack space="sm" flexWrap="wrap">
             {FIELD_TYPES.map((type) => (
               <Pressable
                 key={type.value}
@@ -370,17 +504,18 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
                   console.log(`타입 변경: ${field.type} -> ${type.value}`);
                   onUpdate({ type: type.value as any });
                 }}
-                bg={field.type === type.value ? "#6366F1" : "#F3F4F6"}
-                p="$2"
-                borderRadius="$sm"
+                bg={field.type === type.value ? "$blue600" : "$white"}
+                px="$3"
+                py="$2"
+                borderRadius="$lg"
                 mb="$1"
-                borderWidth={field.type === type.value ? 2 : 1}
-                borderColor={field.type === type.value ? "#4F46E5" : "#D1D5DB"}
+                borderWidth={2}
+                borderColor={field.type === type.value ? "$blue600" : "$gray300"}
               >
                 <Text 
-                  size="xs" 
-                  color={field.type === type.value ? "white" : "$gray700"}
-                  fontWeight={field.type === type.value ? "bold" : "normal"}
+                  size="sm" 
+                  color={field.type === type.value ? "$white" : "$gray700"}
+                  fontWeight={field.type === type.value ? "$bold" : "$medium"}
                 >
                   {type.label}
                 </Text>
@@ -389,12 +524,11 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
           </HStack>
         </VStack>
 
-
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text size="sm" color="$gray600">필수 입력</Text>
+        <HStack justifyContent="space-between" alignItems="center" bg="$white" p="$3" borderRadius="$lg">
+          <Text size="md" color="$gray700" fontWeight="$medium">필수 입력</Text>
           <Pressable
             onPress={() => onUpdate({ required: !field.required })}
-            bg={field.required ? "$primary600" : "$gray300"}
+            bg={field.required ? "$blue600" : "$gray300"}
             w="$12"
             h="$6"
             borderRadius="$full"
@@ -402,41 +536,71 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, index, onUpdate, onRem
             justifyContent="center"
           >
             <Box
-              w="$4"
-              h="$4"
+              w="$5"
+              h="$5"
               bg="white"
               borderRadius="$full"
               position="absolute"
               left={field.required ? "$6" : "$1"}
-              transition="all 0.2s"
             />
           </Pressable>
         </HStack>
 
         {field.type === 'select' && (
-          <VStack space="sm">
-            <Text size="sm" fontWeight="bold" color="$gray700">선택 옵션:</Text>
+          <VStack space="md" bg="$white" p="$3" borderRadius="$lg">
+            <Text size="md" fontWeight="$bold" color="$gray900">선택 옵션</Text>
             
             <HStack space="sm">
-              <Input flex={1}>
+              <Input 
+                flex={1}
+                size="lg"
+                borderRadius="$lg"
+                borderWidth={2}
+                borderColor="$gray300"
+              >
                 <InputField
-                  placeholder="옵션 추가"
+                  placeholder="옵션 추가..."
                   value={optionText}
                   onChangeText={setOptionText}
                 />
               </Input>
-              <Button size="sm" onPress={addOption} isDisabled={!optionText.trim()}>
+              <Button 
+                size="lg" 
+                onPress={addOption} 
+                isDisabled={!optionText.trim()}
+                bg="$blue600"
+                borderRadius="$lg"
+              >
                 <ButtonIcon as={Plus} />
               </Button>
             </HStack>
 
             <VStack space="xs">
-              {field.options?.map((option) => (
-                <HStack key={option} justifyContent="space-between" alignItems="center" bg="white" p="$2" borderRadius="$sm">
-                  <Text size="sm" color="$gray800">{option}</Text>
-                  <Button variant="link" size="sm" onPress={() => removeOption(field.options?.indexOf(option) || 0)} style={{ backgroundColor: 'transparent' }}>
-                    <ButtonIcon as={Trash2} color="$red500" />
-                  </Button>
+              {field.options?.map((option, idx) => (
+                <HStack 
+                  key={option} 
+                  justifyContent="space-between" 
+                  alignItems="center" 
+                  bg="$gray50" 
+                  p="$3" 
+                  borderRadius="$lg"
+                  borderWidth={1}
+                  borderColor="$gray200"
+                >
+                  <HStack alignItems="center" space="sm" flex={1}>
+                    <Badge size="sm" variant="solid" bg="$blue100" borderRadius="$md">
+                      <Text size="xs" color="$blue700" fontWeight="$bold">{idx + 1}</Text>
+                    </Badge>
+                    <Text size="sm" color="$gray900" fontWeight="$medium">{option}</Text>
+                  </HStack>
+                  <Pressable 
+                    onPress={() => removeOption(field.options?.indexOf(option) || 0)}
+                    p="$2"
+                    borderRadius="$md"
+                    bg="$red50"
+                  >
+                    <Trash2 size={16} color="#ef4444" />
+                  </Pressable>
                 </HStack>
               ))}
             </VStack>

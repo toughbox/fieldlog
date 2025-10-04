@@ -249,12 +249,12 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
       <Pressable
         onPress={() => navigation.navigate('RecordDetail', { recordId: item.id })}
       >
-        <Card 
-          bg="$white" 
-          p="$4" 
+        <Card
+          bg="$white"
+          p="$4"
           borderRadius="$xl"
-          borderLeftWidth={4}
-          borderLeftColor={getFieldColor(item.field_id)}
+          borderWidth={1}
+          borderColor="$gray200"
         >
           <VStack space="sm">
             {/* 헤더 */}
