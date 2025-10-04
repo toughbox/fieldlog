@@ -622,27 +622,39 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             </Text>
           </ModalBody>
           <ModalFooter>
-            <HStack space="sm">
-              <Button
-                variant="outline"
-                action="secondary"
+            <HStack space="md" width="100%" justifyContent="space-between">
+              <Pressable
                 onPress={() => setShowDeleteModal(false)}
                 flex={1}
+                py="$2"
+                px="$3"
+                borderRadius="$md"
+                borderWidth={1}
+                borderColor="$gray300"
+                bg="$white"
+                alignItems="center"
+                justifyContent="center"
               >
-                <ButtonText>취소</ButtonText>
-              </Button>
-              <Button
-                action="negative"
+                <Text color="$gray700" fontWeight="$medium" size="sm">취소</Text>
+              </Pressable>
+              <Pressable
                 onPress={handleDelete}
-                isDisabled={isDeleting}
+                disabled={isDeleting}
                 flex={1}
+                py="$2"
+                px="$3"
+                borderRadius="$md"
+                bg="$red600"
+                alignItems="center"
+                justifyContent="center"
+                opacity={isDeleting ? 0.5 : 1}
               >
                 {isDeleting ? (
                   <Spinner color="white" size="small" />
                 ) : (
-                  <ButtonText>삭제</ButtonText>
+                  <Text color="$white" fontWeight="$bold" size="sm">삭제</Text>
                 )}
-              </Button>
+              </Pressable>
             </HStack>
           </ModalFooter>
         </ModalContent>
@@ -665,27 +677,39 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             </Text>
           </ModalBody>
           <ModalFooter>
-            <HStack space="sm">
-              <Button
-                variant="outline"
-                action="secondary"
+            <HStack space="md" width="100%" justifyContent="space-between">
+              <Pressable
                 onPress={() => setShowCompleteModal(false)}
                 flex={1}
+                py="$2"
+                px="$3"
+                borderRadius="$md"
+                borderWidth={1}
+                borderColor="$gray300"
+                bg="$white"
+                alignItems="center"
+                justifyContent="center"
               >
-                <ButtonText>취소</ButtonText>
-              </Button>
-              <Button
-                action="positive"
+                <Text color="$gray700" fontWeight="$medium" size="sm">취소</Text>
+              </Pressable>
+              <Pressable
                 onPress={confirmComplete}
-                isDisabled={isCompleting}
+                disabled={isCompleting}
                 flex={1}
+                py="$2"
+                px="$3"
+                borderRadius="$md"
+                bg="$green600"
+                alignItems="center"
+                justifyContent="center"
+                opacity={isCompleting ? 0.5 : 1}
               >
                 {isCompleting ? (
                   <Spinner color="white" size="small" />
                 ) : (
-                  <ButtonText>완료</ButtonText>
+                  <Text color="$white" fontWeight="$bold" size="sm">완료</Text>
                 )}
-              </Button>
+              </Pressable>
             </HStack>
           </ModalFooter>
         </ModalContent>
