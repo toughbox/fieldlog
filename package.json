@@ -4,8 +4,15 @@
   "main": "index.tsx",
   "scripts": {
     "start": "expo start",
+    "start:clear": "expo start --clear",
+    "start:local": "node scripts/copy-env.js local && expo start",
+    "start:production": "node scripts/copy-env.js production && expo start",
     "android": "expo run:android",
+    "android:local": "node scripts/copy-env.js local && expo run:android",
+    "android:production": "node scripts/copy-env.js production && expo run:android",
     "ios": "expo run:ios",
+    "ios:local": "node scripts/copy-env.js local && expo run:ios",
+    "ios:production": "node scripts/copy-env.js production && expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {

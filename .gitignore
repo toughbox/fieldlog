@@ -30,10 +30,18 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-#.env
-#.env*.local
-#backend/.env
+# local env files - 실제 환경 설정 파일 제외
+.env
+.env.local
+.env*.local
+backend/.env
+backend/.env.local
+
+# 환경 설정 템플릿은 포함
+!.env.example
+!backend/env.example
+!.env.local.example
+!.env.production.example
 
 # typescript
 *.tsbuildinfo
