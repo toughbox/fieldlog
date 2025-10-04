@@ -185,8 +185,14 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
   };
 
   const renderRecordItem = ({ item }: { item: Record }) => (
-    <Pressable onPress={() => handleRecordPress(item)} mb="$3">
-      <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8}>
+    <Pressable onPress={() => handleRecordPress(item)}>
+      <Card 
+        bg="white" 
+        p="$4" 
+        borderRadius="$xl"
+        borderWidth={1}
+        borderColor="$gray200"
+      >
         <VStack space="sm">
           <HStack justifyContent="space-between" alignItems="center">
             <Heading size="md" color="$gray900" flex={1} numberOfLines={1}>
@@ -239,56 +245,106 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
   const renderEmptyState = () => (
     <Center flex={1} p="$8">
       <VStack alignItems="center" space="lg">
-        <Box w="$20" h="$20" bg="$gray100" borderRadius="$full" alignItems="center" justifyContent="center">
-          <FileText size={40} color="#9ca3af" />
+        <Box 
+          w="$24" 
+          h="$24" 
+          bg="$blue50" 
+          borderRadius="$full" 
+          alignItems="center" 
+          justifyContent="center"
+        >
+          <FileText size={48} color="#2563eb" strokeWidth={2} />
         </Box>
         <VStack alignItems="center" space="sm">
-          <Heading size="lg" color="$gray900">기록이 없습니다</Heading>
-          <Text size="sm" color="$gray600" textAlign="center">
-            이 현장의 첫 번째 기록을 작성해보세요
+          <Heading size="xl" color="$gray900" fontWeight="$bold">
+            기록이 없습니다
+          </Heading>
+          <Text size="md" color="$gray600" textAlign="center" lineHeight="$lg">
+            이 현장의 첫 번째 기록을{'\n'}작성해보세요
           </Text>
         </VStack>
         <Button 
-          action="primary"
+          bg="$blue600"
+          size="lg"
+          borderRadius="$xl"
           onPress={handleCreateRecord}
+          px="$6"
         >
-          <ButtonIcon as={Plus} />
-          <ButtonText>기록 작성</ButtonText>
+          <ButtonIcon as={Plus} mr="$2" />
+          <ButtonText fontWeight="$bold">기록 작성</ButtonText>
         </Button>
       </VStack>
     </Center>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
       
-      {/* 헤더 */}
-      <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
+      {/* 헤더 - 그라데이션 배경 */}
+      <Box
+        bg="$blue600"
+        px="$6"
+        pt="$4"
+        pb="$6"
+        borderBottomLeftRadius="$3xl"
+        borderBottomRightRadius="$3xl"
+      >
         <HStack justifyContent="space-between" alignItems="center">
-          <HStack alignItems="center" space="sm">
-            <Button variant="ghost" size="sm" onPress={() => navigation.navigate('FieldList')}>
-              <ButtonIcon as={ArrowLeft} />
-            </Button>
-            <VStack>
-              <Heading size="lg" color="$gray900">{field.name}</Heading>
-              <Text size="sm" color="$gray600">현장 상세</Text>
+          <HStack alignItems="center" space="md" flex={1}>
+            <Pressable
+              onPress={() => navigation.navigate('FieldList')}
+              w="$10"
+              h="$10"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <ArrowLeft size={20} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <VStack flex={1}>
+              <Heading size="xl" color="$white" fontWeight="$bold">{field.name}</Heading>
+              <Text size="sm" color="$blue100">현장 상세</Text>
             </VStack>
           </HStack>
           <HStack space="sm">
-            <Button variant="ghost" size="sm" onPress={handleEditField}>
-              <ButtonIcon as={Edit} />
-            </Button>
-            <Button variant="ghost" size="sm" onPress={handleDeleteField}>
-              <ButtonIcon as={Trash2} />
-            </Button>
+            <Pressable
+              onPress={handleEditField}
+              w="$10"
+              h="$10"
+              borderRadius="$full"
+              bg="rgba(255, 255, 255, 0.2)"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Edit size={18} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
+            <Pressable
+              onPress={handleDeleteField}
+              w="$10"
+              h="$10"
+              borderRadius="$full"
+              bg="rgba(239, 68, 68, 0.2)"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Trash2 size={18} color="#ffffff" strokeWidth={2.5} />
+            </Pressable>
           </HStack>
         </HStack>
       </Box>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <VStack space="lg">
         {/* 현장 정보 */}
-        <Card bg="white" p="$4" borderRadius="$lg" shadowOpacity={0.1} shadowRadius={8} mb="$4">
+        <Card 
+          bg="white" 
+          p="$5" 
+          borderRadius="$xl"
+          borderWidth={1}
+          borderColor="$gray200"
+        >
           <VStack space="md">
             <HStack alignItems="center" space="sm">
               <Box w="$6" h="$6" borderRadius="$full" bg={field.color} />
@@ -331,19 +387,19 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
 
         {/* 액션 버튼 */}
         <Button 
-          action="primary" 
-          size="lg" 
-          mb="$4"
+          bg="$blue600" 
+          size="xl" 
+          borderRadius="$xl"
           onPress={handleCreateRecord}
         >
-          <ButtonIcon as={Plus} />
-          <ButtonText>새 기록 작성</ButtonText>
+          <ButtonIcon as={Plus} mr="$2" />
+          <ButtonText fontWeight="$bold">새 기록 작성</ButtonText>
         </Button>
 
         {/* 기록 목록 */}
         {records.length > 0 ? (
-          <VStack space="sm">
-            <Heading size="md" color="$gray900">기록 목록</Heading>
+          <VStack space="md">
+            <Heading size="xl" color="$gray900" fontWeight="$bold">기록 목록</Heading>
             {records.map((record) => (
               <Box key={record.id}>
                 {renderRecordItem({ item: record })}
@@ -353,6 +409,7 @@ const FieldDetailScreen: React.FC<FieldDetailScreenProps> = ({ navigation, route
         ) : (
           renderEmptyState()
         )}
+        </VStack>
       </ScrollView>
       
       {/* 하단 네비게이션 */}
