@@ -26,7 +26,8 @@ import {
   LogOut,
   Edit,
   Building,
-  List
+  List,
+  FileText
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { currentRecordApi } from '../services/api';
@@ -287,14 +288,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
           {/* 마감 임박 작업 */}
           <VStack space="md">
-            <HStack alignItems="center" space="sm" px="$1">
-              <Box bg="$orange100" p="$2" borderRadius="$lg">
-                <Calendar size={18} color="#f59e0b" strokeWidth={2.5} />
-              </Box>
-              <Heading size="lg" color="$gray900" fontWeight="$semibold">
-                마감 임박 작업
-              </Heading>
-            </HStack>
+            <Heading size="xl" color="$gray900" fontWeight="$bold" px="$1">
+              마감 임박 작업
+            </Heading>
             
             {upcomingTasks.length > 0 ? (
               <VStack space="sm">
@@ -310,38 +306,50 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       borderWidth={1}
                       borderColor="$gray200"
                     >
-                      <HStack justifyContent="space-between" alignItems="center">
-                        <VStack flex={1} space="xs" pr="$3">
-                          <Text size="md" fontWeight="$semibold" color="$gray900" numberOfLines={1}>
-                            {task.title}
-                          </Text>
-                          <HStack space="sm" alignItems="center">
+                      <VStack space="sm">
+                        <HStack justifyContent="space-between" alignItems="flex-start">
+                          <VStack flex={1} space="xs" pr="$3">
+                            <Text size="md" fontWeight="$bold" color="$gray900" numberOfLines={1}>
+                              {task.title}
+                            </Text>
+                            <HStack space="xs" alignItems="center" flexWrap="wrap">
+                              <Badge
+                                size="sm"
+                                variant="solid"
+                                bg="$blue600"
+                                borderRadius="$md"
+                              >
+                                <Text size="xs" color="$white" fontWeight="$bold">
+                                  {task.field}
+                                </Text>
+                              </Badge>
+                              <Badge
+                                size="sm"
+                                variant="solid"
+                                bg={task.priority === 'high' ? '$red600' : task.priority === 'medium' ? '$orange600' : '$green600'}
+                                borderRadius="$md"
+                              >
+                                <Text size="xs" color="$white" fontWeight="$bold">
+                                  {task.priority === 'high' ? '긴급' : task.priority === 'medium' ? '보통' : '낮음'}
+                                </Text>
+                              </Badge>
+                            </HStack>
+                          </VStack>
+                          <VStack alignItems="flex-end" space="xs">
                             <Badge
                               size="sm"
                               variant="solid"
-                              bg="$blue100"
+                              bg="$red600"
                               borderRadius="$md"
+                              px="$3"
                             >
-                              <Text size="xs" color="$blue700" fontWeight="$medium">
-                                {task.field}
+                              <Text size="xs" color="$white" fontWeight="$bold">
+                                {task.dueDate}
                               </Text>
                             </Badge>
-                          </HStack>
-                        </VStack>
-                        <VStack alignItems="flex-end" space="xs">
-                          <Badge
-                            size="sm"
-                            variant="solid"
-                            bg="$red100"
-                            borderRadius="$full"
-                            px="$3"
-                          >
-                            <Text size="xs" color="$red700" fontWeight="$bold">
-                              {task.dueDate}
-                            </Text>
-                          </Badge>
-                        </VStack>
-                      </HStack>
+                          </VStack>
+                        </HStack>
+                      </VStack>
                     </Card>
                   </Pressable>
                 ))}
@@ -358,14 +366,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
           {/* 빠른 작업 */}
           <VStack space="md">
-            <HStack alignItems="center" space="sm" px="$1">
-              <Box bg="$blue100" p="$2" borderRadius="$lg">
-                <Plus size={18} color="#2563eb" strokeWidth={2.5} />
-              </Box>
-              <Heading size="lg" color="$gray900" fontWeight="$semibold">
-                빠른 작업
-              </Heading>
-            </HStack>
+            <Heading size="xl" color="$gray900" fontWeight="$bold" px="$1">
+              빠른 작업
+            </Heading>
             
             <VStack space="sm">
               {/* 새 현장 - 주요 액션 */}
@@ -417,22 +420,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               {/* 기타 액션 */}
               <HStack space="sm">
                 <Pressable flex={1} onPress={() => navigation.navigate('FieldList')}>
-                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
-                    <Box bg="$purple100" p="$3" borderRadius="$lg" mb="$2">
-                      <List size={24} color="#9333ea" strokeWidth={2} />
+                  <Card 
+                    bg="$white" 
+                    p="$4" 
+                    borderRadius="$xl" 
+                    borderWidth={1}
+                    borderColor="$gray200"
+                    alignItems="center"
+                  >
+                    <Box bg="$purple600" p="$3" borderRadius="$xl" mb="$2">
+                      <Building size={24} color="#ffffff" strokeWidth={2.5} />
                     </Box>
-                    <Text size="sm" fontWeight="$semibold" color="$gray900">
+                    <Text size="sm" fontWeight="$bold" color="$gray900">
                       현장 관리
                     </Text>
                   </Card>
                 </Pressable>
 
                 <Pressable flex={1} onPress={() => navigation.navigate('RecordsList')}>
-                  <Card bg="$white" p="$4" borderRadius="$xl" alignItems="center">
-                    <Box bg="$orange100" p="$3" borderRadius="$lg" mb="$2">
-                      <BarChart3 size={24} color="#ea580c" strokeWidth={2} />
+                  <Card 
+                    bg="$white" 
+                    p="$4" 
+                    borderRadius="$xl"
+                    borderWidth={1}
+                    borderColor="$gray200" 
+                    alignItems="center"
+                  >
+                    <Box bg="$orange600" p="$3" borderRadius="$xl" mb="$2">
+                      <FileText size={24} color="#ffffff" strokeWidth={2.5} />
                     </Box>
-                    <Text size="sm" fontWeight="$semibold" color="$gray900">
+                    <Text size="sm" fontWeight="$bold" color="$gray900">
                       기록 목록
                     </Text>
                   </Card>
