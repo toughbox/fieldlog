@@ -342,30 +342,30 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
               {/* 상태 및 우선순위 */}
               <HStack justifyContent="space-between" alignItems="center">
                 <HStack space="sm" flexWrap="wrap" flex={1}>
-                  <HStack 
-                    alignItems="center" 
-                    space="xs" 
-                    bg={statusConfig.bgColor} 
-                    px="$3" 
-                    py="$1" 
+                  <Badge 
+                    variant="solid" 
+                    bg={statusConfig.color}
                     borderRadius="$md"
                   >
-                    <StatusIcon size={16} color={statusConfig.color} />
-                    <Text size="sm" color={statusConfig.color} fontWeight="500">
-                      {statusConfig.label}
-                    </Text>
-                  </HStack>
+                    <HStack alignItems="center" space="xs">
+                      <StatusIcon size={16} color="#ffffff" strokeWidth={2.5} />
+                      <Text size="sm" color="$white" fontWeight="$bold">
+                        {statusConfig.label}
+                      </Text>
+                    </HStack>
+                  </Badge>
 
                   <Badge 
                     variant="solid" 
                     bg={priorityConfig.color}
+                    borderRadius="$md"
                   >
-                    <Text color="white" size="sm">{priorityConfig.label}</Text>
+                    <Text color="$white" size="sm" fontWeight="$bold">{priorityConfig.label}</Text>
                   </Badge>
 
                   {overdue && (
-                    <Badge variant="solid" bg="$red500">
-                      <Text color="white" size="sm">지연</Text>
+                    <Badge variant="solid" bg="$red600" borderRadius="$md">
+                      <Text color="$white" size="sm" fontWeight="$bold">지연</Text>
                     </Badge>
                   )}
                 </HStack>
@@ -395,19 +395,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             borderColor="$gray200"
           >
             <VStack space="lg">
-              <HStack alignItems="center" space="sm">
-                <Box
-                  w="$10"
-                  h="$10"
-                  bg="$blue50"
-                  borderRadius="$lg"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Calendar size={22} color="#2563eb" strokeWidth={2} />
-                </Box>
-                <Heading size="xl" color="$gray900" fontWeight="$bold">일정 정보</Heading>
-              </HStack>
+              <Heading size="xl" color="$gray900" fontWeight="$bold">일정 정보</Heading>
 
               <VStack space="sm">
                 <VStack space="xs">
@@ -462,19 +450,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
               borderColor="$gray200"
             >
               <VStack space="lg">
-                <HStack alignItems="center" space="sm">
-                  <Box
-                    w="$10"
-                    h="$10"
-                    bg="$blue50"
-                    borderRadius="$lg"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Tag size={22} color="#2563eb" strokeWidth={2} />
-                  </Box>
-                  <Heading size="xl" color="$gray900" fontWeight="$bold">상세 정보</Heading>
-                </HStack>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">상세 정보</Heading>
 
                 <VStack space="sm">
                   {Object.entries(record.custom_data).map(([key, value], index, array) => (
@@ -575,24 +551,12 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
               borderColor="$gray200"
             >
               <VStack space="lg">
-                <HStack alignItems="center" space="sm">
-                  <Box
-                    w="$10"
-                    h="$10"
-                    bg="$blue50"
-                    borderRadius="$lg"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Tag size={22} color="#2563eb" strokeWidth={2} />
-                  </Box>
-                  <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
-                </HStack>
+                <Heading size="xl" color="$gray900" fontWeight="$bold">태그</Heading>
 
                 <HStack space="xs" flexWrap="wrap">
                   {record.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" mb="$1">
-                      <Text size="sm">{tag}</Text>
+                    <Badge key={tag} variant="solid" bg="$purple600" borderRadius="$md" mb="$1">
+                      <Text size="sm" color="$white" fontWeight="$bold">#{tag}</Text>
                     </Badge>
                   ))}
                 </HStack>
