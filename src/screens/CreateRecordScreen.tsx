@@ -664,9 +664,10 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                         variant="solid" 
                         mb="$1" 
                         mr="$1"
-                        bg="$blue500"
+                        bg="$purple600"
+                        borderRadius="$md"
                       >
-                        <Text color="white" size="sm">{tag} ×</Text>
+                        <Text color="$white" size="sm" fontWeight="$bold">#{tag} ×</Text>
                       </Badge>
                     </Pressable>
                   ))}

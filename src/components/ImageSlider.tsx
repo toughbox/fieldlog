@@ -27,12 +27,16 @@ const getFullImageUrl = (url: string): string => {
     return url; // 이미 전체 URL이거나 로컬 파일인 경우
   }
   
-  // 상대 경로인 경우 백엔드 API를 통해 서빙
-  const baseUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3030';
+  // api.ts와 동일한 설정 사용
+  const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
+  const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
+  const baseUrl = `http://${API_HOST}:${API_PORT}`;
   const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   
   console.log('🖼️ 이미지 URL 변환:', { 
     originalUrl: url, 
+    API_HOST,
+    API_PORT,
     baseUrl, 
     fullUrl 
   });
