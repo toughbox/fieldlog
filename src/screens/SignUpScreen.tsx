@@ -47,14 +47,19 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   };
 
   const handleSignUp = async () => {
+    console.log('🚀 회원가입 버튼 클릭됨');
+    
     const validation = validateSignUpForm(formData);
+    console.log('✅ 유효성 검사 결과:', validation);
+    
     if (!validation.isValid) {
-      Alert.alert('입력 오류', validation.errors.join('\n'));
+      Alert.alert('입력 오류', validation.message || '입력 정보를 확인해주세요.');
       return;
     }
 
     try {
       setIsLoading(true);
+      console.log('🔄 회원가입 API 호출 시작...');
       
       const signUpRequest: SignUpRequest = {
         name: formData.name,
@@ -64,7 +69,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
         phone: formData.phone || undefined
       };
 
+      console.log('📤 요청 데이터:', { ...signUpRequest, password: '***' });
+
       const response = await currentApi.signUp(signUpRequest);
+      
+      console.log('📥 API 응답:', response);
       
       if (response.success) {
         Alert.alert(
@@ -73,11 +82,14 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
           [{ text: '확인', onPress: () => navigation.goBack() }]
         );
       } else {
-        Alert.alert('회원가입 실패', response.message || '회원가입에 실패했습니다.');
+        Alert.alert('회원가입 실패', response.error || response.message || '회원가입에 실패했습니다.');
       }
     } catch (error) {
-      console.error('회원가입 오류:', error);
-      Alert.alert('오류', '회원가입 중 오류가 발생했습니다.');
+      console.error('❌ 회원가입 오류:', error);
+      Alert.alert(
+        '오류 발생',
+        '네트워크 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.'
+      );
     } finally {
       setIsLoading(false);
     }

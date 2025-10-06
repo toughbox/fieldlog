@@ -14,7 +14,8 @@ import {
   SafeAreaView,
   ButtonText,
   ButtonIcon,
-  Spinner
+  Spinner,
+  Pressable
 } from '@gluestack-ui/themed';
 import { LogIn, Mail, Lock, Eye, EyeOff, Building2 } from 'lucide-react-native';
 import { currentApi, LoginRequest } from '../services/api';
@@ -179,9 +180,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
               {/* 비밀번호 입력 */}
               <VStack space="sm">
-                <Text size="sm" color="$gray700" fontWeight="$medium">
-                  비밀번호
-                </Text>
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Text size="sm" color="$gray700" fontWeight="$medium">
+                    비밀번호
+                  </Text>
+                  <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
+                    <Text size="sm" color="$blue600" fontWeight="$medium">
+                      비밀번호 찾기
+                    </Text>
+                  </Pressable>
+                </HStack>
                 <Input 
                   variant="outline" 
                   size="xl"

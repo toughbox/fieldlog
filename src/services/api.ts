@@ -291,6 +291,30 @@ export const authApi = {
   checkEmail: async (email: string): Promise<ApiResponse<{ available: boolean }>> => {
     return apiRequest<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(email)}`);
   },
+
+  // 비밀번호 재설정 요청
+  requestPasswordReset: async (email: string): Promise<ApiResponse<{ dev_token?: string }>> => {
+    return apiRequest<{ dev_token?: string }>('/auth/request-password-reset', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  // 재설정 토큰 확인
+  verifyResetToken: async (email: string, token: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/auth/verify-reset-token', {
+      method: 'POST',
+      body: JSON.stringify({ email, token }),
+    });
+  },
+
+  // 비밀번호 재설정
+  resetPassword: async (email: string, token: string, newPassword: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, token, newPassword }),
+    });
+  },
 };
 
 // 현장 기록 관리 API

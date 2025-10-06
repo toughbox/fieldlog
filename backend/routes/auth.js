@@ -1,9 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { query, transaction } = require('../config/database');
+const { sendPasswordResetEmail, sendPasswordResetConfirmationEmail } = require('../services/emailService');
 
 const router = express.Router();
+
+// 비밀번호 재설정 토큰 저장소 (메모리) - 프로덕션에서는 Redis나 DB 사용 권장
+const resetTokens = new Map(); // { email: { token, expiresAt, used } }
 
 // 회원가입 API
 router.post('/signup', async (req, res) => {
@@ -237,5 +242,245 @@ router.get('/check-email', async (req, res) => {
     });
   }
 });
+
+// 비밀번호 재설정 요청 API
+router.post('/request-password-reset', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: '이메일을 입력해주세요.'
+      });
+    }
+
+    // 사용자 존재 확인
+    const result = await query(
+      'SELECT id, name, email FROM fieldlog.user WHERE email = $1 AND is_active = true',
+      [email.toLowerCase()]
+    );
+
+    const user = result.rows[0];
+
+    // 보안을 위해 사용자가 없어도 성공 응답 (이메일 존재 여부 노출 방지)
+    if (!user) {
+      console.log('⚠️ 존재하지 않는 이메일로 비밀번호 재설정 요청:', email);
+      return res.json({
+        success: true,
+        message: '이메일이 등록되어 있다면 비밀번호 재설정 안내가 발송되었습니다.'
+      });
+    }
+
+    // 6자리 숫자 토큰 생성
+    const resetToken = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10분 후 만료
+
+    // 토큰 저장
+    resetTokens.set(email.toLowerCase(), {
+      token: resetToken,
+      expiresAt: expiresAt,
+      used: false,
+      userId: user.id
+    });
+
+    // 이메일 발송
+    const emailSent = await sendPasswordResetEmail(user.email, user.name, resetToken);
+
+    if (!emailSent) {
+      console.error('❌ 이메일 발송 실패, 하지만 개발 모드에서는 토큰을 반환합니다');
+    }
+
+    console.log('✅ 비밀번호 재설정 토큰 생성:', {
+      email: user.email,
+      token: resetToken,
+      expiresAt: expiresAt
+    });
+
+    res.json({
+      success: true,
+      message: '이메일로 비밀번호 재설정 안내가 발송되었습니다.',
+      // 개발 환경에서만 토큰 반환 (프로덕션에서는 제거)
+      ...(process.env.NODE_ENV === 'development' && { dev_token: resetToken })
+    });
+
+  } catch (error) {
+    console.error('❌ 비밀번호 재설정 요청 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '비밀번호 재설정 요청 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 토큰 확인 API
+router.post('/verify-reset-token', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+
+    if (!email || !token) {
+      return res.status(400).json({
+        success: false,
+        error: '이메일과 토큰을 입력해주세요.'
+      });
+    }
+
+    const resetData = resetTokens.get(email.toLowerCase());
+
+    if (!resetData) {
+      return res.status(400).json({
+        success: false,
+        error: '유효하지 않은 토큰입니다.'
+      });
+    }
+
+    if (resetData.used) {
+      return res.status(400).json({
+        success: false,
+        error: '이미 사용된 토큰입니다.'
+      });
+    }
+
+    if (new Date() > resetData.expiresAt) {
+      resetTokens.delete(email.toLowerCase());
+      return res.status(400).json({
+        success: false,
+        error: '토큰이 만료되었습니다. 다시 요청해주세요.'
+      });
+    }
+
+    if (resetData.token !== token) {
+      return res.status(400).json({
+        success: false,
+        error: '토큰이 일치하지 않습니다.'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: '토큰이 확인되었습니다.'
+    });
+
+  } catch (error) {
+    console.error('❌ 토큰 확인 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '토큰 확인 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 비밀번호 재설정 API
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+
+    if (!email || !token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: '모든 필드를 입력해주세요.'
+      });
+    }
+
+    // 비밀번호 강도 검증
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: '비밀번호는 6자 이상이어야 합니다.'
+      });
+    }
+
+    const resetData = resetTokens.get(email.toLowerCase());
+
+    if (!resetData) {
+      return res.status(400).json({
+        success: false,
+        error: '유효하지 않은 토큰입니다.'
+      });
+    }
+
+    if (resetData.used) {
+      return res.status(400).json({
+        success: false,
+        error: '이미 사용된 토큰입니다.'
+      });
+    }
+
+    if (new Date() > resetData.expiresAt) {
+      resetTokens.delete(email.toLowerCase());
+      return res.status(400).json({
+        success: false,
+        error: '토큰이 만료되었습니다. 다시 요청해주세요.'
+      });
+    }
+
+    if (resetData.token !== token) {
+      return res.status(400).json({
+        success: false,
+        error: '토큰이 일치하지 않습니다.'
+      });
+    }
+
+    // 비밀번호 해싱
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+    // 비밀번호 업데이트
+    const result = await query(
+      `UPDATE fieldlog.user 
+       SET password_hash = $1, updated_at = NOW()
+       WHERE email = $2 AND is_active = true
+       RETURNING id, name, email`,
+      [passwordHash, email.toLowerCase()]
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: '사용자를 찾을 수 없습니다.'
+      });
+    }
+
+    // 토큰 사용 처리
+    resetData.used = true;
+    
+    // 일정 시간 후 토큰 삭제 (재사용 방지)
+    setTimeout(() => {
+      resetTokens.delete(email.toLowerCase());
+    }, 60000); // 1분 후 삭제
+
+    // 비밀번호 변경 완료 이메일 발송
+    await sendPasswordResetConfirmationEmail(user.email, user.name);
+
+    console.log('✅ 비밀번호 재설정 완료:', {
+      userId: user.id,
+      email: user.email
+    });
+
+    res.json({
+      success: true,
+      message: '비밀번호가 성공적으로 변경되었습니다.'
+    });
+
+  } catch (error) {
+    console.error('❌ 비밀번호 재설정 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '비밀번호 재설정 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 만료된 토큰 정리 (주기적으로 실행)
+setInterval(() => {
+  const now = new Date();
+  for (const [email, data] of resetTokens.entries()) {
+    if (now > data.expiresAt || data.used) {
+      resetTokens.delete(email);
+    }
+  }
+}, 5 * 60 * 1000); // 5분마다 실행
 
 module.exports = router;
