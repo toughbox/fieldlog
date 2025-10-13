@@ -134,6 +134,18 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
       return;
     }
 
+    // 선택 타입 필드의 옵션 확인
+    const selectFieldWithoutOptions = fields.find(
+      field => field.type === 'select' && (!field.options || field.options.length === 0)
+    );
+    if (selectFieldWithoutOptions) {
+      Alert.alert(
+        '선택 항목 필요', 
+        `"${selectFieldWithoutOptions.label}" 필드는 선택 유형입니다.\n최소 하나의 선택 항목을 추가해주세요.`
+      );
+      return;
+    }
+
     try {
       setIsLoading(true);
       
