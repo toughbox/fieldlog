@@ -1,5 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { Dimensions, FlatList, Image as RNImage, Animated } from 'react-native';
+import { Dimensions, FlatList, Image as RNImage, Animated as RNAnimated } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import Constants from 'expo-constants';
 import {
   VStack,
@@ -53,9 +63,141 @@ interface ImageSliderProps {
   }>;
 }
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const imageWidth = screenWidth - 40; // 좌우 패딩 고려
 const imageHeight = 280;
+
+// 확대/축소 가능한 이미지 컴포넌트
+interface ZoomableImageProps {
+  imageUrl: string;
+  onClose: () => void;
+  onLoadStart?: () => void;
+  onLoad?: () => void;
+  onError?: () => void;
+}
+
+const ZoomableImage: React.FC<ZoomableImageProps> = ({ 
+  imageUrl, 
+  onClose,
+  onLoadStart,
+  onLoad,
+  onError 
+}) => {
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
+  // 핀치 제스처
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((event) => {
+      const newScale = savedScale.value * event.scale;
+      scale.value = Math.max(1, Math.min(newScale, 5)); // 1배 ~ 5배
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+      if (scale.value < 1) {
+        scale.value = withSpring(1);
+        savedScale.value = 1;
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      }
+    });
+
+  // 팬 제스처 (드래그)
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      if (scale.value > 1) {
+        translateX.value = savedTranslateX.value + event.translationX;
+        translateY.value = savedTranslateY.value + event.translationY;
+      }
+    })
+    .onEnd(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+      
+      // 경계 체크
+      const maxTranslateX = (screenWidth * (scale.value - 1)) / 2;
+      const maxTranslateY = (screenHeight * (scale.value - 1)) / 2;
+
+      if (translateX.value > maxTranslateX) {
+        translateX.value = withSpring(maxTranslateX);
+        savedTranslateX.value = maxTranslateX;
+      } else if (translateX.value < -maxTranslateX) {
+        translateX.value = withSpring(-maxTranslateX);
+        savedTranslateX.value = -maxTranslateX;
+      }
+
+      if (translateY.value > maxTranslateY) {
+        translateY.value = withSpring(maxTranslateY);
+        savedTranslateY.value = maxTranslateY;
+      } else if (translateY.value < -maxTranslateY) {
+        translateY.value = withSpring(-maxTranslateY);
+        savedTranslateY.value = -maxTranslateY;
+      }
+    });
+
+  // 더블 탭 제스처
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .onEnd(() => {
+      if (scale.value > 1) {
+        // 축소
+        scale.value = withSpring(1);
+        savedScale.value = 1;
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      } else {
+        // 확대
+        scale.value = withSpring(2.5);
+        savedScale.value = 2.5;
+      }
+    });
+
+  // 제스처 합성
+  const composedGesture = Gesture.Simultaneous(
+    doubleTapGesture,
+    Gesture.Simultaneous(pinchGesture, panGesture)
+  );
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { scale: scale.value },
+      ],
+    };
+  });
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Animated.View style={[animatedStyle]}>
+            <RNImage
+              source={{ uri: imageUrl }}
+              style={{
+                width: screenWidth,
+                height: screenHeight * 0.8,
+              }}
+              resizeMode="contain"
+              onLoadStart={() => onLoadStart?.()}
+              onLoad={() => onLoad?.()}
+              onError={() => onError?.()}
+            />
+          </Animated.View>
+        </Animated.View>
+      </GestureDetector>
+    </GestureHandlerRootView>
+  );
+};
 
 const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -65,8 +207,8 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
   const [touchStartX, setTouchStartX] = useState(0);
   
   // 애니메이션 관련 상태
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new RNAnimated.Value(0)).current;
+  const fadeAnim = useRef(new RNAnimated.Value(1)).current;
 
   // 이미지 파일만 필터링
   const imageAttachments = attachments.filter(att => 
@@ -135,13 +277,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
     const slideValue = direction === 'left' ? -slideDistance : slideDistance;
     
     // 페이드 아웃과 슬라이드 아웃
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
+    RNAnimated.parallel([
+      RNAnimated.timing(fadeAnim, {
         toValue: 0.3,
         duration: 150,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      RNAnimated.timing(slideAnim, {
         toValue: slideValue,
         duration: 150,
         useNativeDriver: true,
@@ -156,13 +298,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
       slideAnim.setValue(0);
       
       // 페이드 인과 슬라이드 인
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
+      RNAnimated.parallel([
+        RNAnimated.timing(fadeAnim, {
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.spring(slideAnim, {
+        RNAnimated.spring(slideAnim, {
           toValue: 0,
           tension: 100,
           friction: 8,
@@ -325,58 +467,41 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ attachments }) => {
                 </Text>
               </VStack>
             ) : (
-              <Animated.View 
-                style={{
-                  opacity: fadeAnim,
-                  transform: [{ translateX: slideAnim }]
-                }}
-              >
-                <Box position="relative">
-                  {(() => {
-                    const currentImage = imageAttachments[selectedImageIndex];
-                    if (!currentImage) {
-                      return <Text color="$gray800">이미지를 찾을 수 없습니다</Text>;
-                    }
-                    
-                    const imageUrl = getFullImageUrl(currentImage.url);
-                    return (
-                      <RNImage
-                        key={`modal-image-${selectedImageIndex}`}
-                        source={{ uri: imageUrl }}
-                        style={{ 
-                          width: screenWidth - 10, 
-                          height: (screenWidth - 10) * 0.85,
-                          borderRadius: 8
-                        }}
-                        resizeMode="contain"
-                        onLoad={() => {
-                          console.log('✅ 모달 이미지 로딩 완료:', selectedImageIndex);
-                          setLoadingImages(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(selectedImageIndex);
-                            return newSet;
-                          });
-                        }}
-                        onError={(error) => {
-                          console.log('❌ 모달 이미지 로딩 오류:', {
-                            index: selectedImageIndex,
-                            error,
-                            url: imageUrl,
-                            fileName: currentImage.name
-                          });
-                          setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
-                          setLoadingImages(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(selectedImageIndex);
-                            return newSet;
-                          });
-                        }}
-                      />
-                    );
-                  })()}
-                  
-                </Box>
-              </Animated.View>
+              (() => {
+                const currentImage = imageAttachments[selectedImageIndex];
+                if (!currentImage) {
+                  return <Text color="$gray800">이미지를 찾을 수 없습니다</Text>;
+                }
+                
+                const imageUrl = getFullImageUrl(currentImage.url);
+                return (
+                  <ZoomableImage 
+                    imageUrl={imageUrl}
+                    onClose={() => setIsModalOpen(false)}
+                    onLoadStart={() => {
+                      console.log('🔄 줌 가능 이미지 로딩 시작:', selectedImageIndex);
+                      setLoadingImages(prev => new Set(prev).add(selectedImageIndex));
+                    }}
+                    onLoad={() => {
+                      console.log('✅ 줌 가능 이미지 로딩 완료:', selectedImageIndex);
+                      setLoadingImages(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(selectedImageIndex);
+                        return newSet;
+                      });
+                    }}
+                    onError={() => {
+                      console.log('❌ 줌 가능 이미지 로딩 오류:', selectedImageIndex);
+                      setImageLoadErrors(prev => new Set(prev).add(selectedImageIndex));
+                      setLoadingImages(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(selectedImageIndex);
+                        return newSet;
+                      });
+                    }}
+                  />
+                );
+              })()
             )}
           </Center>
         </ModalContent>
