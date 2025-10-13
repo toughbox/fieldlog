@@ -31,7 +31,7 @@ import {
   TextareaInput,
   Center
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Tag, Calendar, Save, ChevronDown } from 'lucide-react-native';
+import { ArrowLeft, Tag, Calendar, Save, ChevronDown, Check } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, UpdateRecordRequest, Field, FieldRecord } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -363,6 +363,38 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
                 onChangeText={(text) => updateCustomField(key, text)}
               />
             </Textarea>
+          </VStack>
+        );
+
+      case 'checkbox':
+        return (
+          <VStack key={key} space="xs">
+            <HStack alignItems="center" justifyContent="space-between" py="$2">
+              <HStack alignItems="center" space="sm" flex={1}>
+                <Text size="sm" color="$gray600">
+                  {label} {required && <Text color="$red500">*</Text>}
+                </Text>
+              </HStack>
+              <Pressable
+                onPress={() => updateCustomField(key, value === 'true' || value === true ? 'false' : 'true')}
+                p="$2"
+              >
+                <HStack 
+                  alignItems="center" 
+                  justifyContent="center"
+                  w="$8" 
+                  h="$8" 
+                  borderRadius="$md" 
+                  borderWidth={2}
+                  borderColor={value === 'true' || value === true ? "$blue600" : "$gray400"}
+                  bg={value === 'true' || value === true ? "$blue600" : "$white"}
+                >
+                  {(value === 'true' || value === true) && (
+                    <Check size={20} color="#ffffff" strokeWidth={3} />
+                  )}
+                </HStack>
+              </Pressable>
+            </HStack>
           </VStack>
         );
 

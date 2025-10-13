@@ -31,7 +31,7 @@ import {
   Textarea,
   TextareaInput
 } from '@gluestack-ui/themed';
-import { ArrowLeft, Calendar, MapPin, Tag, Clock } from 'lucide-react-native';
+import { ArrowLeft, Calendar, MapPin, Tag, Clock, Check } from 'lucide-react-native';
 import { currentRecordApi, currentFieldApi, CreateRecordRequest, Field, FieldSchema } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ImagePickerComponent from '../components/ImagePicker';
@@ -98,7 +98,8 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
         // 사용자 정의 필드 초기화
         const initialCustomData: Record<string, any> = {};
         field.field_schema.fields.forEach(fieldDef => {
-          initialCustomData[fieldDef.key] = '';
+          // 체크박스는 false로 초기화, 나머지는 빈 문자열
+          initialCustomData[fieldDef.key] = fieldDef.type === 'checkbox' ? 'false' : '';
         });
         setCustomData(initialCustomData);
         
@@ -373,6 +374,38 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
                 }}
               />
             )}
+          </VStack>
+        );
+
+      case 'checkbox':
+        return (
+          <VStack key={key} space="xs">
+            <HStack alignItems="center" justifyContent="space-between" py="$2">
+              <HStack alignItems="center" space="sm" flex={1}>
+                <Text size="sm" color="$gray600">
+                  {label} {required && <Text color="$red500">*</Text>}
+                </Text>
+              </HStack>
+              <Pressable
+                onPress={() => updateCustomField(key, value === 'true' || value === true ? 'false' : 'true')}
+                p="$2"
+              >
+                <HStack 
+                  alignItems="center" 
+                  justifyContent="center"
+                  w="$8" 
+                  h="$8" 
+                  borderRadius="$md" 
+                  borderWidth={2}
+                  borderColor={value === 'true' || value === true ? "$blue600" : "$gray400"}
+                  bg={value === 'true' || value === true ? "$blue600" : "$white"}
+                >
+                  {(value === 'true' || value === true) && (
+                    <Check size={20} color="#ffffff" strokeWidth={3} />
+                  )}
+                </HStack>
+              </Pressable>
+            </HStack>
           </VStack>
         );
 

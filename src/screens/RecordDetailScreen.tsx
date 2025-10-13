@@ -36,7 +36,8 @@ import {
   CheckCircle2, 
   X,
   Share,
-  Trash2
+  Trash2,
+  Check
 } from 'lucide-react-native';
 import ImageSlider from '../components/ImageSlider';
 import { currentRecordApi, FieldRecord } from '../services/api';
@@ -194,10 +195,33 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
 
   const renderCustomField = (key: string, value: any, index: number, isLast: boolean, fieldSchema: any) => {
-    if (!value && value !== 0) return null;
+    if (!value && value !== 0 && value !== 'false' && value !== false) return null;
 
     const fieldDef = fieldSchema?.fields?.find((f: any) => f.key === key);
     const label = fieldDef?.label || key;
+    const fieldType = fieldDef?.type;
+
+    // 체크박스 값 처리
+    let displayValue = value;
+    if (fieldType === 'checkbox') {
+      const isChecked = value === 'true' || value === true;
+      displayValue = (
+        <HStack alignItems="center" space="xs">
+          <Box 
+            w="$6" 
+            h="$6" 
+            borderRadius="$md" 
+            borderWidth={2}
+            borderColor={isChecked ? "$blue600" : "$gray400"}
+            bg={isChecked ? "$blue600" : "$white"}
+            alignItems="center"
+            justifyContent="center"
+          >
+            {isChecked && <Check size={16} color="#ffffff" strokeWidth={3} />}
+          </Box>
+        </HStack>
+      );
+    }
 
     return (
       <VStack key={key} space="xs">
@@ -205,9 +229,13 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
           <Text size="sm" color="$gray600" fontWeight="500">
             {label}:
           </Text>
-          <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
-            {value.toString()}
-          </Text>
+          {fieldType === 'checkbox' ? (
+            <Box flex={1}>{displayValue}</Box>
+          ) : (
+            <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+              {value.toString()}
+            </Text>
+          )}
         </HStack>
         {!isLast && (
           <Divider bg="$gray200" opacity={0.5} />
