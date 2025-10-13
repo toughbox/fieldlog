@@ -37,7 +37,7 @@ import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { TokenService } from '../services/tokenService';
 import ImagePickerComponent from '../components/ImagePicker';
-import { UploadedImage } from '../services/imageService';
+import { UploadedImage, getImageUrl } from '../services/imageService';
 import BottomNavigation from '../components/BottomNavigation';
 
 interface EditRecordScreenProps {
@@ -169,11 +169,21 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
         if (recordData.attachment && Array.isArray(recordData.attachment)) {
           const imageAttachments = recordData.attachment
             .filter(att => att.type === 'image')
-            .map(att => ({
-              fileName: att.name,
-              url: att.url,
-              size: att.size || 0
-            }));
+            .map(att => {
+              // URL이 상대 경로인 경우 전체 URL로 변환
+              let imageUrl = att.url;
+              if (!imageUrl.startsWith('http')) {
+                // 상대 경로에서 파일명 추출
+                const fileName = imageUrl.split('/').pop() || att.name;
+                imageUrl = getImageUrl(fileName);
+              }
+              
+              return {
+                fileName: att.name,
+                url: imageUrl,
+                size: att.size || 0
+              };
+            });
           setImages(imageAttachments);
         }
       } else {
@@ -690,7 +700,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
               <ImagePickerComponent
                 images={images}
                 onImagesChange={setImages}
-                maxImages={10}
+                maxImages={3}
                 recordId={record?.id}
               />
             </VStack>

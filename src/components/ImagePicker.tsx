@@ -15,7 +15,7 @@ import {
   Spinner
 } from '@gluestack-ui/themed';
 import { Camera, X, Plus } from 'lucide-react-native';
-import { selectImages, uploadImages, deleteImage, ImageFile, UploadedImage } from '../services/imageService';
+import { selectImages, uploadImages, deleteImage, ImageFile, UploadedImage, getImageUrl } from '../services/imageService';
 import { TokenService } from '../services/tokenService';
 
 interface ImagePickerProps {
@@ -58,7 +58,7 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
       const imagesToUpload = selectedImages.slice(0, remainingSlots);
       
       if (selectedImages.length > remainingSlots) {
-        Alert.alert('알림', `${remainingSlots}개의 이미지만 추가됩니다.`);
+        Alert.alert('알림', `${remainingSlots}개의 이미지만 업로드 가능합니다.`);
       }
 
       // recordId가 있는 경우에만 즉시 업로드
@@ -78,7 +78,8 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
       }
     } catch (error) {
       console.error('📸 이미지 선택 오류:', error);
-      Alert.alert('오류', `이미지 선택 중 오류가 발생했습니다: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      Alert.alert('오류', `이미지 선택 중 오류가 발생했습니다: ${errorMessage}`);
     }
   };
 
@@ -94,7 +95,27 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
       }
 
       const uploadedImages = await uploadImages(selectedImages, recordId!, accessToken);
-      onImagesChange([...images, ...uploadedImages]);
+      
+      // 업로드된 이미지의 URL을 전체 URL로 변환
+      const imagesWithFullUrls = uploadedImages.map(img => {
+        let fullUrl = img.url;
+        if (!fullUrl.startsWith('http')) {
+          // 상대 경로인 경우 전체 URL로 변환
+          const fileName = fullUrl.split('/').pop() || img.fileName;
+          fullUrl = getImageUrl(fileName);
+          console.log('🖼️ 업로드된 이미지 URL 변환:', { 
+            fileName, 
+            originalUrl: img.url, 
+            fullUrl 
+          });
+        }
+        return {
+          ...img,
+          url: fullUrl
+        };
+      });
+      
+      onImagesChange([...images, ...imagesWithFullUrls]);
       
       Alert.alert('성공', `${uploadedImages.length}개의 이미지가 업로드되었습니다.`);
     } catch (error) {
@@ -126,21 +147,22 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
 
   const renderImageItem = (image: UploadedImage, index: number) => (
     <Box key={index} position="relative" m="$1">
-      <Image
-        source={{ uri: image.url }}
-        alt={`첨부 이미지 ${index + 1}`}
-        width={80}
-        height={80}
-        borderRadius="$md"
-      />
+      <Box w={80} h={80} borderRadius="$md" overflow="hidden">
+        <Image
+          source={{ uri: image.url }}
+          alt={`첨부 이미지 ${index + 1}`}
+          w="$full"
+          h="$full"
+        />
+      </Box>
       <Pressable
         position="absolute"
         top="$1"
         right="$1"
         bg="$red500"
         borderRadius="$full"
-        width={20}
-        height={20}
+        w={20}
+        h={20}
         onPress={() => handleRemoveImage(image, index)}
       >
         <Center flex={1}>
@@ -186,8 +208,8 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
             {!isUploading && images.length < maxImages && (
               <Pressable onPress={handleSelectImages}>
                 <Box
-                  width={80}
-                  height={80}
+                  w={80}
+                  h={80}
                   bg="$gray100"
                   borderRadius="$md"
                   borderWidth={2}

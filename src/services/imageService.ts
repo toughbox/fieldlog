@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
 
 export interface ImageFile {
   uri: string;
@@ -16,7 +17,47 @@ export interface UploadedImage {
   tempFile?: ImageFile; // 임시 파일 정보
 }
 
-// expo-image-picker는 함수 내에서 옵션을 직접 설정합니다
+// 이미지 압축 및 리사이징 설정
+const MAX_IMAGE_WIDTH = 1200; // 최대 너비 (px)
+const MAX_IMAGE_HEIGHT = 1200; // 최대 높이 (px)
+const COMPRESS_QUALITY = 0.7; // 압축 품질 (70%)
+
+// 이미지 압축 함수
+const compressImage = async (uri: string): Promise<{ uri: string; width: number; height: number }> => {
+  try {
+    console.log('🔄 이미지 압축 시작:', uri);
+    
+    // 이미지 리사이징 및 압축
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [
+        { 
+          resize: { 
+            width: MAX_IMAGE_WIDTH,
+            height: MAX_IMAGE_HEIGHT
+          } 
+        }
+      ],
+      { 
+        compress: COMPRESS_QUALITY,
+        format: ImageManipulator.SaveFormat.JPEG
+      }
+    );
+    
+    console.log('✅ 이미지 압축 완료:', {
+      originalUri: uri,
+      compressedUri: manipResult.uri,
+      width: manipResult.width,
+      height: manipResult.height
+    });
+    
+    return manipResult;
+  } catch (error) {
+    console.error('❌ 이미지 압축 오류:', error);
+    // 압축 실패 시 원본 반환
+    return { uri, width: 0, height: 0 };
+  }
+};
 
 // 이미지 선택 함수
 export const selectImages = async (): Promise<ImageFile[]> => {
@@ -37,7 +78,7 @@ export const selectImages = async (): Promise<ImageFile[]> => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      quality: 0.8,
+      quality: 1, // 선택 시에는 원본 품질로 (압축은 나중에 수동으로)
       selectionLimit: 10,
     });
 
@@ -49,25 +90,50 @@ export const selectImages = async (): Promise<ImageFile[]> => {
     }
 
     if (result.assets && result.assets.length > 0) {
-      const imageFiles: ImageFile[] = result.assets.map(asset => {
-        // 파일 확장자로부터 MIME 타입 결정
-        const fileName = asset.fileName || `image_${Date.now()}.jpg`;
-        const extension = fileName.split('.').pop()?.toLowerCase();
-        let mimeType = 'image/jpeg'; // 기본값
-        
-        if (extension === 'png') mimeType = 'image/png';
-        else if (extension === 'gif') mimeType = 'image/gif';
-        else if (extension === 'webp') mimeType = 'image/webp';
-        else if (extension === 'jpg' || extension === 'jpeg') mimeType = 'image/jpeg';
-        
-        return {
-          uri: asset.uri,
-          fileName: fileName,
-          type: mimeType,
-          size: asset.fileSize || 0,
-        };
-      });
-      console.log('📸 선택된 이미지들:', imageFiles);
+      console.log(`📸 ${result.assets.length}개 이미지 압축 처리 중...`);
+      
+      // 각 이미지를 압축 처리
+      const imageFiles: ImageFile[] = await Promise.all(
+        result.assets.map(async (asset, index) => {
+          const originalSize = asset.fileSize || 0;
+          console.log(`📸 [${index + 1}/${result.assets.length}] 원본 크기: ${(originalSize / 1024 / 1024).toFixed(2)}MB`);
+          
+          // 이미지 압축
+          const compressed = await compressImage(asset.uri);
+          
+          // 압축된 파일의 실제 크기 가져오기
+          let compressedSize = 0;
+          try {
+            const fileInfo = await FileSystem.getInfoAsync(compressed.uri);
+            if (fileInfo.exists && 'size' in fileInfo) {
+              compressedSize = fileInfo.size;
+            }
+          } catch (error) {
+            console.warn('⚠️ 파일 크기 확인 실패, 추정값 사용:', error);
+            compressedSize = Math.floor(originalSize * COMPRESS_QUALITY);
+          }
+          
+          // 파일 이름 생성
+          const fileName = asset.fileName 
+            ? asset.fileName.replace(/\.[^/.]+$/, '.jpg') // 확장자를 jpg로 변경
+            : `image_${Date.now()}_${index}.jpg`;
+          
+          const reductionPercent = originalSize > 0 
+            ? Math.round((1 - compressedSize / originalSize) * 100)
+            : 0;
+          
+          console.log(`📸 [${index + 1}/${result.assets.length}] 압축 완료: ${(compressedSize / 1024 / 1024).toFixed(2)}MB (${reductionPercent}% 절감)`);
+          
+          return {
+            uri: compressed.uri,
+            fileName: fileName,
+            type: 'image/jpeg',
+            size: compressedSize,
+          };
+        })
+      );
+      
+      console.log(`📸 총 ${imageFiles.length}개 이미지 압축 완료`);
       return imageFiles;
     } else {
       console.log('📸 선택된 이미지 없음');
@@ -107,9 +173,10 @@ export const uploadImages = async (
         recordId: recordId.toString()
       });
       
-      // API URL 설정
-      const baseUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3030';
-      const apiUrl = `${baseUrl}/api/upload/image`;
+      // API URL 설정 (api.ts와 동일한 방식)
+      const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
+      const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
+      const apiUrl = `http://${API_HOST}:${API_PORT}/api/upload/image`;
       console.log(`📸 업로드 URL: ${apiUrl}`);
       
       // 백엔드 API 호출
@@ -153,7 +220,12 @@ export const deleteImage = async (
   accessToken: string
 ): Promise<boolean> => {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3030'}/api/upload/image/${fileName}`, {
+    // API URL 설정 (api.ts와 동일한 방식)
+    const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
+    const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
+    const apiUrl = `http://${API_HOST}:${API_PORT}/api/upload/image/${fileName}`;
+    
+    const response = await fetch(apiUrl, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -170,6 +242,8 @@ export const deleteImage = async (
 
 // 이미지 URL 생성 함수
 export const getImageUrl = (fileName: string): string => {
-  const baseUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3030';
-  return `${baseUrl}/api/upload/image/${fileName}`;
+  // API URL 설정 (api.ts와 동일한 방식)
+  const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
+  const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
+  return `http://${API_HOST}:${API_PORT}/api/upload/image/${fileName}`;
 };

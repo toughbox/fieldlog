@@ -723,7 +723,7 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
               <ImagePickerComponent
                 images={images}
                 onImagesChange={setImages}
-                maxImages={10}
+                maxImages={3}
               />
             </VStack>
           </Card>

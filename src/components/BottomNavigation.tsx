@@ -66,25 +66,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ navigation, current
           alignItems="center" 
           p="$2" 
           flex={1}
-          onPress={() => navigation.navigate('RecordsList')}
-        >
-          <Center mb="$1">
-            <List size={24} color={getIconColor('RecordsList')} />
-          </Center>
-          <Text 
-            size="xs" 
-            color={getTextColor('RecordsList')} 
-            fontWeight={getTextWeight('RecordsList')} 
-            fontFamily="NotoSansKR_400Regular"
-          >
-            기록
-          </Text>
-        </Pressable>
-        
-        <Pressable 
-          alignItems="center" 
-          p="$2" 
-          flex={1}
           onPress={() => navigation.navigate('FieldList')}
         >
           <Center mb="$1">
@@ -97,6 +78,25 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ navigation, current
             fontFamily="NotoSansKR_400Regular"
           >
             현장
+          </Text>
+        </Pressable>
+
+        <Pressable 
+          alignItems="center" 
+          p="$2" 
+          flex={1}
+          onPress={() => navigation.navigate('RecordsList')}
+        >
+          <Center mb="$1">
+            <List size={24} color={getIconColor('RecordsList')} />
+          </Center>
+          <Text 
+            size="xs" 
+            color={getTextColor('RecordsList')} 
+            fontWeight={getTextWeight('RecordsList')} 
+            fontFamily="NotoSansKR_400Regular"
+          >
+            기록
           </Text>
         </Pressable>
         
