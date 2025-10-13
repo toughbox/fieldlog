@@ -46,7 +46,7 @@ const ImagePickerComponent: React.FC<ImagePickerProps> = ({
       const remainingSlots = maxImages - images.length;
       console.log('📸 남은 슬롯:', remainingSlots);
       
-      const selectedImages = await selectImages();
+      const selectedImages = await selectImages(remainingSlots);
       console.log('📸 선택된 이미지 개수:', selectedImages.length);
       
       if (selectedImages.length === 0) {

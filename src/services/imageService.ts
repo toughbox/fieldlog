@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 export interface ImageFile {
   uri: string;
@@ -26,9 +26,6 @@ const compressImage = async (uri: string): Promise<{ uri: string; width: number;
   try {
     console.log('🔄 이미지 압축 시작:', uri);
     
-    // 먼저 원본 이미지 크기 확인
-    const imageInfo = await FileSystem.getInfoAsync(uri);
-    
     // 이미지 리사이징 및 압축
     // width만 지정하면 비율을 유지하면서 자동으로 리사이징됨
     const manipResult = await ImageManipulator.manipulateAsync(
@@ -47,9 +44,8 @@ const compressImage = async (uri: string): Promise<{ uri: string; width: number;
     );
     
     console.log('✅ 이미지 압축 완료 (비율 유지):', {
-      originalUri: uri,
-      compressedUri: manipResult.uri,
-      originalSize: imageInfo.exists && 'size' in imageInfo ? `${(imageInfo.size / 1024 / 1024).toFixed(2)}MB` : 'unknown',
+      originalUri: uri.substring(uri.length - 30), // URI 마지막 30자만 표시
+      compressedUri: manipResult.uri.substring(manipResult.uri.length - 30),
       resultSize: `${manipResult.width}x${manipResult.height}`,
       aspectRatio: (manipResult.width / manipResult.height).toFixed(2)
     });
@@ -63,9 +59,9 @@ const compressImage = async (uri: string): Promise<{ uri: string; width: number;
 };
 
 // 이미지 선택 함수
-export const selectImages = async (): Promise<ImageFile[]> => {
+export const selectImages = async (maxCount: number = 10): Promise<ImageFile[]> => {
   try {
-    console.log('📸 이미지 선택 시작');
+    console.log('📸 이미지 선택 시작, 최대:', maxCount);
     
     // 권한 요청
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -82,7 +78,7 @@ export const selectImages = async (): Promise<ImageFile[]> => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 1, // 선택 시에는 원본 품질로 (압축은 나중에 수동으로)
-      selectionLimit: 10,
+      selectionLimit: maxCount, // 동적으로 제한
     });
 
     console.log('📸 이미지 선택 결과:', result);
