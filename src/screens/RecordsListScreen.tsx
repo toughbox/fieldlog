@@ -201,6 +201,38 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
     setIsLoadingMore(false);
   };
 
+  const checkFieldsAndNavigateToCreateRecord = async () => {
+    try {
+      const accessToken = await TokenService.getAccessToken();
+      if (!accessToken) {
+        Alert.alert('오류', '접근 권한이 없습니다.');
+        return;
+      }
+
+      // 현장 목록이 비어있는지 확인
+      if (!fields || fields.length === 0) {
+        Alert.alert(
+          '현장이 없습니다',
+          '기록을 작성하려면 먼저 현장을 생성해주세요.',
+          [
+            { text: '취소', style: 'cancel' },
+            { 
+              text: '현장 생성', 
+              onPress: () => navigation.navigate('CreateField')
+            }
+          ]
+        );
+        return;
+      }
+
+      // 현장이 있으면 기록 작성 화면으로 이동
+      navigation.navigate('CreateRecord');
+    } catch (error) {
+      console.error('❌ 현장 확인 오류:', error);
+      Alert.alert('오류', '현장 정보를 확인하는 중 오류가 발생했습니다.');
+    }
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedFieldId(null);
@@ -443,7 +475,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
           size="lg"
           bg="$blue600"
           borderRadius="$xl"
-          onPress={() => navigation.navigate('CreateRecord')}
+          onPress={checkFieldsAndNavigateToCreateRecord}
           mt="$4"
           px="$6"
         >
@@ -481,7 +513,7 @@ const RecordsListScreen: React.FC<RecordsListScreenProps> = ({ navigation, route
             현장 기록
           </Heading>
           <Pressable 
-            onPress={() => navigation.navigate('CreateRecord')}
+            onPress={checkFieldsAndNavigateToCreateRecord}
             p="$3"
             borderRadius="$full"
             bg="rgba(255, 255, 255, 0.2)"

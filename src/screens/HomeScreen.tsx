@@ -30,7 +30,7 @@ import {
   FileText
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
-import { currentRecordApi } from '../services/api';
+import { currentRecordApi, currentFieldApi } from '../services/api';
 import { TokenService } from '../services/tokenService';
 import BottomNavigation from '../components/BottomNavigation';
 
@@ -170,6 +170,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
       ]
     );
+  };
+
+  const checkFieldsAndNavigateToCreateRecord = async () => {
+    try {
+      const accessToken = await TokenService.getAccessToken();
+      if (!accessToken) {
+        Alert.alert('오류', '접근 권한이 없습니다.');
+        return;
+      }
+
+      // 현장 목록 조회
+      const response = await currentRecordApi.getRecords(accessToken, {
+        page: 1,
+        limit: 1 // 하나만 확인
+      });
+
+      // 현장 API로 직접 확인
+      const fieldsResponse = await currentFieldApi.getFields(accessToken);
+      
+      if (!fieldsResponse.success || !fieldsResponse.data || fieldsResponse.data.length === 0) {
+        Alert.alert(
+          '현장이 없습니다',
+          '기록을 작성하려면 먼저 현장을 생성해주세요.',
+          [
+            { text: '취소', style: 'cancel' },
+            { 
+              text: '현장 생성', 
+              onPress: () => navigation.navigate('CreateField')
+            }
+          ]
+        );
+        return;
+      }
+
+      // 현장이 있으면 기록 작성 화면으로 이동
+      navigation.navigate('CreateRecord');
+    } catch (error) {
+      console.error('❌ 현장 확인 오류:', error);
+      Alert.alert('오류', '현장 정보를 확인하는 중 오류가 발생했습니다.');
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -395,7 +435,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               </Pressable>
 
               {/* 새 기록 작성 - 주요 액션 */}
-              <Pressable onPress={() => navigation.navigate('CreateRecord')}>
+              <Pressable onPress={checkFieldsAndNavigateToCreateRecord}>
                 <Card
                   bg="$blue600"
                   p="$5"
