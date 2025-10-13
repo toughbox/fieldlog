@@ -18,23 +18,25 @@ export interface UploadedImage {
 }
 
 // 이미지 압축 및 리사이징 설정
-const MAX_IMAGE_WIDTH = 1200; // 최대 너비 (px)
-const MAX_IMAGE_HEIGHT = 1200; // 최대 높이 (px)
+const MAX_IMAGE_SIZE = 1200; // 최대 크기 (긴 쪽 기준, px)
 const COMPRESS_QUALITY = 0.7; // 압축 품질 (70%)
 
-// 이미지 압축 함수
+// 이미지 압축 함수 (원본 비율 유지)
 const compressImage = async (uri: string): Promise<{ uri: string; width: number; height: number }> => {
   try {
     console.log('🔄 이미지 압축 시작:', uri);
     
+    // 먼저 원본 이미지 크기 확인
+    const imageInfo = await FileSystem.getInfoAsync(uri);
+    
     // 이미지 리사이징 및 압축
+    // width만 지정하면 비율을 유지하면서 자동으로 리사이징됨
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
       [
         { 
           resize: { 
-            width: MAX_IMAGE_WIDTH,
-            height: MAX_IMAGE_HEIGHT
+            width: MAX_IMAGE_SIZE // 비율 유지하면서 width를 기준으로 리사이징
           } 
         }
       ],
@@ -44,11 +46,12 @@ const compressImage = async (uri: string): Promise<{ uri: string; width: number;
       }
     );
     
-    console.log('✅ 이미지 압축 완료:', {
+    console.log('✅ 이미지 압축 완료 (비율 유지):', {
       originalUri: uri,
       compressedUri: manipResult.uri,
-      width: manipResult.width,
-      height: manipResult.height
+      originalSize: imageInfo.exists && 'size' in imageInfo ? `${(imageInfo.size / 1024 / 1024).toFixed(2)}MB` : 'unknown',
+      resultSize: `${manipResult.width}x${manipResult.height}`,
+      aspectRatio: (manipResult.width / manipResult.height).toFixed(2)
     });
     
     return manipResult;
