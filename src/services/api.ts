@@ -22,6 +22,17 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
+// 401/403 에러 핸들러 (로그아웃 처리용)
+let unauthorizedHandler: (() => void) | null = null;
+
+export const setUnauthorizedHandler = (handler: () => void) => {
+  unauthorizedHandler = handler;
+};
+
+export const clearUnauthorizedHandler = () => {
+  unauthorizedHandler = null;
+};
+
 // 사용자 관련 타입
 export interface SignUpRequest {
   name: string;
@@ -245,6 +256,13 @@ async function apiRequest<T>(
         url,
         method: config.method || 'GET'
       });
+      
+      // 401 또는 403 에러 (인증 실패)인 경우 로그아웃 처리
+      if ((response.status === 401 || response.status === 403) && unauthorizedHandler) {
+        console.log('🚫 인증 실패 감지 - 로그아웃 처리 실행');
+        unauthorizedHandler();
+      }
+      
       return {
         success: false,
         error: result.message || result.error || `HTTP ${response.status}`,

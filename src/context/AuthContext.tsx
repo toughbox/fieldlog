@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { TokenService, UserData } from '../services/tokenService';
+import { setUnauthorizedHandler, clearUnauthorizedHandler } from '../services/api';
+import { Alert } from 'react-native';
 
 interface AuthContextType {
   // 상태
@@ -115,10 +117,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 앱 시작 시 인증 상태 확인
+  // 앱 시작 시 인증 상태 확인 및 401/403 에러 핸들러 등록
   useEffect(() => {
     console.log('🌟 AuthProvider 마운트 - 인증 상태 확인 시작');
     checkAuthStatus();
+    
+    // 401/403 에러 발생 시 자동 로그아웃 처리
+    setUnauthorizedHandler(() => {
+      console.log('🔒 토큰 만료 또는 유효하지 않음 - 자동 로그아웃');
+      Alert.alert(
+        '세션 만료',
+        '로그인 세션이 만료되었습니다. 다시 로그인해주세요.',
+        [
+          {
+            text: '확인',
+            onPress: () => logout()
+          }
+        ]
+      );
+    });
+    
+    // 컴포넌트 언마운트 시 핸들러 제거
+    return () => {
+      clearUnauthorizedHandler();
+    };
   }, []);
 
   const value: AuthContextType = {
