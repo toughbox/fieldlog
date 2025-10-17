@@ -18,7 +18,8 @@ app.use(helmet());
 
 // CORS 설정
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8081',
+  //origin: process.env.CORS_ORIGIN || 'http://localhost:8081',
+  origin: process.env.CORS_ORIGIN || '*',
   credentials: true
 }));
 

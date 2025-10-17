@@ -2,7 +2,10 @@
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST || 'toughdev.cafe24.com';
 const API_PORT = process.env.EXPO_PUBLIC_API_PORT || '3030';
 
+// 테스트: 도메인 대신 IP 직접 사용
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}/api`;
+
+console.warn('⚠️ API URL 테스트 모드:', API_BASE_URL);
 
 console.log('🌐 API 설정:', {
   host: API_HOST,
