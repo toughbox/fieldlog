@@ -224,21 +224,21 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
     }
 
     return (
-      <VStack key={key} space="xs">
-        <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
-          <Text size="sm" color="$gray600" fontWeight="500">
+      <VStack key={key}>
+        <HStack space="sm" alignItems="flex-start" flexWrap="wrap" mb="$1">
+          <Text size="md" color="$gray600" fontWeight="500">
             {label}:
           </Text>
           {fieldType === 'checkbox' ? (
             <Box flex={1}>{displayValue}</Box>
           ) : (
-            <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+            <Text size="md" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
               {value.toString()}
             </Text>
           )}
         </HStack>
         {!isLast && (
-          <Divider bg="$gray200" opacity={0.5} />
+          <Divider bg="$gray200" opacity={0.5} mb="$3" />
         )}
       </VStack>
     );
@@ -425,13 +425,13 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
             <VStack space="lg">
               <Heading size="xl" color="$gray900" fontWeight="$bold">일정 정보</Heading>
 
-              <VStack space="sm">
-                <VStack space="xs">
-                  <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
-                    <Text size="sm" color="$gray600" fontWeight="500">
+              <VStack space="md">
+                <VStack>
+                  <HStack space="sm" alignItems="flex-start" flexWrap="wrap" mb="$1">
+                    <Text size="md" color="$gray600" fontWeight="500">
                       생성일:
                     </Text>
-                    <Text size="sm" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
+                    <Text size="md" color="$gray900" fontWeight="600" flex={1} flexShrink={1}>
                       {formatDate(record.created_at)}
                     </Text>
                   </HStack>
@@ -439,12 +439,12 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                 </VStack>
 
                 {record.due_date && (
-                  <VStack space="xs">
-                    <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
-                      <Text size="sm" color="$gray600" fontWeight="500">
+                  <VStack>
+                    <HStack space="sm" alignItems="flex-start" flexWrap="wrap" mb="$1">
+                      <Text size="md" color="$gray600" fontWeight="500">
                         마감일:
                       </Text>
-                      <Text size="sm" color={overdue ? "$red600" : "$gray900"} fontWeight="600" flex={1} flexShrink={1}>
+                      <Text size="md" color={overdue ? "$red600" : "$gray900"} fontWeight="600" flex={1} flexShrink={1}>
                         {formatDate(record.due_date)}
                       </Text>
                     </HStack>
@@ -453,12 +453,12 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
                 )}
 
                 {record.completed_at && (
-                  <VStack space="xs">
+                  <VStack>
                     <HStack space="sm" alignItems="flex-start" flexWrap="wrap">
-                      <Text size="sm" color="$gray600" fontWeight="500">
+                      <Text size="md" color="$gray600" fontWeight="500">
                         완료일:
                       </Text>
-                      <Text size="sm" color="$green600" fontWeight="600" flex={1} flexShrink={1}>
+                      <Text size="md" color="$green600" fontWeight="600" flex={1} flexShrink={1}>
                         {formatDate(record.completed_at)}
                       </Text>
                     </HStack>
