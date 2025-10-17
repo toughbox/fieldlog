@@ -127,10 +127,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               {/* 타이틀 */}
               <VStack space="xs" alignItems="center">
                 <Heading size="2xl" color="$white" fontWeight="$bold">
-                  FieldLog
+                  현장기록
                 </Heading>
                 <Text size="md" color="$blue100" fontWeight="$medium">
-                  현장 기록 관리 시스템
+                  자유롭게 작성하는 현장 기록 관리 시스템
                 </Text>
               </VStack>
             </VStack>
@@ -140,14 +140,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <Box flex={1} px="$6" pt="$8">
             <VStack space="xl">
               {/* 환영 메시지 */}
-              <VStack space="xs">
+              {/* <VStack space="xs">
                 <Heading size="xl" color="$gray900">
                   환영합니다!
                 </Heading>
                 <Text size="md" color="$gray600">
                   계정에 로그인하여 시작하세요
                 </Text>
-              </VStack>
+              </VStack> */}
 
               {/* 이메일 입력 */}
               <VStack space="sm">

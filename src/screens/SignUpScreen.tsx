@@ -143,7 +143,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                   회원가입
                 </Heading>
                 <Text size="sm" color="$blue100" fontWeight="$medium">
-                  FieldLog에 오신 것을 환영합니다
+                  현장기록에 오신 것을 환영합니다
                 </Text>
               </VStack>
             </VStack>

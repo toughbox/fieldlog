@@ -246,7 +246,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <HStack justifyContent="space-between" alignItems="center" mb="$4">
           <VStack flex={1}>
             <Heading size="2xl" color="$white" fontWeight="$bold">
-              FieldLog
+              현장기록
             </Heading>
             <Text size="md" color="$blue100" fontWeight="$medium" mt="$1">
               안녕하세요, {user?.name || '사용자'}님! 👋
