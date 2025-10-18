@@ -27,7 +27,7 @@
     "production": {
       "distribution": "store",
       "android": {
-        "buildType": "apk",
+        "buildType": "aab",
         "gradleCommand": ":app:bundleRelease"
       },
       "ios": {

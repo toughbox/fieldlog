@@ -15,12 +15,6 @@ export const validatePassword = (password: string): { isValid: boolean; message?
   return { isValid: true };
 };
 
-export const validatePhone = (phone: string): boolean => {
-  if (!phone) return true; // 선택사항이므로 빈 값은 허용
-  const phoneRegex = /^[0-9-+().\s]+$/;
-  return phoneRegex.test(phone);
-};
-
 export const validateName = (name: string): boolean => {
   return name.trim().length >= 2;
 };
@@ -30,8 +24,6 @@ export interface SignUpFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  company?: string;
-  phone?: string;
 }
 
 export const validateSignUpForm = (formData: SignUpFormData): { isValid: boolean; message?: string } => {
@@ -50,10 +42,6 @@ export const validateSignUpForm = (formData: SignUpFormData): { isValid: boolean
 
   if (formData.password !== formData.confirmPassword) {
     return { isValid: false, message: '비밀번호가 일치하지 않습니다.' };
-  }
-
-  if (formData.phone && !validatePhone(formData.phone)) {
-    return { isValid: false, message: '올바른 전화번호 형식을 입력해주세요.' };
   }
 
   return { isValid: true };

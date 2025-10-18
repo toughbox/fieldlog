@@ -17,7 +17,7 @@ import {
   Spinner,
   Pressable
 } from '@gluestack-ui/themed';
-import { UserPlus, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Building2, Phone } from 'lucide-react-native';
+import { UserPlus, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
 import { currentApi, SignUpRequest } from '../services/api';
 import { validateSignUpForm, SignUpFormData } from '../utils/validation';
 
@@ -30,9 +30,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    company: '',
-    phone: ''
+    confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -64,9 +62,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
       const signUpRequest: SignUpRequest = {
         name: formData.name,
         email: formData.email,
-        password: formData.password,
-        company: formData.company || undefined,
-        phone: formData.phone || undefined
+        password: formData.password
       };
 
       console.log('📤 요청 데이터:', { ...signUpRequest, password: '***' });
@@ -275,61 +271,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                       color="$gray500"
                     />
                   </InputSlot>
-                </Input>
-              </VStack>
-
-              {/* 회사명 입력 (선택) */}
-              <VStack space="sm">
-                <Text size="sm" color="$gray700" fontWeight="$medium">
-                  회사명 <Text size="xs" color="$gray500">(선택)</Text>
-                </Text>
-                <Input 
-                  variant="outline" 
-                  size="xl"
-                  borderColor={focusedField === 'company' ? '$blue600' : '$gray300'}
-                  borderWidth={focusedField === 'company' ? 2 : 1}
-                  bg="$gray50"
-                >
-                  <InputSlot pl="$4">
-                    <InputIcon as={Building2} color={focusedField === 'company' ? "$blue600" : "$gray500"} />
-                  </InputSlot>
-                  <InputField
-                    placeholder="소속 회사명"
-                    value={formData.company}
-                    onChangeText={(value) => updateFormData('company', value)}
-                    onFocus={() => setFocusedField('company')}
-                    onBlur={() => setFocusedField(null)}
-                    fontSize="$md"
-                    pl="$2"
-                  />
-                </Input>
-              </VStack>
-
-              {/* 전화번호 입력 (선택) */}
-              <VStack space="sm">
-                <Text size="sm" color="$gray700" fontWeight="$medium">
-                  전화번호 <Text size="xs" color="$gray500">(선택)</Text>
-                </Text>
-                <Input 
-                  variant="outline" 
-                  size="xl"
-                  borderColor={focusedField === 'phone' ? '$blue600' : '$gray300'}
-                  borderWidth={focusedField === 'phone' ? 2 : 1}
-                  bg="$gray50"
-                >
-                  <InputSlot pl="$4">
-                    <InputIcon as={Phone} color={focusedField === 'phone' ? "$blue600" : "$gray500"} />
-                  </InputSlot>
-                  <InputField
-                    placeholder="010-0000-0000"
-                    value={formData.phone}
-                    onChangeText={(value) => updateFormData('phone', value)}
-                    keyboardType="phone-pad"
-                    onFocus={() => setFocusedField('phone')}
-                    onBlur={() => setFocusedField(null)}
-                    fontSize="$md"
-                    pl="$2"
-                  />
                 </Input>
               </VStack>
 

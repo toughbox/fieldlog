@@ -13,7 +13,7 @@ const resetTokens = new Map(); // { email: { token, expiresAt, used } }
 // 회원가입 API
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password, phone, company } = req.body;
+    const { name, email, password } = req.body;
 
     // 필수 필드 검증
     if (!name || !email || !password) {
@@ -25,7 +25,7 @@ router.post('/signup', async (req, res) => {
 
     // 이메일 형식 검증
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email)) {ㅍㄷㄱ냐ㅐ
       return res.status(400).json({
         success: false,
         error: '올바른 이메일 형식을 입력해주세요.'
@@ -59,10 +59,10 @@ router.post('/signup', async (req, res) => {
 
     // 사용자 등록
     const result = await query(
-      `INSERT INTO fieldlog.user (name, email, password_hash, phone, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, NOW(), NOW())
-       RETURNING id, name, email, phone, created_at`,
-      [name.trim(), email.toLowerCase(), passwordHash, phone?.trim() || null]
+      `INSERT INTO fieldlog.user (name, email, password_hash, created_at, updated_at)
+       VALUES ($1, $2, $3, NOW(), NOW())
+       RETURNING id, name, email, created_at`,
+      [name.trim(), email.toLowerCase(), passwordHash]
     );
 
     const newUser = result.rows[0];
@@ -79,7 +79,6 @@ router.post('/signup', async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        phone: newUser.phone,
         created_at: newUser.created_at
       },
       message: '회원가입이 완료되었습니다.'

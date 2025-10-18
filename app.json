@@ -23,8 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.toughbox.fieldlog",
-      "versionCode": 4,
-      "buildType": "apk"
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"
