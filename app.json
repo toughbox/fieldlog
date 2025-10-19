@@ -31,7 +31,9 @@
     "extra": {
       "eas": {
         "projectId": "your-project-id"
-      }
+      },
+      "apiHost": "toughdev.cafe24.com",
+      "apiPort": "3030"
     }
   }
 }
