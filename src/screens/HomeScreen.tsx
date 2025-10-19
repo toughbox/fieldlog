@@ -38,24 +38,6 @@ interface HomeScreenProps {
   navigation: any;
 }
 
-// 최근 활동 목 데이터 (나중에 실제 데이터로 교체 예정)
-const mockData = {
-  recentActivities: [
-    {
-      id: 1,
-      title: '배송지연 이슈',
-      time: '30분 전',
-      type: 'created'
-    },
-    {
-      id: 2,
-      title: '안전점검 완료',
-      time: '1시간 전',
-      type: 'completed'
-    }
-  ]
-};
-
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [todayStats, setTodayStats] = useState({
