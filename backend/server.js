@@ -88,10 +88,6 @@ async function startServer() {
     
     app.listen(PORT, () => {
       console.log(`🚀 FieldLog API 서버가 포트 ${PORT}에서 실행 중입니다.`);
-      console.log(`📍 Health Check: http://localhost:${PORT}/api/health`);
-      console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
-      console.log(`🏗️  Fields API: http://localhost:${PORT}/api/fields`);
-      console.log(`📝 Records API: http://localhost:${PORT}/api/records`);
     });
   } catch (error) {
     console.error('❌ 서버 시작 실패:', error);
