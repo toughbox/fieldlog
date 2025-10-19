@@ -276,14 +276,15 @@ async function apiRequest<T>(
       message: result.message,
     };
   } catch (error) {
+    const err = error as Error;
     console.error('🌐 네트워크 오류 상세:', {
-      errorName: error.name,
-      errorMessage: error.message,
-      errorStack: error.stack
+      errorName: err.name,
+      errorMessage: err.message,
+      errorStack: err.stack
     });
     return {
       success: false,
-      error: error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.',
+      error: err instanceof Error ? err.message : '네트워크 오류가 발생했습니다.',
     };
   }
 }
@@ -332,6 +333,22 @@ export const authApi = {
     return apiRequest<void>('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ email, token, newPassword }),
+    });
+  },
+
+  // 이메일 검증 요청 (회원가입 1단계)
+  requestEmailVerification: async (userData: SignUpRequest): Promise<ApiResponse<{ dev_token?: string }>> => {
+    return apiRequest<{ dev_token?: string }>('/auth/request-email-verification', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  },
+
+  // 이메일 검증 토큰 확인 및 회원가입 완료 (회원가입 2단계)
+  verifyEmailAndSignUp: async (email: string, token: string): Promise<ApiResponse<SignUpResponse>> => {
+    return apiRequest<SignUpResponse>('/auth/verify-email-and-signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, token }),
     });
   },
 };
@@ -498,8 +515,6 @@ export const mockApi = {
       id: Math.floor(Math.random() * 1000) + 1,
       email: userData.email,
       name: userData.name,
-      phone: userData.phone,
-      company: userData.company,
       created_at: new Date().toISOString(),
     };
 

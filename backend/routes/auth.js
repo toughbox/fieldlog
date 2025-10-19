@@ -3,15 +3,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { query, transaction } = require('../config/database');
-const { sendPasswordResetEmail, sendPasswordResetConfirmationEmail } = require('../services/emailService');
+const { sendPasswordResetEmail, sendPasswordResetConfirmationEmail, sendEmailVerification } = require('../services/emailService');
 
 const router = express.Router();
 
 // 비밀번호 재설정 토큰 저장소 (메모리) - 프로덕션에서는 Redis나 DB 사용 권장
 const resetTokens = new Map(); // { email: { token, expiresAt, used } }
 
-// 회원가입 API
-router.post('/signup', async (req, res) => {
+// 이메일 검증 토큰 저장소 (메모리) - 프로덕션에서는 Redis나 DB 사용 권장
+const verificationTokens = new Map(); // { email: { token, expiresAt, used, name, password } }
+
+// 이메일 검증 요청 API (회원가입 1단계)
+router.post('/request-email-verification', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -25,7 +28,7 @@ router.post('/signup', async (req, res) => {
 
     // 이메일 형식 검증
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {ㅍㄷㄱ냐ㅐ
+    if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
         error: '올바른 이메일 형식을 입력해주세요.'
@@ -53,21 +56,114 @@ router.post('/signup', async (req, res) => {
       });
     }
 
+    // 6자리 숫자 토큰 생성
+    const verificationToken = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10분 후 만료
+
     // 비밀번호 해싱
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // 사용자 등록
+    // 토큰 저장 (회원가입 정보 함께 저장)
+    verificationTokens.set(email.toLowerCase(), {
+      token: verificationToken,
+      expiresAt: expiresAt,
+      used: false,
+      name: name.trim(),
+      passwordHash: passwordHash
+    });
+
+    // 이메일 발송
+    const emailSent = await sendEmailVerification(email, name, verificationToken);
+
+    if (!emailSent) {
+      console.error('❌ 이메일 발송 실패, 하지만 개발 모드에서는 토큰을 반환합니다');
+    }
+
+    console.log('✅ 이메일 검증 토큰 생성:', {
+      email: email,
+      token: verificationToken,
+      expiresAt: expiresAt
+    });
+
+    res.json({
+      success: true,
+      message: '이메일로 인증 코드가 발송되었습니다.',
+      // 개발 환경에서만 토큰 반환 (프로덕션에서는 제거)
+      ...(process.env.NODE_ENV === 'development' && { dev_token: verificationToken })
+    });
+
+  } catch (error) {
+    console.error('❌ 이메일 검증 요청 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '이메일 검증 요청 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 이메일 검증 토큰 확인 및 회원가입 완료 API (회원가입 2단계)
+router.post('/verify-email-and-signup', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+
+    if (!email || !token) {
+      return res.status(400).json({
+        success: false,
+        error: '이메일과 인증 코드를 입력해주세요.'
+      });
+    }
+
+    const verificationData = verificationTokens.get(email.toLowerCase());
+
+    if (!verificationData) {
+      return res.status(400).json({
+        success: false,
+        error: '유효하지 않은 인증 코드입니다.'
+      });
+    }
+
+    if (verificationData.used) {
+      return res.status(400).json({
+        success: false,
+        error: '이미 사용된 인증 코드입니다.'
+      });
+    }
+
+    if (new Date() > verificationData.expiresAt) {
+      verificationTokens.delete(email.toLowerCase());
+      return res.status(400).json({
+        success: false,
+        error: '인증 코드가 만료되었습니다. 다시 요청해주세요.'
+      });
+    }
+
+    if (verificationData.token !== token) {
+      return res.status(400).json({
+        success: false,
+        error: '인증 코드가 일치하지 않습니다.'
+      });
+    }
+
+    // 이메일 검증 성공 - 회원가입 진행
     const result = await query(
       `INSERT INTO fieldlog.user (name, email, password_hash, created_at, updated_at)
        VALUES ($1, $2, $3, NOW(), NOW())
        RETURNING id, name, email, created_at`,
-      [name.trim(), email.toLowerCase(), passwordHash]
+      [verificationData.name, email.toLowerCase(), verificationData.passwordHash]
     );
 
     const newUser = result.rows[0];
 
-    console.log('✅ 새 사용자 등록 성공:', {
+    // 토큰 사용 처리
+    verificationData.used = true;
+    
+    // 일정 시간 후 토큰 삭제 (재사용 방지)
+    setTimeout(() => {
+      verificationTokens.delete(email.toLowerCase());
+    }, 60000); // 1분 후 삭제
+
+    console.log('✅ 이메일 검증 및 회원가입 성공:', {
       id: newUser.id,
       email: newUser.email,
       name: newUser.name
@@ -81,11 +177,20 @@ router.post('/signup', async (req, res) => {
         email: newUser.email,
         created_at: newUser.created_at
       },
-      message: '회원가입이 완료되었습니다.'
+      message: '이메일 인증이 완료되어 회원가입이 완료되었습니다.'
     });
 
   } catch (error) {
-    console.error('❌ 회원가입 오류:', error);
+    console.error('❌ 이메일 검증 및 회원가입 오류:', error);
+    
+    // 이메일 중복 오류 처리
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        error: '이미 사용 중인 이메일입니다.'
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: '회원가입 중 오류가 발생했습니다.'
@@ -475,9 +580,18 @@ router.post('/reset-password', async (req, res) => {
 // 만료된 토큰 정리 (주기적으로 실행)
 setInterval(() => {
   const now = new Date();
+  
+  // 비밀번호 재설정 토큰 정리
   for (const [email, data] of resetTokens.entries()) {
     if (now > data.expiresAt || data.used) {
       resetTokens.delete(email);
+    }
+  }
+  
+  // 이메일 검증 토큰 정리
+  for (const [email, data] of verificationTokens.entries()) {
+    if (now > data.expiresAt || data.used) {
+      verificationTokens.delete(email);
     }
   }
 }, 5 * 60 * 1000); // 5분마다 실행
