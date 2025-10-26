@@ -236,22 +236,22 @@ const CreateRecordScreen: React.FC<CreateRecordScreenProps> = ({ navigation, rou
       const response = await currentRecordApi.createRecord(createRequest, accessToken);
       
       if (response.success) {
-        // 로컬 알림 예약 (일정 하루 전 알림)
-        if (response.data && response.data.id) {
-          const record = response.data;
-          try {
-            const notificationIds = await NotificationService.scheduleRecordNotifications({
-              id: record.id,
-              title: record.title,
-              created_at: record.created_at,
-              due_date: record.due_date,
-            });
-            console.log('✅ 알림 예약됨:', notificationIds);
-          } catch (notifError) {
-            console.error('알림 예약 실패:', notifError);
-            // 알림 예약 실패해도 일정은 생성됨
-          }
-        }
+        // 🔕 로컬 알림 비활성화 (FCM만 사용)
+        // if (response.data && response.data.id) {
+        //   const record = response.data;
+        //   try {
+        //     const notificationIds = await NotificationService.scheduleRecordNotifications({
+        //       id: record.id,
+        //       title: record.title,
+        //       created_at: record.created_at,
+        //       due_date: record.due_date,
+        //     });
+        //     console.log('✅ 알림 예약됨:', notificationIds);
+        //   } catch (notifError) {
+        //     console.error('알림 예약 실패:', notifError);
+        //     // 알림 예약 실패해도 일정은 생성됨
+        //   }
+        // }
 
         Alert.alert('성공', '현장 기록이 성공적으로 생성되었습니다.', [
           { 
