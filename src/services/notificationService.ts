@@ -279,11 +279,15 @@ export function setupFCMListeners(
   const unsubscribeForeground = messaging().onMessage(async (remoteMessage) => {
     console.log('포그라운드 메시지 수신:', remoteMessage);
     
+    // 한글 깨짐 방지: data 필드의 title/body 우선 사용
+    const title = remoteMessage.data?.title || remoteMessage.notification?.title || '알림';
+    const body = remoteMessage.data?.body || remoteMessage.notification?.body || '';
+    
     // 포그라운드에서도 알림 표시
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: remoteMessage.notification?.title || '알림',
-        body: remoteMessage.notification?.body || '',
+        title: title,
+        body: body,
         data: remoteMessage.data || {},
       },
       trigger: null,

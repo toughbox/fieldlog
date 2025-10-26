@@ -65,10 +65,24 @@ async function sendNotificationToTokens(tokens, title, body, data = {}) {
       },
       data: {
         ...data,
-        // 모든 값은 문자열이어야 함
+        // 한글 깨짐 방지: title과 body를 data에도 포함
+        title: title,
+        body: body,
         timestamp: new Date().toISOString()
       },
-      tokens: tokens.filter(token => token && token.trim() !== '')
+      tokens: tokens.filter(token => token && token.trim() !== ''),
+      // Android 전용 설정
+      android: {
+        priority: 'high',
+        notification: {
+          title: title,
+          body: body,
+          channelId: 'default',
+          priority: 'high',
+          defaultSound: true,
+          defaultVibrateTimings: true
+        }
+      }
     };
 
     // 데이터를 문자열로 변환
