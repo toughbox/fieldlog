@@ -8,7 +8,11 @@ const authRoutes = require('./routes/auth');
 const fieldRoutes = require('./routes/fields');
 const recordRoutes = require('./routes/records');
 const uploadRoutes = require('./routes/upload');
+const notificationRoutes = require('./routes/notifications');
 const { connectDB } = require('./config/database');
+const notificationService = require('./services/notificationService');
+const schedulerService = require('./services/schedulerService');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3030;
@@ -48,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/fields', fieldRoutes);
 app.use('/api/records', recordRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 기본 헬스체크 엔드포인트
 app.get('/api/health', (req, res) => {
@@ -86,8 +91,20 @@ async function startServer() {
     await connectDB();
     console.log('✅ 데이터베이스 연결 성공');
     
+    // Firebase Admin 초기화
+    try {
+      const firebaseKeyPath = path.join(__dirname, 'firebase-service-account.json');
+      notificationService.initializeFirebase(firebaseKeyPath);
+    } catch (firebaseError) {
+      console.log('⚠️ Firebase 초기화 건너뜀 (선택 사항)');
+    }
+    
+    // 일정 알림 스케줄러 시작
+    schedulerService.startScheduler();
+    
     app.listen(PORT, () => {
       console.log(`🚀 FieldLog API 서버가 포트 ${PORT}에서 실행 중입니다.`);
+      console.log(`📱 푸시 알림 기능 활성화`);
     });
   } catch (error) {
     console.error('❌ 서버 시작 실패:', error);

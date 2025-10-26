@@ -488,8 +488,56 @@ export const fieldApi = {
   },
 };
 
+// 푸시 알림 API
+export const notificationApi = {
+  // 디바이스 토큰 등록
+  registerToken: async (userId: number, deviceToken: string, deviceType: 'ios' | 'android', deviceInfo?: any): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/notifications/register-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        deviceToken,
+        deviceType,
+        deviceInfo,
+      }),
+    });
+  },
+
+  // 디바이스 토큰 제거
+  unregisterToken: async (deviceToken: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/notifications/unregister-token', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        deviceToken,
+      }),
+    });
+  },
+
+  // 테스트 알림 발송
+  sendTestNotification: async (userId: number, title?: string, body?: string): Promise<ApiResponse<any>> => {
+    return apiRequest<any>('/notifications/test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        title,
+        body,
+      }),
+    });
+  },
+};
+
 // 실제 백엔드 연동 사용
 export const currentApi = authApi;
 export const currentFieldApi = fieldApi;
 export const currentRecordApi = recordApi;
+export const currentNotificationApi = notificationApi;
 

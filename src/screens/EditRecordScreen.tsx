@@ -39,6 +39,7 @@ import { TokenService } from '../services/tokenService';
 import ImagePickerComponent from '../components/ImagePicker';
 import { UploadedImage, getImageUrl } from '../services/imageService';
 import BottomNavigation from '../components/BottomNavigation';
+import * as NotificationService from '../services/notificationService';
 
 interface EditRecordScreenProps {
   navigation: any;
@@ -279,6 +280,25 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
       const response = await currentRecordApi.updateRecord(record.id, updateRequest, accessToken);
       
       if (response.success) {
+        // 로컬 알림 재예약 (마감일이 변경된 경우)
+        if (response.data) {
+          const updatedRecord = response.data;
+          try {
+            // 기존 알림 취소는 불가능하므로 새로 추가 예약
+            // TODO: 알림 ID를 DB에 저장하여 취소 가능하도록 개선
+            const notificationIds = await NotificationService.scheduleRecordNotifications({
+              id: updatedRecord.id,
+              title: updatedRecord.title,
+              created_at: updatedRecord.created_at,
+              due_date: updatedRecord.due_date,
+            });
+            console.log('✅ 알림 재예약됨:', notificationIds);
+          } catch (notifError) {
+            console.error('알림 재예약 실패:', notifError);
+            // 알림 예약 실패해도 일정은 수정됨
+          }
+        }
+
         Alert.alert('성공', '현장 기록이 성공적으로 수정되었습니다.', [
           { text: '확인', onPress: () => navigation.goBack() }
         ]);

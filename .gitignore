@@ -52,3 +52,7 @@ tamagui-web.css
 
 # Android - 전체 폴더 제외 (prebuild로 자동 생성됨)
 android/
+
+firebase-service-account.json
+google-services.json
+GoogleService-Info.plist

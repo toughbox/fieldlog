@@ -10,8 +10,10 @@ import {
   NotoSansKR_700Bold 
 } from '@expo-google-fonts/noto-sans-kr';
 import { Platform, View, Text, ActivityIndicator, SafeAreaView } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Notifications from 'expo-notifications';
+import firebase from '@react-native-firebase/app';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
@@ -26,6 +28,7 @@ import RecordsListScreen from './src/screens/RecordsListScreen';
 import RecordDetailScreen from './src/screens/RecordDetailScreen';
 import EditRecordScreen from './src/screens/EditRecordScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import * as NotificationService from './src/services/notificationService';
 
 const Stack = createStackNavigator();
 
@@ -135,6 +138,9 @@ export default function App() {
     NotoSansKR_700Bold,
   });
 
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
+
   useEffect(() => {
     const hideSplashScreen = async () => {
       if (fontsLoaded || fontError) {
@@ -148,6 +154,78 @@ export default function App() {
 
     hideSplashScreen();
   }, [fontsLoaded, fontError]);
+
+  // 푸시 알림 리스너 설정
+  useEffect(() => {
+    // Firebase 앱이 초기화되었는지 확인
+    const initializeFirebase = async () => {
+      try {
+        // Firebase 앱이 이미 초기화되었는지 확인
+        if (!firebase.apps.length) {
+          // Firebase가 초기화되지 않았으면 google-services.json에서 자동으로 초기화
+          await firebase.initializeApp();
+          console.log('✅ Firebase 초기화 완료');
+        } else {
+          console.log('✅ Firebase 이미 초기화됨');
+        }
+      } catch (error) {
+        console.error('❌ Firebase 초기화 실패:', error);
+        // Firebase 초기화 실패 시에도 앱은 계속 실행
+      }
+    };
+
+    initializeFirebase();
+
+    // 알림이 수신되었을 때 호출
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('📬 알림 수신:', notification);
+    });
+
+    // 사용자가 알림을 탭했을 때 호출
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('👆 알림 탭:', response);
+      const data = response.notification.request.content.data;
+      
+      // 알림 데이터에 따라 화면 이동 등 처리
+      if (data.recordId) {
+        console.log('일정 ID:', data.recordId, '타입:', data.type);
+        // TODO: 해당 일정 상세 화면으로 이동
+      }
+    });
+
+    // FCM 메시지 리스너 설정 (Firebase 초기화 후)
+    let unsubscribeFCM: (() => void) | null = null;
+    
+    setTimeout(() => {
+      try {
+        if (firebase.apps.length > 0) {
+          unsubscribeFCM = NotificationService.setupFCMListeners(
+            (message) => {
+              console.log('📨 FCM 메시지 수신:', message);
+            },
+            async (token) => {
+              console.log('🔄 FCM 토큰 갱신:', token);
+              // TODO: 서버에 새 토큰 업데이트
+            }
+          );
+        }
+      } catch (error) {
+        console.error('❌ FCM 리스너 설정 실패:', error);
+      }
+    }, 1000);
+
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      }
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
+      if (unsubscribeFCM) {
+        unsubscribeFCM();
+      }
+    };
+  }, []);
 
   // 디버그 정보 표시 컴포넌트 제거
   // const DebugOverlay = () => (...);

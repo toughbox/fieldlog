@@ -23,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.toughbox.fieldlog",
-      "versionCode": 6
+      "versionCode": 6,
+      "googleServicesFile": "./android/app/google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +35,18 @@
       },
       "apiHost": "toughdev.cafe24.com",
       "apiPort": "3030"
-    }
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FCD34D",
+          "sounds": ["./assets/notification.wav"],
+          "mode": "production"
+        }
+      ]
+    ]
   }
 }

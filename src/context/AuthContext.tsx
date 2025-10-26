@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { TokenService, UserData } from '../services/tokenService';
-import { setUnauthorizedHandler, clearUnauthorizedHandler } from '../services/api';
-import { Alert } from 'react-native';
+import { setUnauthorizedHandler, clearUnauthorizedHandler, currentNotificationApi } from '../services/api';
+import { Alert, Platform } from 'react-native';
+import * as NotificationService from '../services/notificationService';
 
 interface AuthContextType {
   // 상태
@@ -83,6 +84,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userData);
       setIsAuthenticated(true);
       
+      // 푸시 알림 초기화
+      await initializePushNotifications(userData.id);
+      
       console.log('✅ 로그인 완료:', userData.name);
     } catch (error) {
       console.error('❌ 로그인 처리 오류:', {
@@ -94,10 +98,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // 푸시 알림 초기화
+  const initializePushNotifications = async (userId: number) => {
+    try {
+      // 푸시 알림 권한 요청
+      const hasPermission = await NotificationService.requestNotificationPermissions();
+      
+      if (hasPermission) {
+        // FCM 토큰 가져오기
+        const fcmToken = await NotificationService.getFCMToken();
+        
+        if (fcmToken) {
+          // 서버에 토큰 등록
+          try {
+            const response = await currentNotificationApi.registerToken(
+              userId,
+              fcmToken,
+              Platform.OS as 'ios' | 'android',
+              {
+                model: Platform.OS,
+                version: Platform.Version,
+              }
+            );
+            
+            if (response.success) {
+              console.log('✅ FCM 토큰이 서버에 등록되었습니다.');
+            }
+          } catch (apiError) {
+            console.error('FCM 토큰 서버 등록 실패:', apiError);
+            // 토큰 등록 실패해도 앱 사용에는 문제 없음
+          }
+        }
+      }
+    } catch (error) {
+      console.error('푸시 알림 초기화 실패:', error);
+    }
+  };
+
   // 로그아웃
   const logout = async () => {
     try {
       console.log('🚪 로그아웃 처리 중...');
+      
+      // 예약된 모든 로컬 알림 취소
+      await NotificationService.cancelAllScheduledNotifications();
+      
+      // 서버에서 토큰 제거
+      try {
+        const fcmToken = await NotificationService.getFCMToken();
+        if (fcmToken) {
+          await currentNotificationApi.unregisterToken(fcmToken);
+          console.log('✅ FCM 토큰이 서버에서 제거되었습니다.');
+        }
+      } catch (apiError) {
+        console.error('FCM 토큰 서버 제거 실패:', apiError);
+        // 토큰 제거 실패해도 로그아웃 계속 진행
+      }
       
       // 저장된 인증 정보 삭제
       await TokenService.clearAuthData();
