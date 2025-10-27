@@ -64,8 +64,8 @@ async function checkDueDateReminders(tomorrowStart, tomorrowEnd) {
         fr.status,
         u.name as user_name,
         u.email as user_email
-       FROM field_record fr
-       JOIN "user" u ON fr.user_id = u.id
+       FROM fieldlog.field_record fr
+       JOIN fieldlog."user" u ON fr.user_id = u.id
        WHERE fr.due_date >= $1 
          AND fr.due_date <= $2
          AND fr.status NOT IN ('completed', 'cancelled')
