@@ -345,6 +345,42 @@ export const authApi = {
       body: JSON.stringify({ email, token }),
     });
   },
+
+  // 로그아웃
+  logout: async (refreshToken: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+  },
+
+  // 토큰 갱신
+  refreshToken: async (refreshToken: string): Promise<ApiResponse<LoginResponse>> => {
+    return apiRequest<LoginResponse>('/auth/refresh-token', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+  },
+
+  // 세션 목록 조회
+  getSessions: async (accessToken: string): Promise<ApiResponse<any[]>> => {
+    return apiRequest<any[]>('/auth/sessions', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  // 특정 세션 로그아웃
+  logoutSession: async (accessToken: string, sessionId: number): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/auth/logout-session', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+  },
 };
 
 // 현장 기록 관리 API

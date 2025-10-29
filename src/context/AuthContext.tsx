@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { TokenService, UserData } from '../services/tokenService';
-import { setUnauthorizedHandler, clearUnauthorizedHandler, currentNotificationApi } from '../services/api';
+import { setUnauthorizedHandler, clearUnauthorizedHandler, currentNotificationApi, authApi } from '../services/api';
 import { Alert, Platform } from 'react-native';
 import * as NotificationService from '../services/notificationService';
 
@@ -53,9 +53,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ 인증 상태 확인 중 치명적 오류:', {
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined
       });
       await handleInvalidAuth();
     } finally {
@@ -90,9 +90,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('✅ 로그인 완료:', userData.name);
     } catch (error) {
       console.error('❌ 로그인 처리 오류:', {
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined
       });
       throw error;
     }
@@ -140,10 +140,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       console.log('🚪 로그아웃 처리 중...');
       
+      // 서버에 로그아웃 요청 (세션 비활성화)
+      try {
+        const refreshToken = await TokenService.getRefreshToken();
+        if (refreshToken) {
+          const response = await authApi.logout(refreshToken);
+          if (response.success) {
+            console.log('✅ 서버 세션이 비활성화되었습니다.');
+          }
+        }
+      } catch (apiError) {
+        console.error('서버 로그아웃 실패:', apiError);
+        // 서버 로그아웃 실패해도 로컬 로그아웃은 계속 진행
+      }
+      
       // 예약된 모든 로컬 알림 취소
       await NotificationService.cancelAllScheduledNotifications();
       
-      // 서버에서 토큰 제거
+      // 서버에서 FCM 토큰 제거
       try {
         const fcmToken = await NotificationService.getFCMToken();
         if (fcmToken) {
@@ -165,9 +179,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('✅ 로그아웃 완료');
     } catch (error) {
       console.error('❌ 로그아웃 처리 오류:', {
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined
       });
       throw error;
     }

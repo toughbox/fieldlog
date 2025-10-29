@@ -271,17 +271,68 @@ router.post('/login', async (req, res) => {
       }
     );
 
-    // 세션 정보 저장 (선택사항)
-    await query(
-      `INSERT INTO fieldlog.user_session (user_id, refresh_token, device_info, ip_address, expires_at, created_at, last_used_at)
-       VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days', NOW(), NOW())`,
-      [
-        user.id,
-        refreshToken,
-        JSON.stringify({ userAgent: req.get('User-Agent') }),
-        req.ip || req.connection.remoteAddress
-      ]
-    );
+    // 같은 기기의 이전 세션 무효화 (선택적)
+    const userAgent = req.get('User-Agent') || 'unknown';
+    
+    console.log('🔄 세션 업데이트 시작:', {
+      userId: user.id,
+      userAgent: userAgent
+    });
+    
+    try {
+      const updateResult = await query(
+        `UPDATE fieldlog.user_session 
+         SET is_active = false 
+         WHERE user_id = $1 AND device_info->>'userAgent' = $2 AND is_active = true`,
+        [user.id, userAgent]
+      );
+      console.log('✅ 이전 세션 비활성화:', updateResult.rowCount, '개');
+    } catch (updateError) {
+      console.error('⚠️ 이전 세션 비활성화 실패 (계속 진행):', updateError.message);
+      // 이전 세션 비활성화 실패해도 로그인은 계속 진행
+    }
+
+    // IP 주소 정리 (IPv6 ::1을 null로, 유효하지 않은 값은 null로)
+    let ipAddress = req.ip || req.connection.remoteAddress || null;
+    if (ipAddress === '::1' || ipAddress === '::ffff:127.0.0.1') {
+      ipAddress = '127.0.0.1'; // localhost를 IPv4로 정규화
+    }
+    // IPv6를 IPv4로 변환 (::ffff: 접두사 제거)
+    if (ipAddress && ipAddress.startsWith('::ffff:')) {
+      ipAddress = ipAddress.substring(7);
+    }
+    
+    console.log('📝 새 세션 저장 시도:', {
+      userId: user.id,
+      ipAddress: ipAddress,
+      deviceInfo: { userAgent }
+    });
+
+    // 새 세션 정보 저장
+    try {
+      const insertResult = await query(
+        `INSERT INTO fieldlog.user_session (user_id, refresh_token, device_info, ip_address, expires_at, created_at, last_used_at)
+         VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days', NOW(), NOW())
+         RETURNING id`,
+        [
+          user.id,
+          refreshToken,
+          JSON.stringify({ userAgent }),
+          ipAddress
+        ]
+      );
+      console.log('✅ 새 세션 저장 완료:', insertResult.rows[0].id);
+    } catch (insertError) {
+      console.error('❌ 세션 저장 실패:', {
+        error: insertError.message,
+        code: insertError.code,
+        detail: insertError.detail,
+        userId: user.id,
+        ipAddress: ipAddress
+      });
+      // 세션 저장 실패해도 로그인은 성공으로 처리 (토큰은 발급됨)
+      // 프로덕션에서는 이 부분을 어떻게 처리할지 결정 필요
+    }
 
     console.log('✅ 로그인 성공:', {
       userId: user.id,
@@ -577,6 +628,264 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// 로그아웃 API
+router.post('/logout', async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+    
+    if (!refresh_token) {
+      return res.status(400).json({
+        success: false,
+        error: 'refresh_token이 필요합니다.'
+      });
+    }
+    
+    // 세션을 비활성화 (삭제하지 않고 is_active = false로 설정)
+    const result = await query(
+      `UPDATE fieldlog.user_session 
+       SET is_active = false, last_used_at = NOW()
+       WHERE refresh_token = $1 AND is_active = true
+       RETURNING user_id`,
+      [refresh_token]
+    );
+    
+    if (result.rows.length > 0) {
+      console.log('✅ 로그아웃 성공:', {
+        userId: result.rows[0].user_id
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: '로그아웃 되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('❌ 로그아웃 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '로그아웃 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 토큰 갱신 API (refresh token으로 새 access token 발급)
+router.post('/refresh-token', async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+    
+    if (!refresh_token) {
+      return res.status(400).json({
+        success: false,
+        error: 'refresh_token이 필요합니다.'
+      });
+    }
+    
+    // refresh token 검증
+    let decoded;
+    try {
+      decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: '유효하지 않거나 만료된 토큰입니다.'
+      });
+    }
+    
+    // 세션 확인 (활성화 상태 및 만료 시간 체크)
+    const sessionResult = await query(
+      `SELECT us.id, us.user_id, us.expires_at, u.name, u.email, u.phone, u.is_active
+       FROM fieldlog.user_session us
+       JOIN fieldlog.user u ON us.user_id = u.id
+       WHERE us.refresh_token = $1 AND us.is_active = true`,
+      [refresh_token]
+    );
+    
+    if (sessionResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        error: '유효하지 않거나 만료된 세션입니다.'
+      });
+    }
+    
+    const session = sessionResult.rows[0];
+    
+    // 세션 만료 확인
+    if (new Date() > new Date(session.expires_at)) {
+      await query(
+        'UPDATE fieldlog.user_session SET is_active = false WHERE id = $1',
+        [session.id]
+      );
+      return res.status(401).json({
+        success: false,
+        error: '세션이 만료되었습니다. 다시 로그인해주세요.'
+      });
+    }
+    
+    // 사용자 계정 활성화 상태 확인
+    if (!session.is_active) {
+      return res.status(401).json({
+        success: false,
+        error: '비활성화된 계정입니다.'
+      });
+    }
+    
+    // 새 access token 생성
+    const tokenPayload = {
+      userId: session.user_id,
+      email: session.email,
+      name: session.name
+    };
+    
+    const accessToken = jwt.sign(
+      tokenPayload,
+      process.env.JWT_SECRET,
+      { 
+        expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+        issuer: 'fieldlog-api'
+      }
+    );
+    
+    // 세션 마지막 사용 시간 업데이트
+    await query(
+      'UPDATE fieldlog.user_session SET last_used_at = NOW() WHERE id = $1',
+      [session.id]
+    );
+    
+    console.log('✅ 토큰 갱신 성공:', {
+      userId: session.user_id,
+      email: session.email
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: session.user_id,
+          name: session.name,
+          email: session.email,
+          phone: session.phone
+        },
+        access_token: accessToken,
+        refresh_token: refresh_token // 기존 refresh_token 재사용
+      },
+      message: '토큰이 갱신되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('❌ 토큰 갱신 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '토큰 갱신 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 모든 세션 조회 API (현재 사용자의 활성 세션 목록)
+router.get('/sessions', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: '인증 토큰이 필요합니다.'
+      });
+    }
+    
+    const token = authHeader.substring(7);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: '유효하지 않은 토큰입니다.'
+      });
+    }
+    
+    const result = await query(
+      `SELECT id, device_info, ip_address, created_at, last_used_at, expires_at
+       FROM fieldlog.user_session
+       WHERE user_id = $1 AND is_active = true
+       ORDER BY last_used_at DESC`,
+      [decoded.userId]
+    );
+    
+    res.json({
+      success: true,
+      data: result.rows
+    });
+    
+  } catch (error) {
+    console.error('❌ 세션 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '세션 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 특정 세션 로그아웃 API (다른 기기에서 로그아웃)
+router.post('/logout-session', async (req, res) => {
+  try {
+    const { session_id } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: '인증 토큰이 필요합니다.'
+      });
+    }
+    
+    if (!session_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'session_id가 필요합니다.'
+      });
+    }
+    
+    const token = authHeader.substring(7);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: '유효하지 않은 토큰입니다.'
+      });
+    }
+    
+    // 자신의 세션만 로그아웃 가능
+    const result = await query(
+      `UPDATE fieldlog.user_session 
+       SET is_active = false, last_used_at = NOW()
+       WHERE id = $1 AND user_id = $2 AND is_active = true
+       RETURNING id`,
+      [session_id, decoded.userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '세션을 찾을 수 없습니다.'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: '세션이 로그아웃되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('❌ 세션 로그아웃 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '세션 로그아웃 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 // 만료된 토큰 정리 (주기적으로 실행)
 setInterval(() => {
   const now = new Date();
@@ -595,5 +904,43 @@ setInterval(() => {
     }
   }
 }, 5 * 60 * 1000); // 5분마다 실행
+
+// 오래된 비활성 세션 정리 (주기적으로 실행)
+// 30일 이상 된 비활성 세션 삭제
+setInterval(async () => {
+  try {
+    const result = await query(
+      `DELETE FROM fieldlog.user_session 
+       WHERE is_active = false 
+         AND last_used_at < NOW() - INTERVAL '30 days'
+       RETURNING id`
+    );
+    
+    if (result.rows.length > 0) {
+      console.log(`✅ ${result.rows.length}개의 오래된 비활성 세션 정리 완료`);
+    }
+  } catch (error) {
+    console.error('❌ 세션 정리 오류:', error);
+  }
+}, 24 * 60 * 60 * 1000); // 24시간마다 실행
+
+// 만료된 활성 세션 비활성화 (주기적으로 실행)
+setInterval(async () => {
+  try {
+    const result = await query(
+      `UPDATE fieldlog.user_session 
+       SET is_active = false 
+       WHERE is_active = true 
+         AND expires_at < NOW()
+       RETURNING id`
+    );
+    
+    if (result.rows.length > 0) {
+      console.log(`✅ ${result.rows.length}개의 만료된 세션 비활성화 완료`);
+    }
+  } catch (error) {
+    console.error('❌ 만료 세션 비활성화 오류:', error);
+  }
+}, 60 * 60 * 1000); // 1시간마다 실행
 
 module.exports = router;
