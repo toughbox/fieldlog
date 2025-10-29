@@ -161,14 +161,14 @@ export default function App() {
     const initializeFirebase = async () => {
       try {
         // Firebase 앱이 이미 초기화되었는지 확인
-        /* //개발 시 firebase 초기화 오류로 인해 주석처리
+        //개발 시 firebase 초기화 오류로 인해 주석처리
         if (!firebase.apps.length) {
           // Firebase가 초기화되지 않았으면 google-services.json에서 자동으로 초기화
           await firebase.initializeApp();
           console.log('✅ Firebase 초기화 완료');
-        } else { */
+        } else {
           console.log('✅ Firebase 이미 초기화됨');
-        /* } */
+        }
       } catch (error) {
         console.error('❌ Firebase 초기화 실패:', error);
         // Firebase 초기화 실패 시에도 앱은 계속 실행
