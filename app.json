@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.toughbox.fieldlog",
-      "versionCode": 9,
+      "versionCode": 10,
       "googleServicesFile": "./android/app/google-services.json"
     },
     "web": {
