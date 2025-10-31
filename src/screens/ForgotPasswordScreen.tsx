@@ -47,9 +47,10 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
       const response = await currentApi.requestPasswordReset(email.trim().toLowerCase());
       
       if (response.success) {
+        // 이메일 발송 성공 - 재설정 화면으로 이동
         Alert.alert(
-          '이메일 발송 완료',
-          '비밀번호 재설정 안내가 이메일로 발송되었습니다.\n이메일을 확인하여 재설정 토큰을 입력하세요.',
+          '✅ 이메일 발송 완료',
+          '비밀번호 재설정 안내가 이메일로 발송되었습니다.\n\n이메일에서 6자리 재설정 토큰을 확인하세요.',
           [
             { 
               text: '확인', 
@@ -64,13 +65,17 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
           ]
         );
       } else {
-        Alert.alert('오류', response.error || '비밀번호 재설정 요청 중 오류가 발생했습니다.');
+        // 이메일이 존재하지 않거나 다른 오류
+        Alert.alert(
+          '❌ 오류', 
+          response.error || '비밀번호 재설정 요청 중 오류가 발생했습니다.'
+        );
       }
     } catch (error) {
       console.error('비밀번호 재설정 요청 오류:', error);
       Alert.alert(
-        '오류 발생',
-        '네트워크 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.'
+        '❌ 네트워크 오류',
+        '서버와 통신할 수 없습니다.\n인터넷 연결을 확인하고 다시 시도해주세요.'
       );
     } finally {
       setIsLoading(false);

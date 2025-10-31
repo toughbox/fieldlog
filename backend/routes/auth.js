@@ -418,12 +418,12 @@ router.post('/request-password-reset', async (req, res) => {
 
     const user = result.rows[0];
 
-    // 보안을 위해 사용자가 없어도 성공 응답 (이메일 존재 여부 노출 방지)
+    // 사용자가 없으면 에러 응답
     if (!user) {
       console.log('⚠️ 존재하지 않는 이메일로 비밀번호 재설정 요청:', email);
-      return res.json({
-        success: true,
-        message: '이메일이 등록되어 있다면 비밀번호 재설정 안내가 발송되었습니다.'
+      return res.status(404).json({
+        success: false,
+        error: '가입되지 않은 이메일입니다. 이메일 주소를 확인해주세요.'
       });
     }
 
