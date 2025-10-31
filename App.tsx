@@ -27,6 +27,7 @@ import CreateRecordScreen from './src/screens/CreateRecordScreen';
 import RecordsListScreen from './src/screens/RecordsListScreen';
 import RecordDetailScreen from './src/screens/RecordDetailScreen';
 import EditRecordScreen from './src/screens/EditRecordScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import * as NotificationService from './src/services/notificationService';
 
@@ -113,6 +114,7 @@ const AppNavigator = () => {
             <Stack.Screen name="RecordsList" component={RecordsListScreen} />
             <Stack.Screen name="RecordDetail" component={RecordDetailScreen} />
             <Stack.Screen name="EditRecord" component={EditRecordScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
           </>
         ) : (
           // 인증되지 않은 사용자용 화면들

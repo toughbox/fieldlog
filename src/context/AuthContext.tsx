@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (accessToken: string, refreshToken: string, userData: UserData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuthStatus: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -187,6 +188,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // 회원 탈퇴
+  const deleteAccount = async () => {
+    try {
+      console.log('🗑️ 회원 탈퇴 처리 중...');
+      
+      // 서버에 회원 탈퇴 요청
+      const accessToken = await TokenService.getAccessToken();
+      if (!accessToken) {
+        throw new Error('인증 토큰이 없습니다.');
+      }
+
+      const response = await authApi.deleteAccount(accessToken);
+      
+      if (!response.success) {
+        throw new Error(response.error || '회원 탈퇴에 실패했습니다.');
+      }
+      
+      console.log('✅ 서버에서 계정이 삭제되었습니다.');
+      
+      // 예약된 모든 로컬 알림 취소
+      await NotificationService.cancelAllScheduledNotifications();
+      
+      // 서버에서 FCM 토큰 제거 (이미 계정이 삭제되어 실패할 수 있음)
+      try {
+        const fcmToken = await NotificationService.getFCMToken();
+        if (fcmToken) {
+          await currentNotificationApi.unregisterToken(fcmToken);
+        }
+      } catch (apiError) {
+        console.error('FCM 토큰 서버 제거 실패 (무시):', apiError);
+      }
+      
+      // 저장된 인증 정보 삭제
+      await TokenService.clearAuthData();
+      
+      // 상태 초기화
+      setIsAuthenticated(false);
+      setUser(null);
+      
+      console.log('✅ 회원 탈퇴 완료');
+    } catch (error) {
+      console.error('❌ 회원 탈퇴 처리 오류:', {
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined
+      });
+      throw error;
+    }
+  };
+
   // 앱 시작 시 인증 상태 확인 및 401/403 에러 핸들러 등록
   useEffect(() => {
     console.log('🌟 AuthProvider 마운트 - 인증 상태 확인 시작');
@@ -220,6 +271,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     checkAuthStatus,
+    deleteAccount,
   };
 
   return (

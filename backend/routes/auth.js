@@ -943,4 +943,100 @@ setInterval(async () => {
   }
 }, 60 * 60 * 1000); // 1시간마다 실행
 
+// 회원 탈퇴 API
+router.delete('/delete-account', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: '인증 토큰이 필요합니다.'
+      });
+    }
+    
+    const token = authHeader.substring(7);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: '유효하지 않은 토큰입니다.'
+      });
+    }
+    
+    const userId = decoded.userId;
+    
+    console.log('🗑️ 회원 탈퇴 시작:', {
+      userId: userId,
+      email: decoded.email
+    });
+    
+    // 트랜잭션으로 모든 데이터 삭제
+    try {
+      await transaction(async (client) => {
+        // 1. 현장 기록 삭제
+        const fieldRecordResult = await client.query(
+          'DELETE FROM fieldlog.field_record WHERE user_id = $1',
+          [userId]
+        );
+        console.log('✅ field_record 삭제:', fieldRecordResult.rowCount, '개');
+        
+        // 2. 현장 삭제
+        const fieldResult = await client.query(
+          'DELETE FROM fieldlog.field WHERE user_id = $1',
+          [userId]
+        );
+        console.log('✅ field 삭제:', fieldResult.rowCount, '개');
+        
+        // 3. 푸시 토큰 삭제
+        const tokenResult = await client.query(
+          'DELETE FROM fieldlog.push_tokens WHERE user_id = $1',
+          [userId]
+        );
+        console.log('✅ push_tokens 삭제:', tokenResult.rowCount, '개');
+        
+        // 4. 세션 삭제
+        const sessionResult = await client.query(
+          'DELETE FROM fieldlog.user_session WHERE user_id = $1',
+          [userId]
+        );
+        console.log('✅ user_session 삭제:', sessionResult.rowCount, '개');
+        
+        // 5. 사용자 삭제
+        const userResult = await client.query(
+          'DELETE FROM fieldlog.user WHERE id = $1 RETURNING email',
+          [userId]
+        );
+        
+        if (userResult.rows.length === 0) {
+          throw new Error('사용자를 찾을 수 없습니다.');
+        }
+        
+        console.log('✅ 회원 탈퇴 완료:', {
+          userId: userId,
+          email: userResult.rows[0].email
+        });
+      });
+      
+      res.json({
+        success: true,
+        message: '회원 탈퇴가 완료되었습니다.'
+      });
+      
+    } catch (transactionError) {
+      console.error('❌ 회원 탈퇴 트랜잭션 오류:', transactionError);
+      throw transactionError;
+    }
+    
+  } catch (error) {
+    console.error('❌ 회원 탈퇴 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: '회원 탈퇴 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 module.exports = router;

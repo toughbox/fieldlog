@@ -381,6 +381,16 @@ export const authApi = {
       body: JSON.stringify({ session_id: sessionId }),
     });
   },
+
+  // 회원 탈퇴
+  deleteAccount: async (accessToken: string): Promise<ApiResponse<void>> => {
+    return apiRequest<void>('/auth/delete-account', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+  },
 };
 
 // 현장 기록 관리 API

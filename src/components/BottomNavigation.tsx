@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, HStack, Text, Pressable, Center } from '@gluestack-ui/themed';
-import { Home, List, Building, LogOut } from 'lucide-react-native';
-import { useAuth } from '../context/AuthContext';
+import { Home, List, Building, Settings } from 'lucide-react-native';
 
 interface BottomNavigationProps {
   navigation: any;
@@ -9,15 +8,6 @@ interface BottomNavigationProps {
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ navigation, currentScreen = 'Home' }) => {
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('로그아웃 오류:', error);
-    }
-  };
 
   const getIconColor = (screenName: string) => {
     return currentScreen === screenName ? '#6366f1' : '#9ca3af';
@@ -104,17 +94,18 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ navigation, current
           alignItems="center" 
           p="$2" 
           flex={1}
-          onPress={handleLogout}
+          onPress={() => navigation.navigate('Settings')}
         >
           <Center mb="$1">
-            <LogOut size={24} color="#ef4444" />
+            <Settings size={24} color={getIconColor('Settings')} />
           </Center>
           <Text 
             size="xs" 
-            color="$red500" 
+            color={getTextColor('Settings')} 
+            fontWeight={getTextWeight('Settings')} 
             fontFamily="NotoSansKR_400Regular"
           >
-            로그아웃
+            설정
           </Text>
         </Pressable>
       </HStack>
