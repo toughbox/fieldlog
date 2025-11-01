@@ -75,7 +75,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="white" />
       
       {/* 헤더 */}
-      <Box bg="white" px="$4" py="$4" shadowOpacity={0.05} shadowRadius={2}>
+      <Box bg="white" px="$4" pt="$8" pb="$4" shadowOpacity={0.05} shadowRadius={2}>
         <HStack alignItems="center" space="md">
           <Settings size={28} color="#6366f1" />
           <Heading size="xl" fontFamily="NotoSansKR_700Bold">
