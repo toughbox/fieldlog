@@ -247,7 +247,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <Center flex={1}>
           <Spinner size="large" color="$blue600" />
           <Text mt="$3" color="$gray600" size="md" fontWeight="$medium">기록을 불러오는 중...</Text>
@@ -259,7 +259,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
   if (!record) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <Center flex={1}>
           <Box 
             w="$24" 
@@ -294,7 +294,7 @@ const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({ navigation, rou
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
       {/* 헤더 - 그라데이션 배경 */}
       <Box

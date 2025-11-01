@@ -247,7 +247,7 @@ export default function App() {
     <GluestackUIProvider config={customConfig}>
       <AuthProvider>
         <AppNavigator />
-        <StatusBar style="dark" backgroundColor="transparent" />
+        <StatusBar style="dark" backgroundColor="#ffffff" />
         {/* 디버그 오버레이 제거 */}
       </AuthProvider>
     </GluestackUIProvider>

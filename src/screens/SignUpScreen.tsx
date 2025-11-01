@@ -149,7 +149,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView flex={1} bg="$white">
-      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

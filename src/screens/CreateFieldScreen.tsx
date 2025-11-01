@@ -194,7 +194,7 @@ const CreateFieldScreen: React.FC<CreateFieldScreenProps> = ({ navigation }) => 
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
       {/* 헤더 - 그라데이션 배경 */}
       <Box

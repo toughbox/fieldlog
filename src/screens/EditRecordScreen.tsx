@@ -436,7 +436,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#1f2937" translucent={false} />
+        <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" translucent={false} />
         <Center flex={1}>
           <Spinner size="large" />
           <Text mt="$2" color="$gray600">기록을 불러오는 중...</Text>
@@ -447,7 +447,7 @@ const EditRecordScreen: React.FC<EditRecordScreenProps> = ({ navigation, route }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#1f2937" translucent={false} />
+      <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" translucent={false} />
       
       {/* 헤더 */}
       <Box bg="white" px="$4" py="$3" shadowOpacity={0.1} shadowRadius={4} shadowOffset={{ width: 0, height: 2 }}>
